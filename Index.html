@@ -95,7 +95,7 @@
       padding: 0 12px 24px 12px;
     }
 
-    /* Pasek górny aplikacji wtopiony w tło (bg-zinc-950 border-b border-zinc-800) */
+    /* Pasek górny aplikacji */
     .app-header {
       display: flex;
       align-items: center;
@@ -201,7 +201,7 @@
     .point-sub {
       font-size: 11px;
       font-weight: 500;
-      color: #a1a1aa;
+      color: #71717a;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       margin-bottom: 4px;
@@ -285,7 +285,21 @@
       padding: 8px 14px;
       font-size: 13px;
     }
-    .btn-primary:hover, .btn-action:hover, button:not([class*="btn-"]):not(.close-btn):not(.tabela-badge):not(.filter-pill):not(.gielda-filter-btn):not(.btn-status-toggle):not(.btn-present):not(.btn-absent):not(.btn-excused):hover {
+    .btn-primary:hover, .btn-gielda-cta {
+      background: #27272a;
+      color: #e4e4e7;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-gielda-cta:hover {
+      background: #3f3f46;
+      color: #ffffff;
+      border-color: #52525b;
+    }
+    .btn-action:hover, button:not([class*="btn-"]):not(.close-btn):not(.tabela-badge):not(.filter-pill):not(.gielda-filter-btn):not(.btn-status-toggle):not(.btn-present):not(.btn-absent):not(.btn-excused):hover {
       background: #e4e4e7;
       border-color: #e4e4e7;
     }
@@ -302,6 +316,32 @@
     .btn-secondary:hover {
       background: #27272a;
       border-color: #3f3f46;
+    }
+
+    /* Ghost/outline nav buttons (HUD) */
+    .btn-ghost {
+      background: #18181b;
+      color: #d4d4d8;
+      border: 1px solid #27272a;
+      font-weight: 500;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ghost:hover {
+      background: #27272a;
+      color: #ffffff;
+      border-color: #3f3f46;
+    }
+    .btn-ghost.active {
+      background: #27272a;
+      color: #fafafa;
+      border-color: #52525b;
     }
 
     /* Przycisk anulowania / usunięcia */
@@ -403,6 +443,15 @@
     }
     .oferta-box.oferta-weekend {
       border-left-color: #a855f7;
+    }
+    .badge-count {
+      background: #27272a;
+      color: #d4d4d8;
+      border: 1px solid #3f3f46;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
     }
     .badge-gielda {
       font-size: 11px;
@@ -729,31 +778,46 @@
       gap: 12px;
       padding: 10px 12px;
       border-radius: 6px;
-      border: 1px solid #27272a;
-      background: #18181b;
-      color: #fafafa;
+      border: 1px solid #3f3f46;
+      background: rgba(39, 39, 42, 0.6);
+      color: #e4e4e7;
       transition: all 0.15s ease;
     }
     .badge-showcase-item:hover {
-      border-color: #3f3f46;
+      border-color: #52525b;
+      background: #27272a;
     }
     .badge-showcase-item.unlocked {
-      background: rgba(16, 185, 129, 0.08) !important;
-      border-color: rgba(16, 185, 129, 0.3) !important;
+      background: rgba(16, 185, 129, 0.12) !important;
+      border-color: rgba(16, 185, 129, 0.35) !important;
+      color: #d1fae5 !important;
+    }
+    .badge-showcase-item.unlocked .badge-icon {
+      color: #34d399 !important;
+    }
+    .badge-showcase-item.failed .badge-icon {
+      color: #f87171 !important;
     }
     .badge-showcase-item.unlocked .badge-icon-box {
       background: rgba(16, 185, 129, 0.2) !important;
       border-color: rgba(16, 185, 129, 0.4) !important;
     }
     .badge-showcase-item.unlocked .badge-status-pill {
-      background: rgba(16, 185, 129, 0.15) !important;
-      color: #34d399 !important;
-      border-color: rgba(16, 185, 129, 0.3) !important;
-      font-weight: 600 !important;
+      font-size: 11px;
+      font-weight: 500;
+      color: #d4d4d8;
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
     }
     .badge-showcase-item.failed {
-      background: rgba(239, 68, 68, 0.08) !important;
-      border-color: rgba(239, 68, 68, 0.25) !important;
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+      color: #fecaca !important;
     }
     .badge-showcase-item.failed .badge-icon-box {
       background: rgba(239, 68, 68, 0.15) !important;
@@ -897,14 +961,17 @@
       min-width: 100%;
       font-size: 12px;
       text-align: center;
-      background: #18181b;
+      background: #09090b;
       color: #fafafa;
     }
     .tbl-grid th, .tbl-grid td {
-      border: 1px solid #27272a;
-      padding: 6px 4px;
+      border: 1px solid rgba(39, 39, 42, 0.6);
+      padding: 4px 2px;
       height: 32px;
       box-sizing: border-box;
+      background: rgba(24, 24, 27, 0.4);
+      text-align: center;
+      vertical-align: middle;
     }
     .tbl-sticky-col {
       position: sticky;
@@ -930,12 +997,13 @@
       background: #18181b !important;
     }
     .tbl-day-sun {
-      background: rgba(239, 68, 68, 0.12) !important;
+      background: rgba(69, 10, 10, 0.2) !important;
       color: #f87171 !important;
       font-weight: 600;
     }
     .tbl-day-sat {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.02) !important;
+      color: #a1a1aa;
       font-weight: 500;
     }
     .tbl-group-header-row td {
@@ -957,18 +1025,19 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border-radius: 4px;
       font-weight: 600;
       font-size: 11px;
       line-height: 1;
+      margin: 0 auto;
     }
-    .b-obecny { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .b-nieobecny { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-    .b-uspraw { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-    .b-zastepca { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
-    .b-oddany { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+    .b-obecny { background: rgba(6, 78, 59, 0.5) !important; color: #34d399 !important; border: 1px solid rgba(16, 185, 129, 0.35) !important; }
+    .b-nieobecny { background: rgba(76, 5, 25, 0.5) !important; color: #fb7185 !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; }
+    .b-uspraw { background: rgba(120, 53, 15, 0.5) !important; color: #fbbf24 !important; border: 1px solid rgba(245, 158, 11, 0.35) !important; }
+    .b-zastepca { background: rgba(30, 58, 138, 0.5) !important; color: #60a5fa !important; border: 1px solid rgba(59, 130, 246, 0.35) !important; }
+    .b-oddany { background: rgba(88, 28, 135, 0.5) !important; color: #c084fc !important; border: 1px solid rgba(168, 85, 247, 0.35) !important; }
 
     .filter-pill {
       padding: 5px 12px;
@@ -982,9 +1051,9 @@
       transition: all 0.15s;
     }
     .filter-pill.active {
-      background: #18181b;
-      color: #09090b;
-      border-color: #fafafa;
+      background: #27272a;
+      color: #fafafa;
+      border-color: #52525b;
       font-weight: 600;
     }
 
@@ -1152,11 +1221,11 @@
           <span id="user-display" style="font-weight:600; color:#fafafa; font-size:15px; letter-spacing:-0.01em;"></span>
         </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; align-items:center;">
-          <button id="btn-top-pulpit" onclick="zamknijWszystkieWidokiDoPulpitu()" style="display:none; width:auto; padding:6px 12px; font-size:12px;" class="btn-secondary" title="Wróć do pulpitu">Pulpit</button>
-          <button id="btn-top-profil" onclick="otworzMojProfil()" style="width:auto; padding:6px 12px; font-size:12px;" class="btn-action" title="Twój profil, ranga i odznaki">Profil</button>
-          <button id="btn-top-tabela" onclick="otworzTabeleMiesiaca()" style="width:auto; padding:6px 12px; font-size:12px;" class="btn-secondary" title="Grafik miesiąca">Grafik</button>
-          <button id="btn-top-refresh" onclick="odswiezDane()" style="width:auto; padding:6px 10px; font-size:12px;" class="btn-secondary" title="Odśwież grafik"><svg class="refresh-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
-          <button onclick="wyloguj()" style="width:auto; padding:6px 10px; font-size:12px;" class="btn-secondary">Wyloguj</button>
+          <button id="btn-top-pulpit" onclick="zamknijWszystkieWidokiDoPulpitu()" class="btn-ghost" style="display:none;" title="Wróć do pulpitu">Pulpit</button>
+          <button id="btn-top-profil" onclick="otworzMojProfil()" class="btn-ghost" title="Twój profil, ranga i odznaki">Profil</button>
+          <button id="btn-top-tabela" onclick="otworzTabeleMiesiaca()" class="btn-ghost" title="Grafik miesiąca">Grafik</button>
+          <button id="btn-top-refresh" onclick="odswiezDane()" class="btn-ghost" style="padding:6px 10px;" title="Odśwież grafik"><svg class="refresh-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+          <button onclick="wyloguj()" class="btn-ghost">Wyloguj</button>
         </div>
       </div>
 
@@ -1206,7 +1275,7 @@
               <span id="dashboard-xp-procent">0%</span>
             </div>
             <div style="width:100%; height:6px; background:#27272a; border-radius:9999px; overflow:hidden;">
-              <div id="dashboard-xp-bar" style="width:0%; height:100%; background:#18181b; border-radius:9999px; transition:width 0.5s ease;"></div>
+              <div id="dashboard-xp-bar" style="width:0%; height:100%; background:#fafafa; border-radius:9999px; transition:width 0.5s ease;"></div>
             </div>
           </div>
           <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#a1a1aa; border-top:1px solid #27272a; padding-top:8px;">
@@ -1287,9 +1356,9 @@
                 <p style="margin:2px 0 0 0; font-size:12px; color:var(--text-muted);">Oddaj dyżur lub zobacz oferty innych</p>
               </div>
             </div>
-            <span id="badge-oferty" class="badge-count" style="display:none;">0 ofert</span>
+            <span id="badge-oferty" class="badge-count" style="display:none; font-size:11px; font-weight:600;">0 ofert</span>
           </div>
-          <button class="btn-action" style="margin-top:12px; padding:10px; font-size:13px; font-weight:500; width:100%;">
+          <button class="btn-gielda-cta" style="margin-top:12px; padding:10px; font-size:13px; font-weight:500; width:100%;">
             Otwórz giełdę zamian
           </button>
         </div>
@@ -1344,7 +1413,7 @@
               <span style="font-weight:600; color:#fafafa; font-size:15px; letter-spacing:-0.01em;">Wolne dyżury do wzięcia</span>
               <span class="badge-plus4" style="background:rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.3); padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:700;">+4 PKT</span>
             </div>
-            <span id="badge-wolne-count" style="background:#18181b; color:#a1a1aa; border:1px solid #27272a; padding:3px 10px; border-radius:9999px; font-size:11px; font-weight:600; white-space:nowrap;">0 wolnych</span>
+            <span id="badge-wolne-count" class="badge-count" style="white-space:nowrap;">0 wolnych</span>
           </div>
           <p style="margin:0 0 12px 0; font-size:12px; color:#a1a1aa; line-height:1.45;">
             Ktoś nie może przyjść na swój dyżur? Weź mszę za niego i zgarnij <b style="color:#fafafa;">aż +4 punkty</b> (zamiast standardowych 2 pkt)!
@@ -1352,7 +1421,7 @@
           <div id="lista-wolne-zastepstwa" style="font-size:13px; color:#a1a1aa;">Ładowanie wolnych dyżurów...</div>
         </div>
 
-        <h3 style="margin: 18px 0 10px 0; font-size:16px; color:var(--primary); display:flex; align-items:center; gap:8px;">
+        <h3 style="margin: 18px 0 10px 0; font-size:16px; display:flex; align-items:center; gap:8px;">
           <span style="color:#fafafa; font-weight:600;">Wymiana dyżurów 1:1</span>
         </h3>
 
@@ -1362,7 +1431,7 @@
             <h3 style="margin:0; font-size:16px; color:#ffffff; font-weight:700; display:flex; align-items:center; gap:6px; letter-spacing:-0.01em;">
               <span>Dostępne oferty wymiany</span>
             </h3>
-            <span id="badge-wymiany-11-count" style="font-size:11px; color:#a1a1aa; font-weight:600; background:#18181b; border:1px solid #27272a; padding:3px 10px; border-radius:9999px;">0 ofert</span>
+            <span id="badge-wymiany-11-count" class="badge-count">0 ofert</span>
           </div>
           <div style="font-size:12px; color:#a1a1aa; margin-bottom:12px;">
             Wszystkie oferty wymiany służby w tygodniu oraz weekendowej w jednym miejscu.
@@ -1823,12 +1892,12 @@
             <!-- Odznaka 1: Żelazna Tarcza -->
             <div id="badge-card-zelazna-tarcza" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Żelazna Tarcza</span>
-                  <span id="badge-status-zelazna-tarcza" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
+                  <span id="badge-status-zelazna-tarcza" class="badge-status-pill">W toku</span>
                 </div>
                 <div id="badge-desc-zelazna-tarcza" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Czyste konto: 0 nieusprawiedliwionych minusów (usprawiedliwienia dozwolone).</div>
               </div>
@@ -1837,12 +1906,12 @@
             <!-- Odznaka 2: Niezawodny -->
             <div id="badge-card-niezawodny" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+                <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niezawodny</span>
-                  <span id="badge-status-niezawodny" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
+                  <span id="badge-status-niezawodny" class="badge-status-pill">W toku</span>
                 </div>
                 <div id="badge-desc-niezawodny" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">100% fizycznej obecności na wszystkich swoich dyżurach (brak absencji).</div>
               </div>
@@ -1851,12 +1920,12 @@
             <!-- Odznaka 3: Niedzielny Rycerz -->
             <div id="badge-card-niedzielny-rycerz" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
+                <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niedzielny Rycerz</span>
-                  <span id="badge-status-niedzielny-rycerz" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
+                  <span id="badge-status-niedzielny-rycerz" class="badge-status-pill">W toku</span>
                 </div>
                 <div id="badge-desc-niedzielny-rycerz" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Obecność na mszach niedzielnych bez nieusprawiedliwionych opuszczeń.</div>
               </div>
@@ -1865,12 +1934,12 @@
             <!-- Odznaka 4: Ratownik Służby (Przejęcie Dyżuru) -->
             <div id="badge-card-przejecie-dyzuru" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+                <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Ratownik Służby</span>
-                  <span id="badge-status-przejecie-dyzuru" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
+                  <span id="badge-status-przejecie-dyzuru" class="badge-status-pill">W toku</span>
                 </div>
                 <div id="badge-desc-przejecie-dyzuru" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Przejęcie dyżuru od innego ministranta z giełdy wolnych służb.</div>
               </div>
@@ -1879,12 +1948,12 @@
             <!-- Odznaka 5: Mistrz Wymiany (Udana Wymiana) -->
             <div id="badge-card-udana-wymiana" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
+                <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Mistrz Wymiany</span>
-                  <span id="badge-status-udana-wymiana" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
+                  <span id="badge-status-udana-wymiana" class="badge-status-pill">W toku</span>
                 </div>
                 <div id="badge-desc-udana-wymiana" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Oddanie dyżuru na giełdę ze skutecznym znalezieniem zastępcy.</div>
               </div>
@@ -3912,25 +3981,25 @@
         var rp = g.rocznePodsumowanie || {};
         var badgesHtml = '';
         if (rp.tarczaCount > 0) {
-          badgesHtml += '<div style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#18181b; display:inline-flex; align-items:center; gap:6px;">Żelazna Tarcza <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.tarczaCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(39,39,42,0.6); border:1px solid #3f3f46; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#e4e4e7; display:inline-flex; align-items:center; gap:6px;">Żelazna Tarcza <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.tarczaCount + '</span></div>';
         }
         if (rp.niezawodnyCount > 0) {
-          badgesHtml += '<div style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#18181b; display:inline-flex; align-items:center; gap:6px;">Niezawodny <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.niezawodnyCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(39,39,42,0.6); border:1px solid #3f3f46; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#e4e4e7; display:inline-flex; align-items:center; gap:6px;">Niezawodny <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.niezawodnyCount + '</span></div>';
         }
         if (rp.rycerzCount > 0) {
-          badgesHtml += '<div style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#18181b; display:inline-flex; align-items:center; gap:6px;">Niedzielny Rycerz <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.rycerzCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(39,39,42,0.6); border:1px solid #3f3f46; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#e4e4e7; display:inline-flex; align-items:center; gap:6px;">Niedzielny Rycerz <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.rycerzCount + '</span></div>';
         }
         if (rp.zlotoCount > 0) {
-          badgesHtml += '<div style="background:#fefce8; border:1px solid #fef08a; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#854d0e; display:inline-flex; align-items:center; gap:6px;">Mistrz Miesiąca <span style="background:#eab308; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.zlotoCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.3); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#facc15; display:inline-flex; align-items:center; gap:6px;">Mistrz Miesiąca <span style="background:#eab308; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.zlotoCount + '</span></div>';
         }
         if (rp.podiumCount > 0) {
-          badgesHtml += '<div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.25); border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#d8b4fe; display:inline-flex; align-items:center; gap:6px;">Na Podium <span style="background:#a855f7; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.podiumCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.3); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#d8b4fe; display:inline-flex; align-items:center; gap:6px;">Na Podium <span style="background:#a855f7; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.podiumCount + '</span></div>';
         }
         if (rp.przejeciaCount > 0) {
-          badgesHtml += '<div style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#18181b; display:inline-flex; align-items:center; gap:6px;">Ratownik Służby <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.przejeciaCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(39,39,42,0.6); border:1px solid #3f3f46; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#e4e4e7; display:inline-flex; align-items:center; gap:6px;">Ratownik Służby <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.przejeciaCount + '</span></div>';
         }
         if (rp.wymianyCount > 0) {
-          badgesHtml += '<div style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#18181b; display:inline-flex; align-items:center; gap:6px;">Mistrz Wymiany <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.wymianyCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(39,39,42,0.6); border:1px solid #3f3f46; border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#e4e4e7; display:inline-flex; align-items:center; gap:6px;">Mistrz Wymiany <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.wymianyCount + '</span></div>';
         }
         if (!badgesHtml) {
           badgesHtml = '<span style="font-size:11px; color:#71717a; font-style:italic;">Brak odznak w tym sezonie — służ regularnie, aby je zdobyć!</span>';
@@ -3953,23 +4022,23 @@
         if (statusEl) {
           statusEl.innerText = badgeData.statusText;
           if (badgeData.odblokowana) {
-            statusEl.style.background = 'rgba(16,185,129,0.1)'; statusEl.style.color='#34d399';
-            statusEl.style.color = '#047857';
-            statusEl.style.borderColor = '#a7f3d0';
+            statusEl.style.background = 'rgba(16, 185, 129, 0.15)';
+            statusEl.style.color = '#34d399';
+            statusEl.style.borderColor = 'rgba(16, 185, 129, 0.35)';
           } else if (badgeData.failed) {
             if (badgeData.statusText && badgeData.statusText.indexOf('absencja') !== -1) {
-              statusEl.style.background = 'rgba(251,191,36,0.1)'; statusEl.style.color='#fbbf24';
-              statusEl.style.color = '#92400e';
-              statusEl.style.borderColor = '#fde68a';
+              statusEl.style.background = 'rgba(251, 191, 36, 0.12)';
+              statusEl.style.color = '#fbbf24';
+              statusEl.style.borderColor = 'rgba(251, 191, 36, 0.3)';
             } else {
-              statusEl.style.background = '#fef2f2';
-              statusEl.style.color = '#991b1b';
-              statusEl.style.borderColor = '#fecaca';
+              statusEl.style.background = 'rgba(239, 68, 68, 0.12)';
+              statusEl.style.color = '#f87171';
+              statusEl.style.borderColor = 'rgba(239, 68, 68, 0.3)';
             }
           } else {
-            statusEl.style.background = '#27272a'; statusEl.style.color='#a1a1aa';
-            statusEl.style.color = '#52525b';
-            statusEl.style.borderColor = '#e4e4e7';
+            statusEl.style.background = '#27272a';
+            statusEl.style.color = '#d4d4d8';
+            statusEl.style.borderColor = '#3f3f46';
           }
         }
         if (descEl) {
@@ -7577,7 +7646,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   '<div style="font-size:10px; font-weight:normal;">' + dayObj.skrotDnia + '</div>' +
                 '</th>';
       }
-      html += '<th style="min-width:45px; background:#27272a; font-weight:600; color:#a1a1aa;">SUMA</th>';
+      html += '<th style="min-width:45px; background:#27272a; font-weight:600; color:#71717a; letter-spacing:0.03em;">SUMA</th>';
       html += '</tr></thead>';
 
       html += '<tbody>';
@@ -7616,7 +7685,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
 
         var isMe = (globalUser.nazwisko && row.nazwisko.toLowerCase() === globalUser.nazwisko.toLowerCase());
-        var rowStyle = isMe ? 'background:rgba(250,250,250,0.05);' : '';
+        var rowStyle = isMe ? 'background:rgba(250,250,250,0.04); outline:1px solid rgba(250,250,250,0.08);' : '';
 
         html += '<tr style="' + rowStyle + '">';
         var safeRowNazw = (row.nazwisko || '').replace(/'/g, "\\'");
@@ -7630,9 +7699,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         for (var c = 0; c < row.komorki.length; c++) {
           var k = row.komorki[c];
-          var cellStyle = '';
-          if (k.maDyzur && k.bg) {
-            cellStyle = 'background-color:' + k.bg + ';';
+          var isSun = (naglowek[c] && naglowek[c].czyNiedziela);
+          var isSat = (naglowek[c] && naglowek[c].czySobota);
+          var cellStyle = isSun ? 'background:rgba(69,10,10,0.15);' : (isSat ? 'background:rgba(255,255,255,0.015);' : '');
+          if (k.maDyzur && (!k.wartosc || k.wartosc === '')) {
+            cellStyle += ' background:rgba(39,39,42,0.45);';
           }
 
           var content = '';
@@ -7667,7 +7738,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
 
             if (!isWeekendServed) {
-              content = '<span style="font-size:16px; color:#94a3b8; line-height:1;">•</span>';
+              content = '<span style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
             }
           }
 
