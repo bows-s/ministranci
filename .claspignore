@@ -1,0 +1,8 @@
+public/**
+.firebase/**
+firebase.json
+.firebaserc
+.claspignore
+test_*.js
+firestore.*
+!appsscript.json

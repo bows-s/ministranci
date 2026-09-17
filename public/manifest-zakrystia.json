@@ -1,0 +1,26 @@
+{
+  "name": "Zakrystia - Parafia św. Józefa",
+  "short_name": "Zakrystia",
+  "description": "Panel zakrystii dla Kościelnego i Księdza do sprawdzania i zapisywania obecności ministrantów",
+  "id": "parafia-zakrystia-app",
+  "start_url": "/zakrystia",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d47a1",
+  "theme_color": "#0d47a1",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
