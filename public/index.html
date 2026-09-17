@@ -278,7 +278,7 @@
 
     /* Główny przycisk akcji: odwrócony kontrast (bg-zinc-100 text-zinc-900) */
     .btn-primary, .btn-action, button:not([class*="btn-"]):not(.close-btn):not(.tabela-badge):not(.filter-pill):not(.gielda-filter-btn):not(.btn-status-toggle):not(.btn-present):not(.btn-absent):not(.btn-excused) {
-      background: #fafafa;
+      background: #18181b;
       color: #09090b;
       border: 1px solid #fafafa;
       font-weight: 500;
@@ -337,7 +337,7 @@
     #install-banner span { font-size: 13px; font-weight: 500; }
     #install-banner button {
       width: auto;
-      background: #fafafa;
+      background: #18181b;
       color: #09090b;
       font-size: 12px;
       padding: 6px 12px;
@@ -448,7 +448,7 @@
       color: #fafafa;
     }
     .gielda-filter-btn.active {
-      background: #fafafa;
+      background: #18181b;
       border-color: #fafafa;
       color: #09090b;
       font-weight: 600;
@@ -490,7 +490,7 @@
       vertical-align: middle;
     }
     .btn-wez-dyzur {
-      background: #fafafa;
+      background: #18181b;
       color: #09090b;
       font-weight: 500;
       font-size: 13px;
@@ -714,7 +714,7 @@
     .ranking-podium-3 { background: rgba(251, 146, 60, 0.08); }
     .tag-you {
       font-size: 10px;
-      background: #fafafa;
+      background: #18181b;
       color: #09090b;
       padding: 1px 6px;
       border-radius: 4px;
@@ -982,7 +982,7 @@
       transition: all 0.15s;
     }
     .filter-pill.active {
-      background: #fafafa;
+      background: #18181b;
       color: #09090b;
       border-color: #fafafa;
       font-weight: 600;
@@ -1206,7 +1206,7 @@
               <span id="dashboard-xp-procent">0%</span>
             </div>
             <div style="width:100%; height:6px; background:#27272a; border-radius:9999px; overflow:hidden;">
-              <div id="dashboard-xp-bar" style="width:0%; height:100%; background:#fafafa; border-radius:9999px; transition:width 0.5s ease;"></div>
+              <div id="dashboard-xp-bar" style="width:0%; height:100%; background:#18181b; border-radius:9999px; transition:width 0.5s ease;"></div>
             </div>
           </div>
           <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#a1a1aa; border-top:1px solid #27272a; padding-top:8px;">
@@ -1568,7 +1568,7 @@
               <i class="mini-spin">⟳</i> Zapisywanie...
             </span>
           </div>
-          <button id="btn-zapisz-zakrystia" onclick="zakrystiaZapiszObecnosc()" style="margin:0; padding:14px; font-size:15px; font-weight:600; background:#fafafa; color:#09090b; border-radius:6px;">
+          <button id="btn-zapisz-zakrystia" onclick="zakrystiaZapiszObecnosc()" style="margin:0; padding:14px; font-size:15px; font-weight:600; width:100%; background:#fafafa; color:#09090b; border:none; border-radius:6px; cursor:pointer;">
             ZAPISZ OBECNOŚĆ
           </button>
         </div>
@@ -1629,7 +1629,7 @@
         </div>
 
         <!-- Kontener tabeli z horyzontalnym scrollem -->
-        <div class="card" style="padding:0; overflow:hidden; border:1px solid #e2e8f0;">
+        <div class="card" style="padding:0; overflow:hidden; border:1px solid #27272a;">
           <div id="tabela-miesiaca-scroll" style="overflow-x:auto; -webkit-overflow-scrolling:touch; max-height:75vh;">
             <div style="text-align:center; padding:30px; color:#94a3b8;" id="tabela-ladowanie">
               Ładowanie grafiku miesiąca...
@@ -1638,7 +1638,7 @@
         </div>
 
         <!-- Legenda tabeli -->
-        <div class="card no-print" style="padding:12px; margin-top:12px; font-size:12px; color:#a1a1aa; background:#f8fafc;">
+        <div class="card no-print" style="padding:12px; margin-top:12px; font-size:12px; color:#a1a1aa; background:#18181b;">
           <b style="color:#fafafa; display:block; margin-bottom:6px;">Legenda oznaczeń:</b>
           <div style="display:flex; gap:12px; flex-wrap:wrap; line-height:1.6;">
             <span style="display:inline-flex; align-items:center; gap:4px;"><span class="tabela-badge b-obecny">5</span> Obecny (+5 pkt)</span>
@@ -1671,11 +1671,11 @@
       </div>
 
       <!-- Wybór miesiąca w rankingu miesięcznym -->
-      <div id="ranking-miesiac-wybor-box" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:7px 12px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px;">
+      <div id="ranking-miesiac-wybor-box" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:7px 12px; background:#27272a; border:1px solid #27272a; border-radius:8px;">
         <span style="font-size:12px; font-weight:700; color:#fafafa; display:flex; align-items:center; gap:6px;">
           <span>Wybierz miesiąc:</span>
         </span>
-        <select id="select-ranking-miesiac" onchange="zmienWybranyMiesiacRankingu(this.value)" style="padding:5px 10px; font-size:12px; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; background:white; color:#0f172a; cursor:pointer;">
+        <select id="select-ranking-miesiac" onchange="zmienWybranyMiesiacRankingu(this.value)" style="padding:5px 10px; font-size:12px; font-weight:500; border-radius:6px; cursor:pointer;">
         </select>
       </div>
 
@@ -1684,7 +1684,7 @@
       </div>
 
       <!-- Przewijana tabela rankingu -->
-      <div id="ranking-lista-box" style="overflow-y:auto; flex:1; max-height:48vh; border:1px solid #e2e8f0; border-radius:8px;">
+      <div id="ranking-lista-box" style="overflow-y:auto; flex:1; max-height:48vh; border:1px solid #27272a; border-radius:8px;">
         <div style="text-align:center; padding:20px; color:var(--text-muted);">Ładowanie rankingu...</div>
       </div>
 
@@ -1710,7 +1710,7 @@
       <div id="modal-szczegoly-roku-lista" style="overflow-y:auto; flex:1; max-height:50vh; padding-right:2px;">
       </div>
 
-      <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #e2e8f0; padding-top:10px;">
+      <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #27272a; padding-top:10px;">
         <div id="modal-szczegoly-roku-suma" style="font-size:12px; font-weight:700; color:var(--text-main);"></div>
         <button onclick="zamknijModalSzczegolyRoku()" style="width:auto; padding:8px 18px; font-size:13px;" class="btn-secondary">Wróć</button>
       </div>
@@ -1759,15 +1759,15 @@
               <span id="profil-ranga-ikona" style="font-size:12px; font-weight:600; color:#fafafa;">L1</span>
               <div>
                 <span id="profil-ranga-nazwa" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Debiutant</span>
-                <span id="profil-poziom-numer" style="font-size:10px; font-weight:700; background:#f4f4f5; color:#18181b; border:1px solid #e4e4e7; padding:1px 6px; border-radius:6px; margin-left:4px;">Lvl 1</span>
+                <span id="profil-poziom-numer" style="font-size:10px; font-weight:600; background:#27272a; color:#a1a1aa; border:1px solid #3f3f46; padding:1px 6px; border-radius:4px; margin-left:4px;">Lvl 1</span>
               </div>
             </div>
-            <span id="profil-xp-suma" style="font-size:14px; font-weight:700; color:#09090b; letter-spacing:-0.01em;">0 XP</span>
+            <span id="profil-xp-suma" style="font-size:14px; font-weight:700; color:#fafafa; letter-spacing:-0.01em;">0 XP</span>
           </div>
 
           <!-- Pasek postępu -->
           <div style="width:100%; height:8px; background:#27272a; border:1px solid #3f3f46; border-radius:9999px; overflow:hidden; margin:8px 0 4px 0;">
-            <div id="profil-xp-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #18181b, #3f3f46); border-radius:9999px; transition:width 0.4s ease;"></div>
+            <div id="profil-xp-bar" style="width:0%; height:100%; background:#fafafa; border-radius:9999px; transition:width 0.4s ease;"></div>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:500; color:#a1a1aa;">
             <span id="profil-xp-progres-tekst">0 / 75 XP</span>
@@ -1782,10 +1782,10 @@
               <span id="profil-passa-ikona" style="font-size:12px; font-weight:600; color:#fb923c;">PASSA</span>
             </div>
             <div>
-              <div id="profil-passa-tytul" style="font-weight:700; font-size:13px; color:#9a3412; letter-spacing:-0.01em;">
+              <div id="profil-passa-tytul" style="font-weight:600; font-size:13px; color:#fb923c; letter-spacing:-0.01em;">
                 Passa: 1 tydzień z rzędu
               </div>
-              <div id="profil-passa-opis" style="font-size:11px; color:#7c2d12; line-height:1.35; margin-top:2px;">
+              <div id="profil-passa-opis" style="font-size:11px; color:#a1a1aa; line-height:1.35; margin-top:2px;">
                 Regularna służba bez opuszczania dyżurów.
               </div>
             </div>
@@ -1794,12 +1794,12 @@
         </div>
 
         <!-- Roczny Dorobek Odznak (Od Stycznia 2026) -->
-        <div id="profil-roczny-dorobek-box" style="background:#ffffff; border-radius:8px; padding:14px 16px; border:1px solid #e4e4e7; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <div id="profil-roczny-dorobek-box" style="background:#18181b; border-radius:8px; padding:14px 16px; border:1px solid #27272a; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h4 style="margin:0; font-size:12px; font-weight:700; color:#09090b; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
+            <h4 style="margin:0; font-size:12px; font-weight:700; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
               <span>Osiągnięcia w sezonie 2026</span>
             </h4>
-            <span id="profil-roczny-bonus-xp" style="font-size:11px; font-weight:700; color:#18181b; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">+0 XP z odznak</span>
+            <span id="profil-roczny-bonus-xp" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">+0 XP z odznak</span>
           </div>
           <div id="profil-roczne-odznaki-lista" style="display:flex; flex-wrap:wrap; gap:6px;">
             <!-- Renderowane dynamicznie kafelki osiągnięć od stycznia -->
@@ -1807,12 +1807,12 @@
         </div>
 
         <!-- Gablota Odznak (Bieżący miesiąc) -->
-        <div style="background:#ffffff; border-radius:8px; padding:14px 16px; border:1px solid #e4e4e7; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <div style="background:#18181b; border-radius:8px; padding:14px 16px; border:1px solid #27272a; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <h4 style="margin:0; font-size:12px; font-weight:700; color:#09090b; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
+            <h4 style="margin:0; font-size:12px; font-weight:700; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
               <span>Misje bieżącego miesiąca</span>
             </h4>
-            <span id="profil-odznaki-zdobyte-licznik" style="font-size:11px; font-weight:700; color:#047857; background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.3); padding:2px 8px; border-radius:9999px;">0 / 5</span>
+            <span id="profil-odznaki-zdobyte-licznik" style="font-size:11px; font-weight:700; color:#34d399; background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.3); padding:2px 8px; border-radius:9999px;">0 / 5</span>
           </div>
           <div style="font-size:11px; color:#71717a; margin-bottom:12px;">
             Każda zdobyta misja zasila rangę bonusem <strong>+10 XP</strong> (lub <strong>+15 XP</strong> za przejęcie dyżuru).
@@ -1823,11 +1823,11 @@
             <!-- Odznaka 1: Żelazna Tarcza -->
             <div id="badge-card-zelazna-tarcza" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="font-size:11px; font-weight:600; color:#a1a1aa;">TARCZA</span>
+                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; font-size:13px; color:#09090b; letter-spacing:-0.01em;">Żelazna Tarcza</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Żelazna Tarcza</span>
                   <span id="badge-status-zelazna-tarcza" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
                 </div>
                 <div id="badge-desc-zelazna-tarcza" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Czyste konto: 0 nieusprawiedliwionych minusów (usprawiedliwienia dozwolone).</div>
@@ -1837,11 +1837,11 @@
             <!-- Odznaka 2: Niezawodny -->
             <div id="badge-card-niezawodny" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="font-size:11px; font-weight:600; color:#a1a1aa;">CEL</span>
+                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; font-size:13px; color:#09090b; letter-spacing:-0.01em;">Niezawodny</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niezawodny</span>
                   <span id="badge-status-niezawodny" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
                 </div>
                 <div id="badge-desc-niezawodny" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">100% fizycznej obecności na wszystkich swoich dyżurach (brak absencji).</div>
@@ -1851,11 +1851,11 @@
             <!-- Odznaka 3: Niedzielny Rycerz -->
             <div id="badge-card-niedzielny-rycerz" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="font-size:11px; font-weight:600; color:#a1a1aa;">SŁUŻBA</span>
+                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; font-size:13px; color:#09090b; letter-spacing:-0.01em;">Niedzielny Rycerz</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niedzielny Rycerz</span>
                   <span id="badge-status-niedzielny-rycerz" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
                 </div>
                 <div id="badge-desc-niedzielny-rycerz" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Obecność na mszach niedzielnych bez nieusprawiedliwionych opuszczeń.</div>
@@ -1865,11 +1865,11 @@
             <!-- Odznaka 4: Ratownik Służby (Przejęcie Dyżuru) -->
             <div id="badge-card-przejecie-dyzuru" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="font-size:11px; font-weight:600; color:#a1a1aa;">POMOC</span>
+                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; font-size:13px; color:#09090b; letter-spacing:-0.01em;">Ratownik Służby</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Ratownik Służby</span>
                   <span id="badge-status-przejecie-dyzuru" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
                 </div>
                 <div id="badge-desc-przejecie-dyzuru" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Przejęcie dyżuru od innego ministranta z giełdy wolnych służb.</div>
@@ -1879,11 +1879,11 @@
             <!-- Odznaka 5: Mistrz Wymiany (Udana Wymiana) -->
             <div id="badge-card-udana-wymiana" class="badge-showcase-item">
               <div class="badge-icon-box" style="width:36px; height:36px; border-radius:8px; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <span class="badge-icon" style="font-size:11px; font-weight:600; color:#a1a1aa;">ZAMIANA</span>
+                <span class="badge-icon" style="color:#a1a1aa; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span style="font-weight:600; font-size:13px; color:#09090b; letter-spacing:-0.01em;">Mistrz Wymiany</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Mistrz Wymiany</span>
                   <span id="badge-status-udana-wymiana" class="badge-status-pill" style="font-size:11px; font-weight:600; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:9999px;">W toku</span>
                 </div>
                 <div id="badge-desc-udana-wymiana" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Oddanie dyżuru na giełdę ze skutecznym znalezieniem zastępcy.</div>
@@ -1897,15 +1897,15 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; padding:10px 12px; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
             <div style="font-size:11px; font-weight:500; color:#71717a; text-transform:uppercase; letter-spacing:0.02em;">Punkty w miesiącu</div>
-            <div id="profil-stat-miesiac" style="font-size:16px; font-weight:700; color:#09090b; letter-spacing:-0.02em; margin-top:2px;">0 pkt</div>
+            <div id="profil-stat-miesiac" style="font-size:16px; font-weight:700; color:#fafafa; letter-spacing:-0.02em; margin-top:2px;">0 pkt</div>
           </div>
           <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; padding:10px 12px; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
             <div style="font-size:11px; font-weight:500; color:#71717a; text-transform:uppercase; letter-spacing:0.02em;">Baza służb (rok)</div>
-            <div id="profil-stat-rok" style="font-size:16px; font-weight:700; color:#09090b; letter-spacing:-0.02em; margin-top:2px;">0 XP</div>
+            <div id="profil-stat-rok" style="font-size:16px; font-weight:700; color:#fafafa; letter-spacing:-0.02em; margin-top:2px;">0 XP</div>
           </div>
           <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; padding:10px 12px; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
             <div style="font-size:11px; font-weight:500; color:#71717a; text-transform:uppercase; letter-spacing:0.02em;">Bonus z odznak</div>
-            <div id="profil-stat-bonus-xp" style="font-size:16px; font-weight:700; color:#09090b; letter-spacing:-0.02em; margin-top:2px;">+0 XP</div>
+            <div id="profil-stat-bonus-xp" style="font-size:16px; font-weight:700; color:#fafafa; letter-spacing:-0.02em; margin-top:2px;">+0 XP</div>
           </div>
           <div style="background:#09090b; border:1px solid #27272a; border-radius:12px; padding:10px 12px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
             <div style="font-size:11px; font-weight:500; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.02em;">Łączne XP</div>
@@ -1953,7 +1953,7 @@
   <div id="modal-nagrody-zakrystia" class="modal-overlay" onclick="if(event.target === this) zamknijModalNagrodyZakrystia()">
     <div class="modal-content" style="max-width:440px; width:100%; text-align:left; max-height:85vh; display:flex; flex-direction:column; padding:18px; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #27272a; padding-bottom:10px;">
-        <h3 style="margin:0; font-size:17px; display:flex; align-items:center; gap:8px; color:#92400e;">
+        <h3 style="margin:0; font-size:17px; display:flex; align-items:center; gap:8px; color:#fbbf24;">
           <span>Nagrody za Ranking (TOP 3)</span>
         </h3>
         <span class="close-btn" onclick="zamknijModalNagrodyZakrystia()" style="font-size:24px; cursor:pointer; line-height:1;">&times;</span>
@@ -1962,7 +1962,7 @@
       <!-- Wybór miesiąca -->
       <div style="margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; background:#27272a; padding:8px 12px; border-radius:6px; border:1px solid #3f3f46;">
         <span style="font-size:12px; font-weight:600; color:#475569;">Wybierz miesiąc:</span>
-        <select id="select-miesiac-nagrody" onchange="zaladujNagrodyDlaMiesiaca(this.value)" style="width:auto; margin:0; padding:6px 10px; font-size:13px; font-weight:700; color:#0f172a; border:1px solid #cbd5e1; border-radius:6px; background:white;">
+        <select id="select-miesiac-nagrody" onchange="zaladujNagrodyDlaMiesiaca(this.value)" style="width:auto; padding:4px 8px; font-size:12px; border-radius:6px;">
         </select>
       </div>
 
@@ -1991,7 +1991,7 @@
         <div id="modal-sukces-zakrystia-opis" style="font-size: 14px; color: #a1a1aa; margin-bottom: 20px; line-height: 1.5;">
           Obecność i punkty zostały pomyślnie zapisane w grafiku.
         </div>
-        <button type="button" onclick="zamknijModalSukcesuZakrystii()" style="width: 100%; padding: 12px; font-size: 15px; font-weight: 600; background: #fafafa; color: #09090b; border: none; border-radius: 6px; cursor: pointer;">
+        <button type="button" onclick="zamknijModalSukcesuZakrystii()" style="width:100%; padding:12px; font-size:15px; font-weight:600; background:#fafafa; color:#09090b; border:none; border-radius:6px; cursor:pointer;">
           Świetnie, dziękuję
         </button>
       </div>
@@ -2002,7 +2002,7 @@
     <div class="modal-content" style="max-width:540px; width:100%; text-align:left; max-height:85vh; display:flex; flex-direction:column; padding:20px; box-sizing:border-box;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #27272a; padding-bottom:10px;">
         <div>
-          <h3 style="margin:0; font-size:17px; color:#1e1b4b; display:flex; align-items:center; gap:8px;">
+          <h3 style="margin:0; font-size:17px; color:#fafafa; display:flex; align-items:center; gap:8px;">
             <span>Historia wpisów punktów (Zakrystia)</span>
           </h3>
           <span style="font-size:12px; color:#a1a1aa;">Rejestr wprowadzonych obecności i punktów</span>
@@ -2011,7 +2011,7 @@
       </div>
       
       <div style="margin-bottom:12px;">
-        <input type="text" id="szukaj-w-historii-zakrystia" placeholder="Szukaj po nazwisku ministranta..." oninput="filtrujHistorieZakrystii()" style="width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; box-sizing:border-box;">
+        <input type="text" id="szukaj-w-historii-zakrystia" placeholder="Szukaj po nazwisku ministranta..." oninput="filtrujHistorieZakrystii()" style="width:100%; padding:9px 12px; border:1px solid #27272a; border-radius:8px; font-size:13px; box-sizing:border-box;">
       </div>
 
       <div id="modal-historia-zakrystia-lista" style="overflow-y:auto; flex:1; min-height:180px; max-height:55vh; padding-right:4px;">
@@ -2027,16 +2027,16 @@
   <!-- Modal Zmiany Mszy / Dnia w Zakrystii -->
   <div id="modal-zmien-msze" class="modal-overlay" onclick="if(event.target === this) zamknijModalZmienMsze()">
     <div class="modal-content" style="max-width:380px; width:100%; text-align:left; padding:20px; box-sizing:border-box;">
-      <h3 style="margin:0 0 12px 0; color:#3730a3; font-size:16px; display:flex; align-items:center; gap:8px;">
+      <h3 style="margin:0 0 12px 0; color:#a5b4fc; font-size:16px; display:flex; align-items:center; gap:8px;">
         <span>Wybierz dzień i godzinę mszy</span>
       </h3>
       <div style="margin-bottom:12px;">
         <label class="section-label">Dzień miesiąca:</label>
-        <select id="sel-zakrystia-dzien" style="width:100%; padding:10px; font-size:15px; border-radius:8px; border:1px solid #cbd5e1; background:white;"></select>
+        <select id="sel-zakrystia-dzien" style="width:100%; padding:10px; font-size:15px; border-radius:8px;"></select>
       </div>
       <div style="margin-bottom:16px;">
         <label class="section-label">Godzina mszy:</label>
-        <select id="sel-zakrystia-godzina" style="width:100%; padding:10px; font-size:15px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
+        <select id="sel-zakrystia-godzina" style="width:100%; padding:10px; font-size:15px; border-radius:8px;">
           <option value="08:30">08:30</option>
           <option value="10:00">10:00</option>
           <option value="11:30">11:30</option>
@@ -2055,7 +2055,7 @@
   <!-- Modal Dodania Ministranta Spoza Grafiku -->
   <div id="modal-dodaj-ministranta" class="modal-overlay" onclick="if(event.target === this) zamknijModalDodajMinistranta()">
     <div class="modal-content" style="max-width:380px; width:100%; text-align:left; padding:20px; box-sizing:border-box;">
-      <h3 style="margin:0 0 12px 0; color:#1d4ed8; font-size:16px; display:flex; align-items:center; gap:8px;">
+      <h3 style="margin:0 0 12px 0; color:#60a5fa; font-size:16px; display:flex; align-items:center; gap:8px;">
         <span>Dodaj ministranta spoza grafiku</span>
       </h3>
       <p style="font-size:13px; color:var(--text-muted); margin:0 0 12px 0;">
@@ -2063,7 +2063,7 @@
       </p>
       <div style="margin-bottom:16px;">
         <label class="section-label">Wybierz ministranta:</label>
-        <select id="sel-dodatkowy-ministrant" style="width:100%; padding:10px; font-size:15px; border-radius:8px; border:1px solid #cbd5e1; background:white;"></select>
+        <select id="sel-dodatkowy-ministrant" style="width:100%; padding:10px; font-size:15px; border-radius:8px;"></select>
       </div>
       <div style="display:flex; gap:8px; justify-content:flex-end;">
         <button type="button" onclick="zamknijModalDodajMinistranta()" class="btn-secondary" style="width:auto; padding:9px 16px; margin:0; font-size:13px;">Anuluj</button>
@@ -2096,7 +2096,7 @@
   <!-- Modal Potwierdzenia Przejęcia Dyżuru (+4 pkt) -->
   <div id="modal-wez-dyzur" class="modal-overlay" onclick="if(event.target === this) zamknijModalWezDyzur()">
     <div class="modal-content" style="max-width:380px; width:100%; text-align:left; padding:20px; box-sizing:border-box;">
-      <h3 style="margin:0 0 10px 0; color:#047857; display:flex; align-items:center; gap:8px; font-size:16px;">
+      <h3 style="margin:0 0 10px 0; color:#34d399; display:flex; align-items:center; gap:8px; font-size:16px;">
         <span>Weź wolny dyżur</span>
         <span class="badge-plus4">+4 PKT</span>
       </h3>
@@ -2133,7 +2133,7 @@
         <div style="background:#0d47a1; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px; flex-shrink:0;">1</div>
         <div style="font-size:13px; line-height:1.4;">
           Na dolnym pasku przeglądarki <b>Safari</b> kliknij ikonę <b>Udostępnij</b>:
-          <div style="margin-top:6px; display:inline-flex; align-items:center; gap:6px; background:white; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:600; color:#0d47a1;">
+          <div style="margin-top:6px; display:inline-flex; align-items:center; gap:6px; background:#18181b; border:1px solid #27272a; padding:4px 10px; border-radius:6px; font-weight:600; color:#60a5fa;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
             Kwadrat ze strzałką
           </div>
@@ -2145,7 +2145,7 @@
         <div style="background:#0d47a1; color:white; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px; flex-shrink:0;">2</div>
         <div style="font-size:13px; line-height:1.4;">
           Przewiń menu lekko w dół i kliknij:
-          <div style="margin-top:6px; display:inline-flex; align-items:center; gap:6px; background:white; border:1px solid #cbd5e1; padding:4px 10px; border-radius:6px; font-weight:600; color:#fafafa;">
+          <div style="margin-top:6px; display:inline-flex; align-items:center; gap:6px; background:#18181b; border:1px solid #27272a; padding:4px 10px; border-radius:6px; font-weight:600; color:#fafafa;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             Do ekranu początkowego
           </div>
@@ -2170,7 +2170,7 @@
   <!-- Modal Ogłoszenia Pogrzebu / Nabożeństwa Dodatkowego -->
   <div id="modal-oglos-liturgie" class="modal-overlay" onclick="if(event.target === this) zamknijModalOglosLiturgie()">
     <div class="modal-content" style="max-width:400px; width:100%; text-align:left; padding:20px; box-sizing:border-box;">
-      <h3 style="margin:0 0 10px 0; color:#3730a3; font-size:16px; display:flex; align-items:center; gap:8px;">
+      <h3 style="margin:0 0 10px 0; color:#a5b4fc; font-size:16px; display:flex; align-items:center; gap:8px;">
         <span>Ogłoś pogrzeb / nabożeństwo</span>
       </h3>
       <p style="font-size:12px; color:var(--text-muted); margin:0 0 14px 0; line-height:1.4;">
@@ -2178,7 +2178,7 @@
       </p>
       <div style="margin-bottom:12px;">
         <label class="section-label">Dzień nabożeństwa:</label>
-        <select id="sel-oglos-dzien" style="width:100%; padding:10px; font-size:14px; border-radius:8px; border:1px solid #cbd5e1; background:white;"></select>
+        <select id="sel-oglos-dzien" style="width:100%; padding:10px; font-size:14px; border-radius:8px;"></select>
       </div>
       <div style="margin-bottom:12px;">
         <label class="section-label">Godzina liturgii:</label>
@@ -2192,11 +2192,11 @@
           <button type="button" class="btn-secondary" style="width:auto; padding:5px 10px; font-size:11px;" onclick="document.getElementById('input-oglos-godzina').value='15:00'">15:00</button>
           <button type="button" class="btn-secondary" style="width:auto; padding:5px 10px; font-size:11px;" onclick="document.getElementById('input-oglos-godzina').value='18:00'">18:00</button>
         </div>
-        <input type="time" id="input-oglos-godzina" value="11:00" min="07:00" max="21:00" step="300" style="width:100%; padding:10px; font-size:14px; border-radius:8px; border:1px solid #cbd5e1; box-sizing:border-box;">
+        <input type="time" id="input-oglos-godzina" value="11:00" min="07:00" max="21:00" step="300" style="width:100%; padding:10px; font-size:14px; border-radius:8px; border:1px solid #27272a; box-sizing:border-box;">
       </div>
       <div style="margin-bottom:14px;">
         <label class="section-label">Rodzaj nabożeństwa:</label>
-        <select id="sel-oglos-rodzaj" style="width:100%; padding:10px; font-size:14px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
+        <select id="sel-oglos-rodzaj" style="width:100%; padding:10px; font-size:14px; border-radius:8px;">
           <option value="Pogrzeb">Pogrzeb (+3 pkt)</option>
           <option value="Ślub">Ślub (+3 pkt)</option>
           <option value="Nabożeństwo dodatkowe">Nabożeństwo dodatkowe (+3 pkt)</option>
@@ -2579,7 +2579,7 @@
         if (isIOS && !isStandalone) {
           cardBox.style.display = 'block';
           if (badge) { badge.innerText = 'Wymaga dodania do ekranu'; badge.className = 'push-badge inactive'; }
-          if (desc) desc.innerHTML = '<b>Na iPhone:</b> Apple wymaga dodania aplikacji do ekranu początkowego, aby włączyć powiadomienia. <a href="javascript:void(0)" onclick="otworzIosModal()" style="color:#0d47a1; font-weight:bold; text-decoration:underline;">Kliknij tutaj po instrukcję</a>.';
+          if (desc) desc.innerHTML = '<b>Na iPhone:</b> Apple wymaga dodania aplikacji do ekranu początkowego, aby włączyć powiadomienia. <a href="javascript:void(0)" onclick="otworzIosModal()" style="color:#60a5fa; font-weight:bold; text-decoration:underline;">Kliknij tutaj po instrukcję</a>.';
           if (btnEnable) btnEnable.style.display = 'none';
         } else {
           cardBox.style.display = 'none';
@@ -3891,13 +3891,13 @@
           elPassaKarta.style.background = '#fef2f2';
           elPassaKarta.style.borderColor = '#fecaca';
         } else if (g.passa >= 10) {
-          elPassaKarta.style.background = '#fffbeb';
+          elPassaKarta.style.background = 'rgba(251,191,36,0.08)'; elPassaKarta.style.borderColor='rgba(251,191,36,0.3)';
           elPassaKarta.style.borderColor = '#fde68a';
         } else if (g.passa === 0) {
-          elPassaKarta.style.background = '#f4f4f5';
+          elPassaKarta.style.background = '#18181b'; elPassaKarta.style.borderColor='#27272a';
           elPassaKarta.style.borderColor = '#e4e4e7';
         } else {
-          elPassaKarta.style.background = '#ffffff';
+          elPassaKarta.style.background = '#18181b'; elPassaKarta.style.borderColor='#27272a';
           elPassaKarta.style.borderColor = '#fed7aa';
         }
       }
@@ -3924,7 +3924,7 @@
           badgesHtml += '<div style="background:#fefce8; border:1px solid #fef08a; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#854d0e; display:inline-flex; align-items:center; gap:6px;">Mistrz Miesiąca <span style="background:#eab308; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.zlotoCount + '</span></div>';
         }
         if (rp.podiumCount > 0) {
-          badgesHtml += '<div style="background:#f3e8ff; border:1px solid #e9d5ff; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#6b21a8; display:inline-flex; align-items:center; gap:6px;">Na Podium <span style="background:#a855f7; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.podiumCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.25); border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#d8b4fe; display:inline-flex; align-items:center; gap:6px;">Na Podium <span style="background:#a855f7; color:#ffffff; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.podiumCount + '</span></div>';
         }
         if (rp.przejeciaCount > 0) {
           badgesHtml += '<div style="background:#27272a; border:1px solid #3f3f46; border-radius:8px; padding:4px 8px; font-size:11px; font-weight:600; color:#18181b; display:inline-flex; align-items:center; gap:6px;">Ratownik Służby <span style="background:#09090b; color:#fafafa; border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.przejeciaCount + '</span></div>';
@@ -3953,12 +3953,12 @@
         if (statusEl) {
           statusEl.innerText = badgeData.statusText;
           if (badgeData.odblokowana) {
-            statusEl.style.background = '#ecfdf5';
+            statusEl.style.background = 'rgba(16,185,129,0.1)'; statusEl.style.color='#34d399';
             statusEl.style.color = '#047857';
             statusEl.style.borderColor = '#a7f3d0';
           } else if (badgeData.failed) {
             if (badgeData.statusText && badgeData.statusText.indexOf('absencja') !== -1) {
-              statusEl.style.background = '#fffbeb';
+              statusEl.style.background = 'rgba(251,191,36,0.1)'; statusEl.style.color='#fbbf24';
               statusEl.style.color = '#92400e';
               statusEl.style.borderColor = '#fde68a';
             } else {
@@ -3967,7 +3967,7 @@
               statusEl.style.borderColor = '#fecaca';
             }
           } else {
-            statusEl.style.background = '#f4f4f5';
+            statusEl.style.background = '#27272a'; statusEl.style.color='#a1a1aa';
             statusEl.style.color = '#52525b';
             statusEl.style.borderColor = '#e4e4e7';
           }
@@ -4180,10 +4180,10 @@
           var pts = m.punkty !== undefined ? m.punkty : 0;
           sumaPts += pts;
           var ptsBadge = pts > 0 
-            ? '<span style="color:#0d47a1; font-weight:800; font-size:13px; background:#e3f2fd; padding:3px 8px; border-radius:12px;">+' + pts + ' pkt</span>'
+            ? '<span style="color:#60a5fa; font-weight:800; font-size:13px; background:#e3f2fd; padding:3px 8px; border-radius:12px;">+' + pts + ' pkt</span>'
             : (pts < 0 
-                ? '<span style="color:#dc2626; font-weight:800; font-size:13px; background:#fee2e2; padding:3px 8px; border-radius:12px;">' + pts + ' pkt</span>'
-                : '<span style="color:#a1a1aa; font-weight:700; font-size:13px; background:#f1f5f9; padding:3px 8px; border-radius:12px;">0 pkt</span>');
+                ? '<span style="color:#f87171; font-weight:800; font-size:13px; background:rgba(239,68,68,0.1); padding:3px 8px; border-radius:12px;">' + pts + ' pkt</span>'
+                : '<span style="color:#a1a1aa; font-weight:700; font-size:13px; background:#27272a; padding:3px 8px; border-radius:12px;">0 pkt</span>');
 
           var pozBadge = '';
           if (m.pozycja && m.pozycja > 0) {
@@ -4201,7 +4201,7 @@
               '<div style="display:flex; align-items:center; gap:8px;">' +
                 '' +
                 '<span style="font-weight:700; font-size:13px; color:#fafafa;">' + (m.miesiac || 'Miesiąc') + rokStr + '</span>' +
-                '<span style="font-size:10px; color:#4f46e5; background:#eef2ff; padding:2px 6px; border-radius:4px; font-weight:700;">Ranking ›</span>' +
+                '<span style="font-size:10px; color:#818cf8; background:#eef2ff; padding:2px 6px; border-radius:4px; font-weight:700;">Ranking ›</span>' +
               '</div>' +
               '<div style="display:flex; align-items:center;">' + pozBadge + ptsBadge + '</div>' +
             '</div>';
@@ -4240,7 +4240,7 @@
 
       if (!minusy || minusy.length === 0) {
         listaDiv.innerHTML = 
-          '<div style="text-align:center; padding:28px 12px; color:#047857;">' +
+          '<div style="text-align:center; padding:28px 12px; color:#34d399;">' +
             '' +
             '<div style="font-weight:700; font-size:15px; color:#34d399;">Czyste konto!</div>' +
             '<div style="font-size:13px; color:#a1a1aa; margin-top:4px;">Brak punktów ujemnych.</div>' +
@@ -4252,12 +4252,12 @@
         posortowane.forEach(function(item) {
           var dataStr = item.dzien + ' ' + (item.miesiacGen || item.miesiac || '') + ' ' + (item.rok || '');
           html += 
-            '<div style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; background:#fff5f5; border-left:3px solid #ef4444; border-radius:8px;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; background:#18181b; border:1px solid #27272a; border-radius:8px; margin-bottom:8px;kground:#fff5f5; border-left:3px solid #ef4444; border-radius:8px;">' +
               '<div>' +
                 '<div style="font-weight:700; font-size:13px; color:#fafafa;">' + dataStr.trim() + '</div>' +
                 '<div style="font-size:12px; color:#a1a1aa; text-transform:capitalize; margin-top:2px;">' + item.dzienTygodnia + '</div>' +
               '</div>' +
-              '<div style="font-size:14px; font-weight:800; color:#dc2626;">' + item.punkty + ' pkt</div>' +
+              '<div style="font-size:14px; font-weight:800; color:#f87171;">' + item.punkty + ' pkt</div>' +
             '</div>';
         });
         html += '</div>';
@@ -4388,7 +4388,7 @@
           var ptsDisplay = '';
           if (tab === 'minus') {
             if (item.minusy < 0) {
-              ptsDisplay = '<span style="color:#dc2626; font-weight:bold;">' + item.minusy + ' pkt</span>';
+              ptsDisplay = '<span style="color:#f87171; font-weight:bold;">' + item.minusy + ' pkt</span>';
             } else {
               ptsDisplay = '<span style="color:#059669; font-weight:bold;">0 pkt</span>';
             }
@@ -4559,10 +4559,10 @@
             htmlL += '<div class="card" style="border:2px solid #6366f1; background:linear-gradient(135deg, #fdf4ff 0%, #f5f3ff 100%); margin-bottom:12px; padding:14px; box-shadow:0 4px 14px rgba(99,102,241,0.12);">' +
                        '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">' +
                          '<div>' +
-                           '<span style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; font-size:10px; font-weight:800; letter-spacing:0.5px; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:4px; text-transform:uppercase;">' +
+                           '<span style="background:rgba(99,102,241,0.12); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); font-size:10px; font-weight:800; letter-spacing:0.5px; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:4px; text-transform:uppercase;">' +
                              'SŁUŻBA DODATKOWA • +' + (l.punkty || 3) + ' PKT' +
                            '</span>' +
-                           '<h3 style="margin:2px 0 4px 0; font-size:16px; color:#1e1b4b;">' +
+                           '<h3 style="margin:2px 0 4px 0; font-size:16px; color:#fafafa;">' +
                              ikona + ' ' + l.rodzaj + ' — ' + l.dataTekst + ' • Godz. ' + dispH +
                            '</h3>' +
                            '<div style="font-size:12px; color:#475569; margin-top:3px;">' +
@@ -4572,7 +4572,7 @@
                        '</div>' +
                        '<div style="margin-top:10px; display:flex; gap:8px;">' +
                          (isSigned ?
-                           '<button type="button" class="btn-cancel" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#fef2f2; color:#dc2626; border-color:#fecaca;" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Jesteś zgłoszony (Kliknij, aby zrezygnować)</button>' :
+                           '<button type="button" class="btn-cancel" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#fef2f2; color:#f87171; border-color:#fecaca;" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Jesteś zgłoszony (Kliknij, aby zrezygnować)</button>' :
                            '<button type="button" class="btn-action" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#4f46e5; color:white; box-shadow:0 2px 8px rgba(79,70,229,0.3);" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Zgłaszam się (Będę • +' + (l.punkty || 3) + ' pkt)</button>') +
                        '</div>' +
                      '</div>';
@@ -4679,18 +4679,18 @@
             } else if (item.typ === 'tydzien') {
               if (item.oddane) {
                 if (item.oddane.status === 'OCZEKUJE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#fffbeb;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#b45309;">Wystawiono na giełdę • Masz 0 pkt (brak minusa)</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#fbbf24;">Wystawiono na giełdę • Masz 0 pkt (brak minusa)</div>' +
                                   '</div>' +
-                                  '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px; background:#ffffff; color:#09090b; border:1px solid #e4e4e7; border-radius:8px; font-weight:600; cursor:pointer;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ')">Wycofaj</button>' +
+                                  '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ')">Wycofaj</button>' +
                                 '</div>';
                 } else if (item.oddane.status === 'PRZEJETE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#f0fdf4;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#18181b;df4;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#047857; font-weight:500;">Zastępca: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy!</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#34d399; font-weight:500;">Zastępca: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy!</div>' +
                                   '</div>' +
                                 '</div>';
                 } else if (item.oddane.status === 'ZREALIZOWANE') {
@@ -4723,18 +4723,18 @@
               var subTekst = item.czyZamienione ? ' (po zamianie)' : '';
               if (item.oddane) {
                 if (item.oddane.status === 'OCZEKUJE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#fffbeb;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#b45309;">Wystawiono na giełdę • ' + godzinaTekst + ' • Masz 0 pkt (brak minusa)</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#fbbf24;">Wystawiono na giełdę • ' + godzinaTekst + ' • Masz 0 pkt (brak minusa)</div>' +
                                   '</div>' +
-                                  '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px; background:#ffffff; color:#09090b; border:1px solid #e4e4e7; border-radius:8px; font-weight:600; cursor:pointer;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ')">Wycofaj</button>' +
+                                  '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ')">Wycofaj</button>' +
                                 '</div>';
                 } else if (item.oddane.status === 'PRZEJETE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#f0fdf4;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#18181b;df4;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#047857; font-weight:500;">Zastępca: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy!</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#34d399; font-weight:500;">Zastępca: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy!</div>' +
                                   '</div>' +
                                 '</div>';
                 } else if (item.oddane.status === 'ZREALIZOWANE') {
@@ -4753,10 +4753,10 @@
                                 '</div>';
                 }
               } else if (item.czyUsprawiedliwiony) {
-                htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#fffbeb;">' +
+                htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
                                 '<div class="dyzur-pulpit-info">' +
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                  '<div class="dyzur-pulpit-opis" style="color:#b45309; font-weight:500;">Zgłoszono nieobecność • Usprawiedliwiony (0 pkt, brak minusa)</div>' +
+                                  '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Zgłoszono nieobecność • Usprawiedliwiony (0 pkt, brak minusa)</div>' +
                                 '</div>' +
                                 '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + item.dzien + ')">Wycofaj zgłoszenie</button>' +
                               '</div>';
@@ -4953,7 +4953,7 @@
         }
 
         if (wolneOferty.length === 0) {
-          listaWolneDiv.innerHTML = '<div style="color:#047857; text-align:center; padding:10px 0; font-size:13px;">Brak wolnych dyżurów do wzięcia. Wszyscy są obecni.</div>';
+          listaWolneDiv.innerHTML = '<div style="color:#34d399; text-align:center; padding:10px 0; font-size:13px;">Brak wolnych dyżurów do wzięcia. Wszyscy są obecni.</div>';
         } else {
           var htmlWolne = '';
           wolneOferty.forEach(function(zo) {
@@ -5636,8 +5636,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             return (a.godzina || '').localeCompare(b.godzina || '');
           });
           if (allUpcomingLits.length > 0) {
-            var hL = '<div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:12px; margin-bottom:12px;">' +
-              '<div style="font-size:12px; font-weight:700; color:#1e40af; text-transform:uppercase; margin-bottom:6px;">Dodatkowe służby / pogrzeby w tym miesiącu:</div>';
+            var hL = '<div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:8px; padding:12px; margin-bottom:12px;">' +
+              '<div style="font-size:12px; font-weight:700; color:#93c5fd; text-transform:uppercase; margin-bottom:6px;">Dodatkowe służby / pogrzeby w tym miesiącu:</div>';
             allUpcomingLits.forEach(function(ul) {
               var zg = (ul.zgloszeni && ul.zgloszeni.length > 0) ? ul.zgloszeni.join(', ') : 'Brak zgłoszonych';
               var dispH = cleanTime(ul.godzina) || ul.godzina;
@@ -6093,7 +6093,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       // 3. Pobierz z bazy Firestore w Warszawie (15 ms!)
       if (dbFirestore) {
-        kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#4f46e5;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie zaplanowanych ministrantów...</div>';
+        kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#818cf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie zaplanowanych ministrantów...</div>';
         var fsPromises = [
           dbFirestore.collection('stan_grafiku').doc(pobierzAktywnyKluczMiesiaca()).get(),
           (function() {
@@ -6368,7 +6368,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       if (!zakrystiaStan.ministranci || zakrystiaStan.ministranci.length === 0) {
-        kontener.innerHTML = '<div style="text-align:center; padding:30px; background:white; border-radius:12px; border:1px dashed #cbd5e1; color:#a1a1aa;">' +
+        kontener.innerHTML = '<div style="text-align:center; padding:30px; background:#18181b; border-radius:12px; border:1px dashed #cbd5e1; color:#a1a1aa;">' +
                                '' +
                                '<b>Brak zaplanowanych ministrantów na tę mszę.</b><br>' +
                                '<span style="font-size:12px;">Możesz dodać ministrantów, którzy przyszli służyć, klikając poniższy przycisk:</span><br><br>' +
@@ -6585,7 +6585,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
               var stopienKrotki = item.stopien ? '<span style="font-size:9px; color:#a1a1aa; font-weight:600; display:block;">' + item.stopien + '</span>' : '';
               var safeNazw = (item.nazwisko || '').replace(/'/g, "\\'");
 
-              return '<div onclick="otworzProfilMinistranta(\'' + safeNazw + '\')" style="background:#ffffff; border:1px solid #e2e8f0; border-left:3px solid ' + accentColor + '; border-radius:6px; padding:6px 8px; margin-bottom:6px; box-shadow:0 1px 3px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.15s ease;" title="Kliknij, aby otworzyć profil">' +
+              return '<div onclick="otworzProfilMinistranta(\'' + safeNazw + '\')" style="background:#27272a; border:1px solid #27272a; border-left:3px solid ' + accentColor + '; border-radius:6px; padding:6px 8px; margin-bottom:6px; box-shadow:0 1px 3px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.15s ease;" title="Kliknij, aby otworzyć profil">' +
                        '<div style="font-weight:700; font-size:12px; color:#fafafa; line-height:1.2; display:flex; justify-content:space-between; align-items:center;">' +
                          '<span>' + item.nazwisko + '</span>' +
                          '' +
@@ -7422,7 +7422,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       } catch(e) {}
 
       if (!tabelaPrzegladanyMiesiacDane) {
-        kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#0284c7;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie grafiku ' + docId.replace('_', ' ') + '...</div>';
+        kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#38bdf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie grafiku ' + docId.replace('_', ' ') + '...</div>';
       }
 
       // 3. Pobierz najnowsze dane z bazy Firestore (Warszawa - 20 ms)
@@ -7674,7 +7674,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
           html += '<td style="' + cellStyle + '">' + content + '</td>';
         }
 
-        html += '<td style="font-weight:800; font-size:13px; color:#0d47a1; background:#f8fafc;">' + row.suma + '</td>';
+        html += '<td style="font-weight:700; font-size:13px; color:#60a5fa; background:#27272a;">' + row.suma + '</td>';
         html += '</tr>';
       }
 
@@ -7727,7 +7727,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       if (container.children.length === 0) {
-        container.innerHTML = '<span style="color:#b00020; font-size:12px;">Brak dostępnych dni roboczych w przód w tym tygodniu.</span>';
+        container.innerHTML = '<span style="color:#f87171; font-size:12px;">Brak dostępnych dni roboczych w przód w tym tygodniu.</span>';
       }
     }
 
@@ -8274,7 +8274,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var btnP = document.getElementById('btn-potwierdz-wez');
       if (btnP) btnP.innerText = 'Weź dyżur (+' + pts + ' pkt)';
 
-      var boxSzczegoly = document.querySelector('#modal-wez-dyzur .modal-content div[style*="background:#ecfdf5"]');
+      var boxSzczegoly = document.querySelector('#modal-wez-dyzur .modal-content div[style*="background:rgbacfdf5"]');
       if (boxSzczegoly) {
         if (isSunday) {
           boxSzczegoly.innerHTML = '<div>• <b>Punkty za mszę:</b> za obecność na tej mszy niedzielnej otrzymasz <b>+3 punkty</b>!</div><div>• Zostaniesz wpisany jako oficjalny zastępca.</div>';
@@ -8472,10 +8472,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (l.typ === 'ZASTEPCA') statusInfo += ' (Zastępstwo za ' + (l.zastepuje || 'kogoś') + ')';
         else if (l.typ === 'DODATKOWY') statusInfo += ' (Służba dodatkowa)';
 
-        h += '<div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">' +
+        h += '<div style="background:#18181b; border:1px solid #27272a; border-radius:6px; padding:10px 12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">' +
           '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">' +
             '<div>' +
-              '<span style="font-weight:700; font-size:14px; color:#0f172a;">' + (l.nazwisko || '') + '</span>' +
+              '<span style="font-weight:600; font-size:14px; color:#fafafa;">' + (l.nazwisko || '') + '</span>' +
               '<div style="font-size:12px; color:#a1a1aa; margin-top:2px;">' +
                 (l.dzien || '') + ' • godz. ' + (l.godzina || '') + ' (' + (l.liturgia || 'Msza') + ')' +
               '</div>' +
@@ -8629,10 +8629,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
         var isOdebrane = !!l.odebrane;
         var btnAction = isOdebrane
           ? '<div style="display:flex; align-items:center; gap:6px;">' +
-              '<span style="font-size:12px; font-weight:700; color:#059669; background:#ecfdf5; padding:4px 8px; border-radius:6px; border:1px solid #a7f3d0;">Odebrano ' + (l.dataOdbioru ? '(' + l.dataOdbioru + ')' : '') + '</span>' +
-              '<button type="button" onclick="zmienStatusOdbioruNagrody(\'' + l.nazwisko.replace(/'/g, "\\'") + '\', false)" style="width:auto; padding:4px 8px; font-size:11px; background:#f1f5f9; color:#a1a1aa; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer;" title="Cofnij odbiór">↩</button>' +
+              '<span style="font-size:12px; font-weight:600; color:#34d399; background:rgba(16,185,129,0.12); padding:4px 8px; border-radius:6px; border:1px solid rgba(16,185,129,0.3);">Odebrano ' + (l.dataOdbioru ? '(' + l.dataOdbioru + ')' : '') + '</span>' +
+              '<button type="button" class="btn-secondary" onclick="zmienStatusOdbioruNagrody(\'' + l.nazwisko.replace(/'/g, "\\'") + '\', false)" style="width:auto; padding:4px 8px; font-size:11px; background:#27272a; color:#a1a1aa; border:1px solid #27272a; border-radius:4px; cursor:pointer;" title="Cofnij odbiór">↩</button>' +
             '</div>'
-          : '<button type="button" onclick="zmienStatusOdbioruNagrody(\'' + l.nazwisko.replace(/'/g, "\\'") + '\', true)" style="width:auto; padding:7px 12px; font-size:12px; font-weight:700; background:#059669; color:white; border-radius:6px; border:none; cursor:pointer;">' +
+          : '<button type="button" class="btn-secondary" onclick="zmienStatusOdbioruNagrody(\'' + l.nazwisko.replace(/'/g, "\\'") + '\', true)" style="width:auto; padding:7px 12px; font-size:12px; font-weight:700; background:#059669; color:white; border-radius:6px; border:none; cursor:pointer;">' +
               'Odhacz odbiór' +
             '</button>';
 
