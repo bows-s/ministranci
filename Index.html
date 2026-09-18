@@ -562,22 +562,22 @@
       color: #fafafa;
     }
     .gielda-filter-btn.active {
-      background: #18181b;
-      border-color: #fafafa;
-      color: #09090b;
-      font-weight: 600;
+      background: #fafafa !important;
+      border-color: #fafafa !important;
+      color: #09090b !important;
+      font-weight: 600 !important;
     }
     .gielda-filter-btn .count-pill {
       background: #27272a;
-      color: #a1a1aa;
-      padding: 1px 6px;
-      border-radius: 4px;
+      color: #d4d4d8;
+      padding: 1px 7px;
+      border-radius: 9999px;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
     }
     .gielda-filter-btn.active .count-pill {
-      background: #09090b;
-      color: #fafafa;
+      background: #18181b !important;
+      color: #fafafa !important;
     }
 
     /* Karta wolnych zastępstw (+4 pkt) */
@@ -1194,27 +1194,158 @@
       color: #09090b !important;
     }
 
-    .checkbox-item-weekend {
+    /* Kafelki wyboru służby do oddania (Wystawianie na giełdę) */
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 10px 0 16px 0;
+    }
+    .tile-choice {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 14px 16px;
       background: #18181b;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      display: inline-flex;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+      position: relative;
+    }
+    .tile-choice:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+      transform: translateY(-1px);
+    }
+    .tile-choice.selected {
+      background: rgba(99, 102, 241, 0.15) !important;
+      border-color: #818cf8 !important;
+      box-shadow: 0 0 0 1px #818cf8, 0 4px 14px rgba(99, 102, 241, 0.25);
+    }
+    .tile-choice.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.2);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+    }
+    .tile-choice .tile-main {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      display: block;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .tile-choice.selected .tile-main {
+      color: #ffffff;
+    }
+    .tile-choice .tile-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: #a1a1aa;
+      display: block;
+      line-height: 1.3;
+    }
+    .tile-choice.selected .tile-sub {
+      color: #c7d2fe;
+    }
+
+    /* Kafelki wyboru dni i godzin w zamian */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin: 10px 0 16px 0;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
       cursor: pointer;
       user-select: none;
-      border: 1px solid #27272a;
+      transition: all 0.15s ease;
       color: #fafafa;
-      flex: 1 1 calc(50% - 10px);
+    }
+    .checkbox-item:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+    .checkbox-item:has(input:checked) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: #6366f1;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: #6366f1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .checkbox-item .label-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .checkbox-item .label-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    .checkbox-item .label-day {
+      font-size: 11px;
+      font-weight: 500;
+      color: #a1a1aa;
+      line-height: 1.3;
+    }
+    .checkbox-item-weekend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      color: #fafafa;
       box-sizing: border-box;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .checkbox-item-weekend:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+    .checkbox-item-weekend:has(input:checked) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: #6366f1;
     }
     .checkbox-item-weekend input {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       margin: 0;
+      accent-color: #6366f1;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     @media print {

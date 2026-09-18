@@ -1019,11 +1019,6 @@ function sprawdzIWyslijPrzypomnieniaGieldy(wymuszone) {
     tresc = "Na giełdzie czekają prośby o zamianę (" + ofertyWymiany.length + "). Zobacz grafik i pomóż chłopakom!";
   }
 
-  var wszyscyWystawiajacy = {};
-  wolneZastepstwa.forEach(function(o) { if (o.oddajacy) wszyscyWystawiajacy[o.oddajacy.trim().toLowerCase()] = true; });
-  ofertyWymiany.forEach(function(o) { if (o.wystawiajacy) wszyscyWystawiajacy[o.wystawiajacy.trim().toLowerCase()] = true; });
-  var unikalniWystawiajacy = Object.keys(wszyscyWystawiajacy);
-
   var wyslanoLicznik = 0;
   var wyslaneDo = [];
 
@@ -1032,12 +1027,36 @@ function sprawdzIWyslijPrzypomnieniaGieldy(wymuszone) {
     var token = tokenData[i][1];
     if (!token || !nazwisko) continue;
 
-    var nNorm = oczyscNazwiskoMinistranta(nazwisko).toLowerCase();
-    if (unikalniWystawiajacy.length === 1 && unikalniWystawiajacy[0] === nNorm) {
+    // Filtrujemy oferty tak, aby ministrant widział TYLKO oferty innych osób (nigdy własne!)
+    var obceWolne = wolneZastepstwa.filter(function(o) {
+      return !czyToTenSamMinistrant(nazwisko, o.oddajacy);
+    });
+    var obceWymiany = ofertyWymiany.filter(function(o) {
+      return !czyToTenSamMinistrant(nazwisko, o.wystawiajacy);
+    });
+
+    // Jeśli dla tego ministranta nie ma żadnych obcych ofert, pomijamy go całkowicie!
+    if (obceWolne.length === 0 && obceWymiany.length === 0) {
       continue;
     }
 
-    var res = wyslijWiadomoscFCM(token, tytul, tresc, {
+    var tytulInd = "";
+    var trescInd = "";
+
+    if (obceWolne.length > 0) {
+      tytulInd = "Giełda: wolne służby do wzięcia! 📢 (+4 pkt)";
+      if (obceWolne.length === 1) {
+        var wz = obceWolne[0];
+        trescInd = "Czeka wolny dyżur na " + wz.dzien + ". dzień miesiąca (godz. " + wz.godzina + "). Kliknij, przejmij i zdobądź +4 pkt!";
+      } else {
+        trescInd = "Czekają wolne dyżury do wzięcia (" + obceWolne.length + " msze). Sprawdź giełdę, pomóż i zgarnij punkty!";
+      }
+    } else {
+      tytulInd = "Giełda dyżurów: aktywne zamiany 🔄";
+      trescInd = "Na giełdzie czekają prośby o zamianę (" + obceWymiany.length + "). Zobacz grafik i pomóż chłopakom!";
+    }
+
+    var res = wyslijWiadomoscFCM(token, tytulInd, trescInd, {
       typ: "PRZYPOMNIENIE_GIELDA",
       widok: "gielda",
       url: "https://ministranci.web.app/?open=gielda"
