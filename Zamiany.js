@@ -1,3 +1,4 @@
+// v2026.09.18
 function doPost(e) {
   return obsluzZapytanieAPI(e);
 }

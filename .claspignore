@@ -5,4 +5,5 @@ firebase.json
 .claspignore
 test_*.js
 firestore.*
+scripts/**
 !appsscript.json
