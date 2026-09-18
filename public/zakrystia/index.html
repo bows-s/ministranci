@@ -5738,27 +5738,29 @@ function czyMaDostepDoZakrystii(nazwisko) {
       return false;
     }
 
-    function czyJestLektorem(nazwisko) {
+    function czyJestCzytajacym(nazwisko) {
       if (!nazwisko) return false;
       var n = nazwisko.toLowerCase().trim();
       return n.indexOf('maciej erich') !== -1 ||
              n.indexOf('maks erich') !== -1 ||
-             n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 ||
              n.indexOf('michał kupiec') !== -1 || n.indexOf('michal kupiec') !== -1 ||
+             n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 ||
              n.indexOf('emil czech') !== -1;
     }
+    var czyJestLektorem = czyJestCzytajacym;
 
     function wyznaczStopienMinistranta(nazwisko, wiersze) {
       var s = (nazwisko || '').toString().trim();
       var sLower = s.toLowerCase();
 
-      // Ścisła lista lektorów i animatora w parafii
-      if (sLower.indexOf('maciej erich') !== -1) {
+      // Animatorzy w parafii (czytający):
+      if (sLower.indexOf('maciej erich') !== -1 ||
+          sLower.indexOf('maks erich') !== -1 ||
+          sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1) {
         return { stopien: "Animator", ranga: 5 };
       }
-      if (sLower.indexOf('maks erich') !== -1 ||
-          sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
-          sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1 ||
+      // Lektorzy w parafii (czytający):
+      if (sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
           sLower.indexOf('emil czech') !== -1) {
         return { stopien: "Lektor", ranga: 4 };
       }
