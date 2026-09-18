@@ -6687,6 +6687,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             { v: '', l: '— Przypisz funkcję —' },
             { v: 'Czytanie i Patena (Bliżej)', l: 'Czytanie i Patena (Bliżej)' },
             { v: 'Czytanie, Dary i Patena (Bliżej)', l: 'Czytanie, Dary i Patena (Bliżej)' },
+            { v: 'Czytanie, Dary, Nalewanie 2 i Patena (Bliżej)', l: 'Czytanie, Dary, Nalewanie 2 i Patena (Bliżej)' },
             { v: 'Czytanie i Patena 1 (Bliżej)', l: 'Czytanie i Patena 1 (Bliżej)' },
             { v: 'I Czytanie i Patena 1 (Bliżej)', l: 'I Czytanie i Patena 1 (Bliżej)' },
             { v: 'I Czytanie, Dary i Patena 1 (Bliżej)', l: 'I Czytanie, Dary i Patena 1 (Bliżej)' },
@@ -6994,12 +6995,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
           czytajacy[0].m.strona = 'Bliżej';
           pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
           pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
+          pozostali[1].m.funkcja = 'Dary i Nalewanie 2 (Bliżej)';
           pozostali[1].m.strona = 'Bliżej';
         } else if (ileCzyta === 2) {
           czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
           czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie i Dary (Bliżej)';
+          czytajacy[1].m.funkcja = 'II Czytanie, Dary i Nalewanie 2 (Bliżej)';
           czytajacy[1].m.strona = 'Bliżej';
           pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
           pozostali[0].m.strona = 'Dalej';
@@ -7024,7 +7025,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         } else if (ileCzyta === 2) {
           czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
           czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie i Dary (Bliżej)';
+          czytajacy[1].m.funkcja = 'II Czytanie, Dary i Nalewanie 2 (Bliżej)';
           czytajacy[1].m.strona = 'Bliżej';
           pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
           pozostali[0].m.strona = 'Dalej';
