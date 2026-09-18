@@ -867,18 +867,44 @@
       background: rgba(16, 185, 129, 0.2) !important;
       border-color: rgba(16, 185, 129, 0.4) !important;
     }
-    .badge-showcase-item.unlocked .badge-status-pill {
+    .badge-showcase-item.unlocked .badge-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      gap: 8px !important;
+    }
+    .link-ranking-subtle {
       font-size: 11px;
-      font-weight: 500;
       color: #a1a1aa;
-      background: #27272a;
-      border: 1px solid #3f3f46;
-      padding: 2px 8px;
-      border-radius: 6px;
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      flex-shrink: 0;
+      background: transparent;
+      border: 0;
+      padding: 0 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+    .link-ranking-subtle:hover {
+      color: #ffffff;
+    }
+
+    .badge-status-pill {
+      flex-shrink: 0 !important;
+      font-size: 11px !important;
+      padding: 3px 10px !important;
+      border-radius: 6px !important;
+      background: rgba(39, 39, 42, 0.8) !important;
+      color: #a1a1aa !important;
+      border: 1px solid #3f3f46 !important;
+      white-space: nowrap !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: auto !important;
+      max-width: none !important;
+      position: static !important;
+      box-sizing: border-box !important;
+      line-height: 1.2 !important;
     }
     .badge-showcase-item.failed {
       background: rgba(239, 68, 68, 0.1) !important;
@@ -1414,7 +1440,7 @@
 
         <!-- Przycisk przejścia do Giełdy Mszy -->
         <div class="card card-action" onclick="otworzGielde()">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div class="badge-header">
             <div style="display:flex; align-items:center; gap:12px;">
               
               <div>
@@ -1961,7 +1987,7 @@
                 <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div class="badge-header">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Żelazna Tarcza</span>
                   <span id="badge-status-zelazna-tarcza" class="badge-status-pill">W toku</span>
                 </div>
@@ -1975,7 +2001,7 @@
                 <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div class="badge-header">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niezawodny</span>
                   <span id="badge-status-niezawodny" class="badge-status-pill">W toku</span>
                 </div>
@@ -1989,7 +2015,7 @@
                 <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div class="badge-header">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niedzielny Rycerz</span>
                   <span id="badge-status-niedzielny-rycerz" class="badge-status-pill">W toku</span>
                 </div>
@@ -2003,7 +2029,7 @@
                 <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div class="badge-header">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Ratownik Służby</span>
                   <span id="badge-status-przejecie-dyzuru" class="badge-status-pill">W toku</span>
                 </div>
@@ -2017,7 +2043,7 @@
                 <span class="badge-icon" style="color:#71717a; display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
               </div>
               <div style="flex:1; min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <div class="badge-header">
                   <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Mistrz Wymiany</span>
                   <span id="badge-status-udana-wymiana" class="badge-status-pill">W toku</span>
                 </div>
@@ -4116,16 +4142,16 @@
             statusEl.style.borderColor = 'rgba(16, 185, 129, 0.35)';
           } else if (badgeData.failed) {
             if (badgeData.statusText && badgeData.statusText.indexOf('absencja') !== -1) {
-              statusEl.style.background = '#27272a';
+              statusEl.style.background = 'rgba(39, 39, 42, 0.8)';
               statusEl.style.color = '#fbbf24';
               statusEl.style.borderColor = 'rgba(251, 191, 36, 0.4)';
             } else {
-              statusEl.style.background = '#27272a';
+              statusEl.style.background = 'rgba(39, 39, 42, 0.8)';
               statusEl.style.color = '#f87171';
               statusEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
             }
           } else {
-            statusEl.style.background = '#27272a';
+            statusEl.style.background = 'rgba(39, 39, 42, 0.8)';
             statusEl.style.color = '#a1a1aa';
             statusEl.style.borderColor = '#3f3f46';
           }
@@ -4338,18 +4364,18 @@
           var pts = m.punkty !== undefined ? m.punkty : 0;
           sumaPts += pts;
           var ptsBadge = pts > 0 
-            ? '<span style="color:#60a5fa; font-weight:800; font-size:13px; background:#e3f2fd; padding:3px 8px; border-radius:12px;">+' + pts + ' pkt</span>'
+            ? '<span style="font-size:12px; font-weight:500; color:#22d3ee; background:rgba(8,51,68,0.4); border:1px solid rgba(6,182,212,0.3); padding:2px 8px; border-radius:4px; white-space:nowrap;">+' + pts + ' pkt</span>'
             : (pts < 0 
-                ? '<span style="color:#f87171; font-weight:800; font-size:13px; background:rgba(239,68,68,0.1); padding:3px 8px; border-radius:12px;">' + pts + ' pkt</span>'
-                : '<span style="color:#a1a1aa; font-weight:700; font-size:13px; background:#27272a; padding:3px 8px; border-radius:12px;">0 pkt</span>');
+                ? '<span style="font-size:12px; font-weight:500; color:#fb7185; background:rgba(76,5,25,0.4); border:1px solid rgba(239,68,68,0.3); padding:2px 8px; border-radius:4px; white-space:nowrap;">' + pts + ' pkt</span>'
+                : '<span style="font-size:12px; font-weight:500; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:4px; white-space:nowrap;">0 pkt</span>');
 
           var pozBadge = '';
           if (m.pozycja && m.pozycja > 0) {
-            var iconPoz = '';
-            if (m.pozycja === 1) iconPoz = '';
-            else if (m.pozycja === 2) iconPoz = '';
-            else if (m.pozycja === 3) iconPoz = '';
-            pozBadge = '<span style="font-size:12px; font-weight:700; color:#fafafa; background:#e2e8f0; padding:3px 7px; border-radius:6px; margin-right:6px;">' + iconPoz + m.pozycja + '. miejsce</span>';
+            if (m.pozycja === 1) {
+              pozBadge = '<span style="font-size:11px; font-weight:600; color:#fcd34d; background:rgba(120,53,15,0.4); border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:4px; margin-right:6px; white-space:nowrap;">1. miejsce</span>';
+            } else {
+              pozBadge = '<span style="font-size:11px; font-weight:500; color:#d4d4d8; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:4px; margin-right:6px; white-space:nowrap;">' + m.pozycja + '. miejsce</span>';
+            }
           }
 
           var rokStr = m.rok ? ' ' + m.rok : '';
@@ -4359,7 +4385,7 @@
               '<div style="display:flex; align-items:center; gap:8px;">' +
                 '' +
                 '<span style="font-weight:700; font-size:13px; color:#fafafa;">' + (m.miesiac || 'Miesiąc') + rokStr + '</span>' +
-                '<span style="font-size:10px; color:#818cf8; background:#eef2ff; padding:2px 6px; border-radius:4px; font-weight:700;">Ranking ›</span>' +
+                '<span class="link-ranking-subtle">Ranking ›</span>' +
               '</div>' +
               '<div style="display:flex; align-items:center;">' + pozBadge + ptsBadge + '</div>' +
             '</div>';
