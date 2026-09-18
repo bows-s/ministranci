@@ -4247,8 +4247,8 @@
       }
       if (elPassaKarta) {
         if (g.wZagrozeniu) {
-          elPassaKarta.style.background = '#fef2f2';
-          elPassaKarta.style.borderColor = '#fecaca';
+          elPassaKarta.style.background = 'rgba(239, 68, 68, 0.1)';
+          elPassaKarta.style.borderColor = 'rgba(239, 68, 68, 0.3)';
         } else if (g.passa >= 10) {
           elPassaKarta.style.background = 'rgba(251,191,36,0.08)'; elPassaKarta.style.borderColor='rgba(251,191,36,0.3)';
           elPassaKarta.style.borderColor = '#fde68a';
@@ -4920,24 +4920,24 @@
               dispH = (Number(l.dzien) === 14) ? '10:00' : '11:00';
             }
 
-            htmlL += '<div class="card" style="border:2px solid #6366f1; background:linear-gradient(135deg, #fdf4ff 0%, #f5f3ff 100%); margin-bottom:12px; padding:14px; box-shadow:0 4px 14px rgba(99,102,241,0.12);">' +
+            htmlL += '<div class="card" style="border:1px solid rgba(99,102,241,0.3); background:#18181b; margin-bottom:12px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,0.3);">' +
                        '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">' +
                          '<div>' +
-                           '<span style="background:rgba(99,102,241,0.12); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); font-size:10px; font-weight:800; letter-spacing:0.5px; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:4px; text-transform:uppercase;">' +
+                           '<span style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); font-size:10px; font-weight:800; letter-spacing:0.5px; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:4px; text-transform:uppercase;">' +
                              'SŁUŻBA DODATKOWA • +' + (l.punkty || 3) + ' PKT' +
                            '</span>' +
                            '<h3 style="margin:2px 0 4px 0; font-size:16px; color:#fafafa;">' +
                              ikona + ' ' + l.rodzaj + ' — ' + l.dataTekst + ' • Godz. ' + dispH +
                            '</h3>' +
-                           '<div style="font-size:12px; color:#475569; margin-top:3px;">' +
+                           '<div style="font-size:12px; color:#a1a1aa; margin-top:3px;">' +
                              'Zgłoszeni chętni (<b>' + zgloszeni.length + '</b>): <span style="color:#fafafa; font-weight:500;">' + zgloszeniTekst + '</span>' +
                            '</div>' +
                          '</div>' +
                        '</div>' +
                        '<div style="margin-top:10px; display:flex; gap:8px;">' +
                          (isSigned ?
-                           '<button type="button" class="btn-cancel" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#fef2f2; color:#f87171; border-color:#fecaca;" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Jesteś zgłoszony (Kliknij, aby zrezygnować)</button>' :
-                           '<button type="button" class="btn-action" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#4f46e5; color:white; box-shadow:0 2px 8px rgba(79,70,229,0.3);" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Zgłaszam się (Będę • +' + (l.punkty || 3) + ' pkt)</button>') +
+                           '<button type="button" class="btn-cancel" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Jesteś zgłoszony (Kliknij, aby zrezygnować)</button>' :
+                           '<button type="button" class="btn-action" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#6366f1; color:#ffffff; border:none; box-shadow:0 2px 8px rgba(99,102,241,0.3);" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Zgłaszam się (Będę • +' + (l.punkty || 3) + ' pkt)</button>') +
                        '</div>' +
                      '</div>';
           });
@@ -5037,7 +5037,7 @@
               htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid ' + borderColPrzej + ';">' +
                               '<div class="dyzur-pulpit-info">' +
                                 '<div class="dyzur-pulpit-data">' + pelnaData + ' <span class="badge-plus4">+4 PKT</span></div>' +
-                                '<div class="dyzur-pulpit-opis" style="color:' + (borderColPrzej === '#ef4444' ? '#dc2626' : '#059669') + '; font-weight:500;">' + statusTekstPrzej + '</div>' +
+                                '<div class="dyzur-pulpit-opis" style="color:' + (borderColPrzej === '#ef4444' ? '#f87171' : '#34d399') + '; font-weight:500;">' + statusTekstPrzej + '</div>' +
                               '</div>' +
                             '</div>';
             } else if (item.typ === 'tydzien') {
@@ -5051,24 +5051,24 @@
                                   '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ')">Wycofaj</button>' +
                                 '</div>';
                 } else if (item.oddane.status === 'PRZEJETE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#18181b;df4;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#18181b;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
                                     '<div class="dyzur-pulpit-opis" style="color:#34d399; font-weight:500;">Zastępca: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy!</div>' +
                                   '</div>' +
                                 '</div>';
                 } else if (item.oddane.status === 'ZREALIZOWANE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #6b7280; background:#f3f4f6;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #6b7280; background:#18181b;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#4b5563;">Zastąpiony przez: <b>' + item.oddane.przejmujacy + '</b> (+1 pkt dopisany)</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#a1a1aa;">Zastąpiony przez: <b>' + item.oddane.przejmujacy + '</b> (+1 pkt dopisany)</div>' +
                                   '</div>' +
                                 '</div>';
                 } else if (item.oddane.status === 'NIESTAWIONY') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #ef4444; background:#fef2f2;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #ef4444; background:rgba(239, 68, 68, 0.08);">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#b91c1c;">Zastępca (' + item.oddane.przejmujacy + ') nie stawił się na mszy • Masz 0 pkt (brak minusa)</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#f87171;">Zastępca (' + item.oddane.przejmujacy + ') nie stawił się na mszy • Masz 0 pkt (brak minusa)</div>' +
                                   '</div>' +
                                 '</div>';
                 }
@@ -5095,24 +5095,24 @@
                                   '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ')">Wycofaj</button>' +
                                 '</div>';
                 } else if (item.oddane.status === 'PRZEJETE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#18181b;df4;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #10b981; background:#18181b;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
                                     '<div class="dyzur-pulpit-opis" style="color:#34d399; font-weight:500;">Zastępca: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy!</div>' +
                                   '</div>' +
                                 '</div>';
                 } else if (item.oddane.status === 'ZREALIZOWANE') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #6b7280; background:#f3f4f6;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #6b7280; background:#18181b;">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#4b5563;">Zastąpiony przez: <b>' + item.oddane.przejmujacy + '</b> (+1 pkt dopisany)</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#a1a1aa;">Zastąpiony przez: <b>' + item.oddane.przejmujacy + '</b> (+1 pkt dopisany)</div>' +
                                   '</div>' +
                                 '</div>';
                 } else if (item.oddane.status === 'NIESTAWIONY') {
-                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #ef4444; background:#fef2f2;">' +
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #ef4444; background:rgba(239, 68, 68, 0.08);">' +
                                   '<div class="dyzur-pulpit-info">' +
                                     '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                    '<div class="dyzur-pulpit-opis" style="color:#b91c1c;">Zastępca (' + item.oddane.przejmujacy + ') nie stawił się na mszy • Masz 0 pkt (brak minusa)</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#f87171;">Zastępca (' + item.oddane.przejmujacy + ') nie stawił się na mszy • Masz 0 pkt (brak minusa)</div>' +
                                   '</div>' +
                                 '</div>';
                 }
