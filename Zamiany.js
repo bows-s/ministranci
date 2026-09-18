@@ -124,6 +124,8 @@ function obsluzZapytanieAPI(e) {
       wynik = wyslijPorannePrzypomnieniaOSluzbie(customDate);
     } else if (funkcja === "symulujPorannePrzypomnienie") {
       wynik = symulujPorannePrzypomnienieDlaMinistranta(args[0]);
+    } else if (funkcja === "przypomnijOGieldzie") {
+      wynik = sprawdzIWyslijPrzypomnieniaGieldy(true);
     } else if (funkcja === "zapiszKluczFirebase") {
       var saJson = args[0];
       if (saJson && typeof saJson === "object") saJson = JSON.stringify(saJson);
@@ -922,6 +924,152 @@ function symulujPorannePrzypomnienieDlaMinistranta(nazwisko) {
   };
 }
 
+function sprawdzIWyslijPrzypomnieniaGieldy(wymuszone) {
+  var ss = pobierzAktywnyArkusz();
+  var now = new Date();
+  var currentDay = now.getDate();
+  var currentMonthIdx = now.getMonth();
+  var currentYear = now.getFullYear();
+
+  var props = PropertiesService.getScriptProperties();
+  if (!wymuszone) {
+    var lastSent = parseInt(props.getProperty("OSTATNIE_PRZYPOMNIENIE_GIELDA") || "0", 10);
+    if (now.getTime() - lastSent < 20 * 60 * 60 * 1000) {
+      return { sukces: true, pominieto: true, wiadomosc: "Przypomnienie o giełdzie zostało już dziś wysłane." };
+    }
+  }
+
+  // 1. Zliczamy aktywne wolne zastępstwa (wolne dyżury +4 pkt)
+  var wolneZastepstwa = [];
+  var zSheet = ss.getSheetByName("Zamiany_Zastepstwa");
+  if (zSheet && zSheet.getLastRow() > 1) {
+    var zData = zSheet.getRange(2, 1, zSheet.getLastRow() - 1, 10).getDisplayValues();
+    for (var zi = 0; zi < zData.length; zi++) {
+      var zStat = zData[zi][7].trim();
+      var zDay = parseInt(zData[zi][2], 10);
+      if (zStat === "OCZEKUJE" && !isNaN(zDay) && zDay >= currentDay) {
+        wolneZastepstwa.push({
+          dzien: zDay,
+          oddajacy: zData[zi][3],
+          godzina: zData[zi][5]
+        });
+      }
+    }
+  }
+
+  // 2. Zliczamy oferty wymiany (1:1 tydzień i niedziele)
+  var ofertyWymiany = [];
+  var tSheet = ss.getSheetByName("Zamiany_Tydzien");
+  if (tSheet && tSheet.getLastRow() > 1) {
+    var tData = tSheet.getRange(2, 1, tSheet.getLastRow() - 1, 8).getDisplayValues();
+    for (var ti = 0; ti < tData.length; ti++) {
+      var tStat = tData[ti][7].trim();
+      var tDay = parseInt(tData[ti][2], 10);
+      if (tStat === "OCZEKUJE" && !isNaN(tDay) && tDay >= currentDay) {
+        ofertyWymiany.push({
+          dzien: tDay,
+          wystawiajacy: tData[ti][3],
+          typ: "Tydzień"
+        });
+      }
+    }
+  }
+
+  var nSheet = ss.getSheetByName("Zamiany_Niedziele");
+  if (nSheet && nSheet.getLastRow() > 1) {
+    var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
+    for (var ni = 0; ni < nData.length; ni++) {
+      var nStat = nData[ni][8].trim();
+      var nDay = parseInt(nData[ni][2], 10);
+      if (nStat === "OCZEKUJE" && !isNaN(nDay) && nDay >= currentDay) {
+        ofertyWymiany.push({
+          dzien: nDay,
+          wystawiajacy: nData[ni][3],
+          typ: "Niedziela"
+        });
+      }
+    }
+  }
+
+  var lacznieOfert = wolneZastepstwa.length + ofertyWymiany.length;
+  if (lacznieOfert === 0) {
+    return { sukces: true, wyslano: 0, wiadomosc: "Brak otwartych ofert na giełdzie dyżurów." };
+  }
+
+  var sheetTok = ss.getSheetByName("Powiadomienia_Tokeny");
+  if (!sheetTok || sheetTok.getLastRow() < 2) {
+    return { sukces: false, wiadomosc: "Brak zarejestrowanych urządzeń w arkuszu Powiadomienia_Tokeny." };
+  }
+
+  var tokenData = sheetTok.getRange(2, 1, sheetTok.getLastRow() - 1, 2).getValues();
+
+  var tytul = "";
+  var tresc = "";
+
+  if (wolneZastepstwa.length > 0) {
+    tytul = "Giełda: wolne służby do wzięcia! 📢 (+4 pkt)";
+    if (wolneZastepstwa.length === 1) {
+      var wz = wolneZastepstwa[0];
+      tresc = "Czeka wolny dyżur na " + wz.dzien + ". dzień miesiąca (godz. " + wz.godzina + "). Kliknij, przejmij i zdobądź +4 pkt!";
+    } else {
+      tresc = "Czekają wolne dyżury do wzięcia (" + wolneZastepstwa.length + " msze). Sprawdź giełdę, pomóż i zgarnij punkty!";
+    }
+  } else {
+    tytul = "Giełda dyżurów: aktywne zamiany 🔄";
+    tresc = "Na giełdzie czekają prośby o zamianę (" + ofertyWymiany.length + "). Zobacz grafik i pomóż chłopakom!";
+  }
+
+  var wszyscyWystawiajacy = {};
+  wolneZastepstwa.forEach(function(o) { if (o.oddajacy) wszyscyWystawiajacy[o.oddajacy.trim().toLowerCase()] = true; });
+  ofertyWymiany.forEach(function(o) { if (o.wystawiajacy) wszyscyWystawiajacy[o.wystawiajacy.trim().toLowerCase()] = true; });
+  var unikalniWystawiajacy = Object.keys(wszyscyWystawiajacy);
+
+  var wyslanoLicznik = 0;
+  var wyslaneDo = [];
+
+  for (var i = 0; i < tokenData.length; i++) {
+    var nazwisko = tokenData[i][0];
+    var token = tokenData[i][1];
+    if (!token || !nazwisko) continue;
+
+    var nNorm = oczyscNazwiskoMinistranta(nazwisko).toLowerCase();
+    if (unikalniWystawiajacy.length === 1 && unikalniWystawiajacy[0] === nNorm) {
+      continue;
+    }
+
+    var res = wyslijWiadomoscFCM(token, tytul, tresc, {
+      typ: "PRZYPOMNIENIE_GIELDA",
+      widok: "gielda",
+      url: "https://ministranci.web.app/?open=gielda"
+    });
+
+    if (res && res.sukces) {
+      wyslanoLicznik++;
+      if (wyslaneDo.indexOf(nazwisko) === -1) wyslaneDo.push(nazwisko);
+    }
+  }
+
+  props.setProperty("OSTATNIE_PRZYPOMNIENIE_GIELDA", String(now.getTime()));
+
+  return {
+    sukces: true,
+    wyslano: wyslanoLicznik,
+    odbiorcy: wyslaneDo,
+    lacznieOfert: lacznieOfert,
+    wolneZastepstwa: wolneZastepstwa.length,
+    ofertyWymiany: ofertyWymiany.length,
+    wiadomosc: "Wysłano przypomnienia o giełdzie do " + wyslaneDo.length + " osób."
+  };
+}
+
+function przypomnieniaGieldaTrigger() {
+  try {
+    sprawdzIWyslijPrzypomnieniaGieldy(false);
+  } catch (e) {
+    console.warn("Błąd w przypomnieniaGieldaTrigger:", e);
+  }
+}
+
 function automatycznyZegarGieldy() {
   try {
     var ss = pobierzAktywnyArkusz();
@@ -932,6 +1080,15 @@ function automatycznyZegarGieldy() {
     ];
     var mGen = polishMonthsGenitive[now.getMonth()];
     przetworzWygasajaceOferty(ss, now.getFullYear(), now.getMonth(), now.getDate(), mGen);
+
+    // Automatyczne okresowe przypomnienie o ofertach na giełdzie (popołudniu między 15 a 19)
+    var h = now.getHours();
+    if (h >= 15 && h <= 19) {
+      var last = parseInt(PropertiesService.getScriptProperties().getProperty("OSTATNIE_PRZYPOMNIENIE_GIELDA") || "0", 10);
+      if (now.getTime() - last > 20 * 60 * 60 * 1000) {
+        sprawdzIWyslijPrzypomnieniaGieldy(false);
+      }
+    }
   } catch (e) {
     console.warn("Błąd w automatycznyZegarGieldy:", e);
   }
@@ -941,7 +1098,7 @@ function utworzWyzwalaczPoranny() {
   var triggers = ScriptApp.getProjectTriggers();
   for (var i = 0; i < triggers.length; i++) {
     var fn = triggers[i].getHandlerFunction();
-    if (fn === "wyslijPorannePrzypomnieniaOSluzbie" || fn === "automatycznyZegarGieldy") {
+    if (fn === "wyslijPorannePrzypomnieniaOSluzbie" || fn === "automatycznyZegarGieldy" || fn === "przypomnieniaGieldaTrigger") {
       ScriptApp.deleteTrigger(triggers[i]);
     }
   }
@@ -958,6 +1115,15 @@ function utworzWyzwalaczPoranny() {
   ScriptApp.newTrigger("automatycznyZegarGieldy")
     .timeBased()
     .everyMinutes(30)
+    .create();
+
+  // 3. Popołudniowe przypomnienie o wolnych służbach na giełdzie o godz. 16:00
+  ScriptApp.newTrigger("przypomnieniaGieldaTrigger")
+    .timeBased()
+    .everyDays(1)
+    .atHour(16)
+    .nearMinute(0)
+    .inTimezone("Europe/Warsaw")
     .create();
 
   return { sukces: true, wiadomosc: "Automatyczne wyzwalacze (przypomnienie o 7:00 oraz zegar giełdy co 30 minut) zostały pomyślnie utworzone!" };
