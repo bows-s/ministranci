@@ -4728,32 +4728,36 @@
           var nameLower = (item.nazwisko || "").trim().toLowerCase();
           var isUser = !!currentLogged && !!nameLower && (nameLower.indexOf(currentLogged) !== -1 || currentLogged.indexOf(nameLower) !== -1);
 
-          var posIcon = item.pozycja;
+          var itemPozycja = (item.pozycja !== undefined && item.pozycja !== null) ? item.pozycja : ((item.miejsce !== undefined && item.miejsce !== null) ? item.miejsce : (i + 1));
+          var itemPunkty = (item.punkty !== undefined && item.punkty !== null) ? item.punkty : ((item.suma !== undefined && item.suma !== null) ? item.suma : 0);
+
+          var posIcon = itemPozycja;
           var podiumClass = '';
           if (tab !== 'minus') {
-            if (item.pozycja === 1) { posIcon = '1'; podiumClass = 'ranking-podium-1'; }
-            else if (item.pozycja === 2) { posIcon = '2'; podiumClass = 'ranking-podium-2'; }
-            else if (item.pozycja === 3) { posIcon = '3'; podiumClass = 'ranking-podium-3'; }
+            if (itemPozycja === 1) { posIcon = '1'; podiumClass = 'ranking-podium-1'; }
+            else if (itemPozycja === 2) { posIcon = '2'; podiumClass = 'ranking-podium-2'; }
+            else if (itemPozycja === 3) { posIcon = '3'; podiumClass = 'ranking-podium-3'; }
           } else {
-            if (item.pozycja === 0) {
+            if (itemPozycja === 0) {
               posIcon = '';
-            } else if (item.pozycja === 1) {
+            } else if (itemPozycja === 1) {
               posIcon = '1';
             } else {
-              posIcon = item.pozycja;
+              posIcon = itemPozycja;
             }
           }
 
           var rowClass = (isUser ? 'ranking-row-user ' : '') + podiumClass;
           var ptsDisplay = '';
           if (tab === 'minus') {
-            if (item.minusy < 0) {
-              ptsDisplay = '<span style="color:#f87171; font-weight:bold;">' + item.minusy + ' pkt</span>';
+            var minVal = (item.minusy !== undefined && item.minusy !== null) ? item.minusy : ((item.punkty !== undefined) ? item.punkty : 0);
+            if (minVal < 0) {
+              ptsDisplay = '<span style="color:#f87171; font-weight:bold;">' + minVal + ' pkt</span>';
             } else {
               ptsDisplay = '<span style="color:#059669; font-weight:bold;">0 pkt</span>';
             }
           } else {
-            ptsDisplay = '<span style="font-weight:bold; color:var(--primary);">' + (item.punkty > 0 ? '+' : '') + item.punkty + ' pkt</span>';
+            ptsDisplay = '<span style="font-weight:bold; color:var(--primary);">' + (itemPunkty > 0 ? '+' : '') + itemPunkty + ' pkt</span>';
           }
 
           var safeName = (item.nazwisko || "").replace(/'/g, "\\'");
@@ -5609,6 +5613,17 @@
         if (!r || !r.nazwisko) return false;
         var n = r.nazwisko.toLowerCase().trim();
         return n !== 'kościelny' && n !== 'koscielny';
+      }).map(function(r, idx) {
+        var p = (r.punkty !== undefined && r.punkty !== null) ? r.punkty : ((r.suma !== undefined && r.suma !== null) ? r.suma : 0);
+        var poz = (r.pozycja !== undefined && r.pozycja !== null) ? r.pozycja : ((r.miejsce !== undefined && r.miejsce !== null) ? r.miejsce : (idx + 1));
+        return {
+          nazwisko: r.nazwisko,
+          punkty: p,
+          suma: p,
+          pozycja: poz,
+          miejsce: poz,
+          grupa: r.grupa
+        };
       });
 
       var rawRok = (docData.rankingRok && docData.rankingRok.length)
@@ -5621,6 +5636,18 @@
         if (!r || !r.nazwisko) return false;
         var n = r.nazwisko.toLowerCase().trim();
         return n !== 'kościelny' && n !== 'koscielny';
+      }).map(function(r, idx) {
+        var p = (r.punkty !== undefined && r.punkty !== null) ? r.punkty : ((r.suma !== undefined && r.suma !== null) ? r.suma : 0);
+        var poz = (r.pozycja !== undefined && r.pozycja !== null) ? r.pozycja : ((r.miejsce !== undefined && r.miejsce !== null) ? r.miejsce : (idx + 1));
+        return {
+          nazwisko: r.nazwisko,
+          punkty: p,
+          suma: p,
+          pozycja: poz,
+          miejsce: poz,
+          grupa: r.grupa,
+          punktyPoMiesiacach: r.punktyPoMiesiacach || []
+        };
       });
 
       var rawMinusy = (docData.rankingMinusy && docData.rankingMinusy.length)
@@ -7806,11 +7833,19 @@ function czyMaDostepDoZakrystii(nazwisko) {
         // BŁYSKAWICZNE PRZELICZENIE RANKINGU (synchronizacja w ułamku sekundy!)
         var rankingNowy = tabelaMiesiacaDane.wiersze
           .filter(function(w) { return w.nazwisko && w.suma !== undefined; })
-          .map(function(w) { return { nazwisko: w.nazwisko, suma: w.suma, grupa: w.grupa }; })
-          .sort(function(a, b) { return b.suma - a.suma; });
+          .map(function(w) {
+            return {
+              nazwisko: w.nazwisko,
+              punkty: w.suma,
+              suma: w.suma,
+              grupa: w.grupa
+            };
+          })
+          .sort(function(a, b) { return b.punkty - a.punkty; });
         var poz = 1;
         rankingNowy.forEach(function(r, idx) {
-          if (idx > 0 && r.suma < rankingNowy[idx - 1].suma) poz = idx + 1;
+          if (idx > 0 && r.punkty < rankingNowy[idx - 1].punkty) poz = idx + 1;
+          r.pozycja = poz;
           r.miejsce = poz;
         });
         tabelaMiesiacaDane.ranking = rankingNowy;

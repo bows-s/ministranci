@@ -2787,6 +2787,9 @@ function przypiszPozycjeRanking(arr, prop) {
       aktPozycja = i + 1;
     }
     arr[i].pozycja = aktPozycja;
+    arr[i].miejsce = aktPozycja;
+    if (arr[i].punkty !== undefined && arr[i].suma === undefined) arr[i].suma = arr[i].punkty;
+    if (arr[i].suma !== undefined && arr[i].punkty === undefined) arr[i].punkty = arr[i].suma;
   }
 }
 
