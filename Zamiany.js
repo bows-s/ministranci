@@ -2176,9 +2176,32 @@ function oczyscNazwiskoMinistranta(raw) {
   return s;
 }
 
+function czyJestLektorem(nazwisko) {
+  if (!nazwisko) return false;
+  var n = nazwisko.toLowerCase().trim();
+  return n.indexOf('maciej erich') !== -1 ||
+         n.indexOf('maks erich') !== -1 ||
+         n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 ||
+         n.indexOf('michał kupiec') !== -1 || n.indexOf('michal kupiec') !== -1 ||
+         n.indexOf('emil czech') !== -1;
+}
+
 function wyciagnijStopienMinistranta(raw) {
   if (!raw) return { stopien: "Młodszy ministrant", ranga: 2 };
   var s = raw.toString().trim();
+  var sLower = s.toLowerCase();
+
+  // Ścisła lista lektorów i animatora w parafii
+  if (sLower.indexOf('maciej erich') !== -1) {
+    return { stopien: "Animator", ranga: 5 };
+  }
+  if (sLower.indexOf('maks erich') !== -1 ||
+      sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
+      sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1 ||
+      sLower.indexOf('emil czech') !== -1) {
+    return { stopien: "Lektor", ranga: 4 };
+  }
+
   // Hierarchia:
   // 1. Animator (5 - najwyżej)
   // 2. Lektor (4)
@@ -2186,10 +2209,12 @@ function wyciagnijStopienMinistranta(raw) {
   // 4. Młodszy ministrant / Ministrant (2)
   // 5. Kandydat (1 - najniżej)
   if (/\b(animator|prezes|ceremoniarz)\b/i.test(s)) {
-    return { stopien: "Animator", ranga: 5 };
+    if (czyJestLektorem(s)) return { stopien: "Animator", ranga: 5 };
+    return { stopien: "Starszy ministrant", ranga: 3 };
   }
   if (/\blektor\b/i.test(s)) {
-    return { stopien: "Lektor", ranga: 4 };
+    if (czyJestLektorem(s)) return { stopien: "Lektor", ranga: 4 };
+    return { stopien: "Starszy ministrant", ranga: 3 };
   }
   if (/\bstarszy(\s+ministrant)?\b/i.test(s)) {
     return { stopien: "Starszy ministrant", ranga: 3 };

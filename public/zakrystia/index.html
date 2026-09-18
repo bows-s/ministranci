@@ -5738,22 +5738,53 @@ function czyMaDostepDoZakrystii(nazwisko) {
       return false;
     }
 
+    function czyJestLektorem(nazwisko) {
+      if (!nazwisko) return false;
+      var n = nazwisko.toLowerCase().trim();
+      return n.indexOf('maciej erich') !== -1 ||
+             n.indexOf('maks erich') !== -1 ||
+             n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 ||
+             n.indexOf('michał kupiec') !== -1 || n.indexOf('michal kupiec') !== -1 ||
+             n.indexOf('emil czech') !== -1;
+    }
+
     function wyznaczStopienMinistranta(nazwisko, wiersze) {
+      var s = (nazwisko || '').toString().trim();
+      var sLower = s.toLowerCase();
+
+      // Ścisła lista lektorów i animatora w parafii
+      if (sLower.indexOf('maciej erich') !== -1) {
+        return { stopien: "Animator", ranga: 5 };
+      }
+      if (sLower.indexOf('maks erich') !== -1 ||
+          sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
+          sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1 ||
+          sLower.indexOf('emil czech') !== -1) {
+        return { stopien: "Lektor", ranga: 4 };
+      }
+
       if (wiersze && wiersze.length) {
         var wRow = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, nazwisko); });
         if (wRow && wRow.stopien) {
-          return { stopien: wRow.stopien, ranga: wRow.stopienRanga || 2 };
+          var st = wRow.stopien;
+          var r = wRow.stopienRanga || 2;
+          if (r >= 4 && !czyJestLektorem(nazwisko)) {
+            st = "Starszy ministrant";
+            r = 3;
+          }
+          return { stopien: st, ranga: r };
         }
       }
-      var s = (nazwisko || '').toString().trim();
-      // Hierarchia:
-      // 1. Animator (5 - najwyżej)
-      // 2. Lektor (4)
-      // 3. Starszy ministrant (3)
-      // 4. Młodszy ministrant / Ministrant (2)
-      // 5. Kandydat (1 - najniżej)
-      if (/\b(animator|prezes|ceremoniarz)\b/i.test(s)) return { stopien: "Animator", ranga: 5 };
-      if (/\blektor\b/i.test(s)) return { stopien: "Lektor", ranga: 4 };
+
+      // Hierarchia zapasowa:
+      if (/\b(animator|prezes|ceremoniarz)\b/i.test(s)) {
+        if (czyJestLektorem(nazwisko)) return { stopien: "Animator", ranga: 5 };
+        return { stopien: "Starszy ministrant", ranga: 3 };
+      }
+      if (/\blektor\b/i.test(s)) {
+        if (czyJestLektorem(nazwisko)) return { stopien: "Lektor", ranga: 4 };
+        return { stopien: "Starszy ministrant", ranga: 3 };
+      }
       if (/\bstarszy(\s+ministrant)?\b/i.test(s)) return { stopien: "Starszy ministrant", ranga: 3 };
       if (/\bkandydat\b/i.test(s)) return { stopien: "Kandydat", ranga: 1 };
       if (/\bmłodszy(\s+ministrant)?\b/i.test(s) || /\bmlodszy(\s+ministrant)?\b/i.test(s)) return { stopien: "Młodszy ministrant", ranga: 2 };
@@ -6652,6 +6683,17 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (m.status === 'OBECNY') {
           var listaOpcji = [
             { v: '', l: '— Przypisz funkcję —' },
+            { v: 'Czytanie i Patena (Bliżej)', l: 'Czytanie i Patena (Bliżej)' },
+            { v: 'Czytanie, Dary i Patena (Bliżej)', l: 'Czytanie, Dary i Patena (Bliżej)' },
+            { v: 'Czytanie i Patena 1 (Bliżej)', l: 'Czytanie i Patena 1 (Bliżej)' },
+            { v: 'I Czytanie i Patena 1 (Bliżej)', l: 'I Czytanie i Patena 1 (Bliżej)' },
+            { v: 'I Czytanie, Dary i Patena 1 (Bliżej)', l: 'I Czytanie, Dary i Patena 1 (Bliżej)' },
+            { v: 'II Czytanie (Bliżej)', l: 'II Czytanie (Bliżej)' },
+            { v: 'II Czytanie i Dary (Bliżej)', l: 'II Czytanie i Dary (Bliżej)' },
+            { v: 'II Czytanie i Patena 2 (Bliżej)', l: 'II Czytanie i Patena 2 (Bliżej)' },
+            { v: 'II Czytanie, Dzwonki, Gong i Patena 2', l: 'II Czytanie, Dzwonki, Gong i Patena 2' },
+            { v: 'Czytanie i Dary (Bliżej)', l: 'Czytanie i Dary (Bliżej)' },
+            { v: 'Czytanie i Służba przy Ołtarzu', l: 'Czytanie i Służba przy Ołtarzu (1 os.)' },
             { v: 'Gong (Dalej)', l: 'Gong (Dalej)' },
             { v: 'Gong i Nalewanie 1 (Dalej)', l: 'Gong i Nalewanie 1 (Dalej)' },
             { v: 'Gong i Patena 2 (Dalej)', l: 'Gong i Patena 2 (Dalej)' },
@@ -6665,6 +6707,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             { v: 'Asysta liturgiczna (Dalej)', l: 'Asysta liturgiczna (Dalej)' },
             { v: 'Dary (Bliżej)', l: 'Dary (Bliżej)' },
             { v: 'Dary i Nalewanie 1 (Bliżej)', l: 'Dary i Nalewanie 1 (Bliżej)' },
+            { v: 'Dary i Nalewanie 2 (Bliżej)', l: 'Dary i Nalewanie 2 (Bliżej)' },
             { v: 'Dary i Patena 1 (Bliżej)', l: 'Dary i Patena 1 (Bliżej)' },
             { v: 'Dary, Nalewanie i Patena (Bliżej)', l: 'Dary, Nalewanie i Patena (Bliżej)' },
             { v: 'Dary, Nalewanie 1 i 2, Patena (Bliżej)', l: 'Dary, Nalewanie 1 i 2, Patena (Bliżej)' },
@@ -6859,6 +6902,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var obecni = [];
       zakrystiaStan.ministranci.forEach(function(m, idx) {
         if (m.status === 'OBECNY') {
+          var st = wyznaczStopienMinistranta(m.nazwisko, tabelaMiesiacaDane ? tabelaMiesiacaDane.wiersze : []);
+          m.stopien = st.stopien;
+          m.stopienRanga = st.ranga;
           obecni.push({ m: m, idx: idx });
         }
       });
@@ -6875,84 +6921,211 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       var N = obecni.length;
 
-      // Sortuj wg rangi stopnia malejąco:
-      // Animator (5) > Lektor (4) > Starszy ministrant (3) > Młodszy ministrant (2) > Kandydat (1)
-      var posortowani = obecni.slice().sort(function(a, b) {
-        var rA = (a.m.stopienRanga !== undefined) ? a.m.stopienRanga : 2;
-        var rB = (b.m.stopienRanga !== undefined) ? b.m.stopienRanga : 2;
-        return rB - rA;
+      var czyNiedziela = false;
+      if (zakrystiaStan.dzienTygodnia && zakrystiaStan.dzienTygodnia.toLowerCase().indexOf('niedz') !== -1) {
+        czyNiedziela = true;
+      } else if (zakrystiaStan.rodzajLiturgii && zakrystiaStan.rodzajLiturgii.toUpperCase().indexOf('NIEDZ') !== -1) {
+        czyNiedziela = true;
+      } else if (zakrystiaStan.rok !== undefined && zakrystiaStan.miesiacIdx !== undefined && zakrystiaStan.dzien !== undefined) {
+        czyNiedziela = (new Date(zakrystiaStan.rok, zakrystiaStan.miesiacIdx, zakrystiaStan.dzien).getDay() === 0);
+      }
+
+      var maxCzytan = czyNiedziela ? 2 : 1;
+
+      // Rozdziel na lektorów i pozostałych (tylko 5 wyznaczonych lektorów może czytać):
+      var obecniLektorzy = [];
+      var obecniInni = [];
+
+      obecni.forEach(function(item) {
+        if (czyJestLektorem(item.m.nazwisko)) {
+          obecniLektorzy.push(item);
+        } else {
+          obecniInni.push(item);
+        }
+      });
+
+      // Sortuj lektorów po randze (Animator 5 > Lektor 4):
+      obecniLektorzy.sort(function(a, b) {
+        return (b.m.stopienRanga || 4) - (a.m.stopienRanga || 4);
+      });
+
+      // Sortuj pozostałych ministrantów po randze:
+      obecniInni.sort(function(a, b) {
+        return (b.m.stopienRanga || 2) - (a.m.stopienRanga || 2);
+      });
+
+      var ileCzyta = Math.min(obecniLektorzy.length, maxCzytan);
+      var czytajacy = obecniLektorzy.slice(0, ileCzyta);
+      var pozostali = obecniLektorzy.slice(ileCzyta).concat(obecniInni);
+      pozostali.sort(function(a, b) {
+        return (b.m.stopienRanga || 2) - (a.m.stopienRanga || 2);
       });
 
       if (N === 1) {
-        posortowani[0].m.funkcja = 'Dzwonki, Gong i Ampułki';
-        posortowani[0].m.strona = 'Ołtarz';
+        if (ileCzyta === 1) {
+          czytajacy[0].m.funkcja = 'Czytanie i Służba przy Ołtarzu';
+          czytajacy[0].m.strona = 'Ołtarz';
+        } else {
+          pozostali[0].m.funkcja = 'Dzwonki, Gong i Ampułki';
+          pozostali[0].m.strona = 'Ołtarz';
+        }
       } else if (N === 2) {
-        posortowani[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-        posortowani[0].m.strona = 'Dalej';
-        posortowani[1].m.funkcja = 'Dary, Nalewanie 1 i 2, Patena (Bliżej)';
-        posortowani[1].m.strona = 'Bliżej';
+        if (ileCzyta === 1) {
+          czytajacy[0].m.funkcja = 'Czytanie, Dary i Patena (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+        } else if (ileCzyta === 2) {
+          czytajacy[0].m.funkcja = 'I Czytanie, Dary i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          czytajacy[1].m.funkcja = 'II Czytanie, Dzwonki, Gong i Patena 2';
+          czytajacy[1].m.strona = 'Dalej';
+        } else {
+          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dary, Nalewanie 1 i 2, Patena (Bliżej)';
+          pozostali[1].m.strona = 'Bliżej';
+        }
       } else if (N === 3) {
-        posortowani[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-        posortowani[0].m.strona = 'Dalej';
-        posortowani[1].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
-        posortowani[1].m.strona = 'Bliżej';
-        posortowani[2].m.funkcja = 'Nalewanie 2 i Patena (Bliżej)';
-        posortowani[2].m.strona = 'Bliżej';
+        if (ileCzyta === 1) {
+          czytajacy[0].m.funkcja = 'Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
+          pozostali[1].m.strona = 'Bliżej';
+        } else if (ileCzyta === 2) {
+          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          czytajacy[1].m.funkcja = 'II Czytanie i Dary (Bliżej)';
+          czytajacy[1].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+        } else {
+          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
+          pozostali[1].m.strona = 'Bliżej';
+          pozostali[2].m.funkcja = 'Nalewanie 2 i Patena (Bliżej)';
+          pozostali[2].m.strona = 'Bliżej';
+        }
       } else if (N === 4) {
-        posortowani[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-        posortowani[0].m.strona = 'Dalej';
-        posortowani[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-        posortowani[1].m.strona = 'Dalej';
-        posortowani[2].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
-        posortowani[2].m.strona = 'Bliżej';
-        posortowani[3].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
-        posortowani[3].m.strona = 'Bliżej';
+        if (ileCzyta === 1) {
+          czytajacy[0].m.funkcja = 'Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Dary i Nalewanie 2 (Bliżej)';
+          pozostali[2].m.strona = 'Bliżej';
+        } else if (ileCzyta === 2) {
+          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          czytajacy[1].m.funkcja = 'II Czytanie i Dary (Bliżej)';
+          czytajacy[1].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+        } else {
+          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
+          pozostali[2].m.strona = 'Bliżej';
+          pozostali[3].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
+          pozostali[3].m.strona = 'Bliżej';
+        }
       } else if (N === 5) {
-        posortowani[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-        posortowani[0].m.strona = 'Dalej';
-        posortowani[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-        posortowani[1].m.strona = 'Dalej';
-
-        posortowani[2].m.funkcja = 'Dary i Patena 1 (Bliżej)';
-        posortowani[2].m.strona = 'Bliżej';
-        posortowani[3].m.funkcja = 'Nalewanie 1 (Bliżej)';
-        posortowani[3].m.strona = 'Bliżej';
-        posortowani[4].m.funkcja = 'Nalewanie 2 (Bliżej)';
-        posortowani[4].m.strona = 'Bliżej';
-      } else if (N === 6) {
-        posortowani[0].m.funkcja = 'Gong (Dalej)';
-        posortowani[0].m.strona = 'Dalej';
-        posortowani[1].m.funkcja = 'Dzwonki (Dalej)';
-        posortowani[1].m.strona = 'Dalej';
-        posortowani[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
-        posortowani[2].m.strona = 'Dalej';
-
-        posortowani[3].m.funkcja = 'Dary (Bliżej)';
-        posortowani[3].m.strona = 'Bliżej';
-        posortowani[4].m.funkcja = 'Nalewanie 1 (Bliżej)';
-        posortowani[4].m.strona = 'Bliżej';
-        posortowani[5].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
-        posortowani[5].m.strona = 'Bliżej';
+        if (ileCzyta === 1) {
+          czytajacy[0].m.funkcja = 'Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Dary (Bliżej)';
+          pozostali[2].m.strona = 'Bliżej';
+          pozostali[3].m.funkcja = 'Nalewanie 2 (Bliżej)';
+          pozostali[3].m.strona = 'Bliżej';
+        } else if (ileCzyta === 2) {
+          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          czytajacy[1].m.funkcja = 'II Czytanie (Bliżej)';
+          czytajacy[1].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Dary i Nalewanie 2 (Bliżej)';
+          pozostali[2].m.strona = 'Bliżej';
+        } else {
+          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Dary i Patena 1 (Bliżej)';
+          pozostali[2].m.strona = 'Bliżej';
+          pozostali[3].m.funkcja = 'Nalewanie 1 (Bliżej)';
+          pozostali[3].m.strona = 'Bliżej';
+          pozostali[4].m.funkcja = 'Nalewanie 2 (Bliżej)';
+          pozostali[4].m.strona = 'Bliżej';
+        }
       } else {
-        posortowani[0].m.funkcja = 'Gong (Dalej)';
-        posortowani[0].m.strona = 'Dalej';
-        posortowani[1].m.funkcja = 'Dzwonki (Dalej)';
-        posortowani[1].m.strona = 'Dalej';
-        posortowani[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
-        posortowani[2].m.strona = 'Dalej';
-
-        posortowani[3].m.funkcja = 'Dary (Bliżej)';
-        posortowani[3].m.strona = 'Bliżej';
-        posortowani[4].m.funkcja = 'Nalewanie 1 (Bliżej)';
-        posortowani[4].m.strona = 'Bliżej';
-        posortowani[5].m.funkcja = 'Nalewanie 2 (Bliżej)';
-        posortowani[5].m.strona = 'Bliżej';
-        posortowani[6].m.funkcja = 'Patena 1 (Bliżej)';
-        posortowani[6].m.strona = 'Bliżej';
-
-        for (var k = 7; k < N; k++) {
-          posortowani[k].m.funkcja = 'Asysta liturgiczna';
-          posortowani[k].m.strona = (k % 2 === 1) ? 'Dalej' : 'Bliżej';
+        // N >= 6
+        if (ileCzyta === 1) {
+          czytajacy[0].m.funkcja = 'Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Gong (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
+          pozostali[2].m.strona = 'Dalej';
+          pozostali[3].m.funkcja = 'Dary (Bliżej)';
+          pozostali[3].m.strona = 'Bliżej';
+          pozostali[4].m.funkcja = 'Nalewanie 2 (Bliżej)';
+          pozostali[4].m.strona = 'Bliżej';
+          for (var k = 5; k < pozostali.length; k++) {
+            pozostali[k].m.funkcja = 'Asysta liturgiczna';
+            pozostali[k].m.strona = (k % 2 === 1) ? 'Dalej' : 'Bliżej';
+          }
+        } else if (ileCzyta === 2) {
+          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
+          czytajacy[0].m.strona = 'Bliżej';
+          czytajacy[1].m.funkcja = 'II Czytanie (Bliżej)';
+          czytajacy[1].m.strona = 'Bliżej';
+          pozostali[0].m.funkcja = 'Gong (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
+          pozostali[2].m.strona = 'Dalej';
+          pozostali[3].m.funkcja = 'Dary i Nalewanie 2 (Bliżej)';
+          pozostali[3].m.strona = 'Bliżej';
+          for (var k = 4; k < pozostali.length; k++) {
+            pozostali[k].m.funkcja = 'Asysta liturgiczna';
+            pozostali[k].m.strona = (k % 2 === 0) ? 'Dalej' : 'Bliżej';
+          }
+        } else {
+          pozostali[0].m.funkcja = 'Gong (Dalej)';
+          pozostali[0].m.strona = 'Dalej';
+          pozostali[1].m.funkcja = 'Dzwonki (Dalej)';
+          pozostali[1].m.strona = 'Dalej';
+          pozostali[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
+          pozostali[2].m.strona = 'Dalej';
+          pozostali[3].m.funkcja = 'Dary (Bliżej)';
+          pozostali[3].m.strona = 'Bliżej';
+          pozostali[4].m.funkcja = 'Nalewanie 1 (Bliżej)';
+          pozostali[4].m.strona = 'Bliżej';
+          pozostali[5].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
+          pozostali[5].m.strona = 'Bliżej';
+          for (var k = 6; k < pozostali.length; k++) {
+            pozostali[k].m.funkcja = 'Asysta liturgiczna';
+            pozostali[k].m.strona = (k % 2 === 1) ? 'Dalej' : 'Bliżej';
+          }
         }
       }
 
@@ -7065,7 +7238,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
           if (elNazwa) elNazwa.innerText = znalezionaFunkcja;
           
           var desc = 'Zajmij wyznaczone miejsce w prezbiterium.';
-          if (znalezionaFunkcja.indexOf('Gong') !== -1 && znalezionaFunkcja.indexOf('Dzwonki') === -1) {
+          if (znalezionaFunkcja.indexOf('Czytanie') !== -1) {
+            desc = 'Strona Bliżej • Czytanie Słowa Bożego przy ambonie oraz asysta przy ołtarzu i patenie. (Jeśli czyta osoba świecka, asystujesz przy darach i ołtarzu).';
+          } else if (znalezionaFunkcja.indexOf('Gong') !== -1 && znalezionaFunkcja.indexOf('Dzwonki') === -1) {
             desc = 'Miejsce 3 na stronie Dalej (naprzeciwko gongu).';
           } else if (znalezionaFunkcja.indexOf('Dzwonki') !== -1 && znalezionaFunkcja.indexOf('Gong') === -1) {
             desc = 'Miejsce 2 na stronie Dalej (obok gongu).';
