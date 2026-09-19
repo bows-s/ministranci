@@ -5944,10 +5944,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
     function czyJestCzytajacym(nazwisko) {
       if (!nazwisko) return false;
       var n = nazwisko.toLowerCase().trim();
-      return n.indexOf('maciej erich') !== -1 ||
+      return n.indexOf('maciej erich') !== -1 || n.indexOf('maciej erlich') !== -1 ||
              n.indexOf('maks erich') !== -1 ||
              n.indexOf('michał kupiec') !== -1 || n.indexOf('michal kupiec') !== -1 ||
-             n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 ||
+             n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 || n.indexOf('mikołaj erlich') !== -1 || n.indexOf('mikolaj erlich') !== -1 ||
              n.indexOf('emil czech') !== -1;
     }
     var czyJestLektorem = czyJestCzytajacym;
@@ -5957,15 +5957,30 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var sLower = s.toLowerCase();
 
       // Animatorzy w parafii (czytający):
-      if (sLower.indexOf('maciej erich') !== -1 ||
-          sLower.indexOf('maks erich') !== -1 ||
+      if (sLower.indexOf('maciej erich') !== -1 || sLower.indexOf('maciej erlich') !== -1 ||
+          sLower.indexOf('maks erich') !== -1 || sLower.indexOf('maks erlich') !== -1 ||
+          sLower.indexOf('maksymilian erich') !== -1 || sLower.indexOf('maksymilian erlich') !== -1 ||
           sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1) {
         return { stopien: "Animator", ranga: 5 };
       }
       // Lektorzy w parafii (czytający):
       if (sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
+          sLower.indexOf('mikołaj erlich') !== -1 || sLower.indexOf('mikolaj erlich') !== -1 ||
           sLower.indexOf('emil czech') !== -1) {
         return { stopien: "Lektor", ranga: 4 };
+      }
+      // Znani ministranci (fallback hierarchii parafialnej):
+      if (sLower.indexOf('paweł głaz') !== -1 || sLower.indexOf('pawel glaz') !== -1) {
+        return { stopien: "Starszy ministrant", ranga: 3 };
+      }
+      if (sLower.indexOf('jakub brytner') !== -1) {
+        return { stopien: "Młodszy ministrant", ranga: 2 };
+      }
+      if (sLower.indexOf('mateusz') !== -1) {
+        return { stopien: "Młodszy ministrant", ranga: 2 };
+      }
+      if (sLower.indexOf('franek kik') !== -1 || sLower.indexOf('franciszek kik') !== -1) {
+        return { stopien: "Kandydat", ranga: 1 };
       }
 
       if (wiersze && wiersze.length) {
@@ -7102,6 +7117,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
       pokazToast('Zaznaczono obecnych ministrantów');
     }
 
+    function zakrystiaWalidujObsadeLiturgii() {
+      return zakrystiaWalidujObsadzenieFunkcji();
+    }
     function zakrystiaWalidujObsadzenieFunkcji() {
       if (!zakrystiaStan || !zakrystiaStan.ministranci) return { sukces: true, braki: [] };
       var obecni = zakrystiaStan.ministranci.filter(function(m) { return m.status === 'OBECNY'; });
@@ -7145,7 +7163,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
     }
 
     function zakrystiaRozdzielFunkcje() {
-      if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci.length) {
+      try {
+        if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci.length) {
         pokazToast('Brak ministrantów do przydziału funkcji.');
         return;
       }
@@ -7317,7 +7336,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
 
         // Safety net - upewnij się, że żadna kluczowa funkcja nie pozostała nieprzypisana
-        var check = zakrystiaWalidujObsadeLiturgii();
+        var check = zakrystiaWalidujObsadzenieFunkcji();
         if (!check.sukces) {
           check.braki.forEach(function(brak) {
             if (brak.indexOf('Nalewanie 1 (Bliżej)') !== -1) {
@@ -7358,6 +7377,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
         pokazToast('Rozdzielono: braki ' + wRes.braki.join(', '));
       }
       zakrystiaAutoZapiszFunkcje();
+      } catch (errRozdziel) {
+        console.error('Błąd podczas zakrystiaRozdzielFunkcje:', errRozdziel);
+        pokazToast('Błąd podziału funkcji: ' + (errRozdziel.message || errRozdziel));
+      }
     }
 
     
