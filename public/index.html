@@ -1762,20 +1762,20 @@
             Zakrystia Parafialna
           </span>
           <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-            <button id="btn-historia-zakrystia" onclick="otworzModalHistoriaZakrystia()" class="btn-secondary" style="width:auto; padding:8px 12px; font-size:12px;" title="Zobacz historię wpisanych punktów">
+            <button id="btn-historia-zakrystia" onclick="otworzModalHistoriaZakrystia()" class="btn-secondary" style="width:auto; padding:7px 11px; font-size:12px; font-weight:500; background:#27272a; border:1px solid #3f3f46; color:#fafafa; border-radius:6px;" title="Historia wpisanych punktów">
               Historia wpisów
             </button>
-            <button id="btn-nagrody-zakrystia" onclick="otworzModalNagrodyZakrystia()" class="btn-secondary" style="width:auto; padding:8px 12px; font-size:12px;" title="Wypłata nagród 50 zł dla TOP 3">
-              Nagrody TOP 3 (50 zł)
+            <button id="btn-nagrody-zakrystia" onclick="otworzModalNagrodyZakrystia()" style="width:auto; padding:7px 11px; font-size:12px; font-weight:600; color:#fde047; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:6px; cursor:pointer;" title="Nagrody TOP 3">
+              🏆 Nagrody TOP 3
             </button>
-            <button id="btn-oglos-liturgie-zakrystia" onclick="otworzModalOglosLiturgie()" class="btn-secondary" style="width:auto; padding:8px 12px; font-size:12px;" title="Ogłoś pogrzeb lub inne nabożeństwo">
-              Ogłoś pogrzeb (+3 pkt)
+            <button id="btn-oglos-liturgie-zakrystia" onclick="otworzModalOglosLiturgie()" style="width:auto; padding:7px 11px; font-size:12px; font-weight:600; color:#d8b4fe; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:6px; cursor:pointer;" title="Ogłoś pogrzeb lub inne nabożeństwo">
+              ✝ Ogłoś pogrzeb
             </button>
-            <button id="btn-zakrystia-install" onclick="zainstalujAplikacjeZakrystia()" class="btn-secondary" style="width:auto; padding:8px 12px; font-size:12px; display:inline-flex; align-items:center; gap:6px;" title="Zainstaluj osobną aplikację Zakrystia">
-              Zainstaluj Zakrystię
+            <button id="btn-zakrystia-install" onclick="zainstalujAplikacjeZakrystia()" style="width:auto; padding:7px 11px; font-size:12px; font-weight:500; color:#fafafa; background:#27272a; border:1px solid #3f3f46; border-radius:6px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Zainstaluj osobną aplikację Zakrystia">
+              📲 Pobierz aplikację
             </button>
-            <button id="btn-zakrystia-odswiez" onclick="odswiezZakrystie()" class="btn-secondary" style="width:auto; padding:8px 14px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Odśwież dane mszy">
-              <svg class="refresh-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <button id="btn-zakrystia-odswiez" onclick="odswiezZakrystie()" style="width:auto; padding:7px 13px; font-size:12px; font-weight:600; color:#fafafa; background:#27272a; border:1px solid #3f3f46; border-radius:6px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Odśwież dane mszy">
+              <svg class="refresh-icon" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
               Odśwież
             </button>
           </div>
@@ -1834,14 +1834,14 @@
 
         <!-- Pasek szybkich akcji -->
         <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-          <button onclick="zakrystiaZaznaczWszystkichObecnych()" class="btn-secondary" style="flex:1; min-width:130px; padding:10px; font-size:13px; font-weight:500;">
-            Wszyscy obecni
+          <button onclick="zakrystiaZaznaczWszystkichObecnych()" style="flex:1; min-width:130px; padding:10px; font-size:13px; font-weight:600; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(16,185,129,0.35); border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
+            ✓ Wszyscy obecni
           </button>
-          <button onclick="zakrystiaRozdzielFunkcje()" class="btn-secondary" id="btn-zakrystia-rozdziel-funkcje" style="flex:1.2; min-width:145px; padding:10px; font-size:13px; font-weight:500;">
-            Rozdziel funkcje
+          <button onclick="zakrystiaRozdzielFunkcje()" id="btn-zakrystia-rozdziel-funkcje" style="flex:1.2; min-width:145px; padding:10px; font-size:13px; font-weight:600; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
+            ⚡ Rozdziel funkcje
           </button>
-          <button onclick="otworzModalDodajMinistranta()" class="btn-secondary" style="flex:1; min-width:130px; padding:10px; font-size:13px; font-weight:500;">
-            Dodaj ministranta
+          <button onclick="otworzModalDodajMinistranta()" style="flex:1; min-width:130px; padding:10px; font-size:13px; font-weight:600; background:#27272a; color:#e4e4e7; border:1px solid #3f3f46; border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
+            + Dodaj ministranta
           </button>
         </div>
 
@@ -6780,7 +6780,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (naglowek) naglowek.innerText = zakrystiaStan.dataTekst + ' • ' + zakrystiaStan.godzina;
       if (podtytul) {
         var typMszy = zakrystiaStan.nazwaLiturgii || ((zakrystiaStan.dzienTygodnia === 'niedziela') ? 'Msza w niedzielę' : 'Msza w tygodniu');
-        podtytul.innerText = typMszy + ' (+' + zakrystiaStan.punktyLiturgii + ' pkt) • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów';
+        var czystyTyp = typMszy.replace(/\s*\([^)]*\)/g, '').trim();
+        podtytul.innerText = czystyTyp + ' • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów';
       }
 
       if (stanInfo) {
@@ -6980,13 +6981,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
           if (tekstEl && typeof zakrystiaWalidujObsadzenieFunkcji === 'function') {
             var valRes = zakrystiaWalidujObsadzenieFunkcji();
             if (valRes.sukces) {
-              tekstEl.innerHTML = '<span style="color:#34d399; font-weight:600;">✓ Pełna obsada ołtarza:</span> ' +
-                '<span style="color:#a1a1aa;">Gong, Dzwonki, 2× Nalewanie 1 (Dalej + Bliżej), Nalewanie 2' +
-                (valRes.najmlodszy ? ' (' + valRes.najmlodszy + ')' : '') +
-                ', Dary' + (valRes.czytanie ? ', Czytanie' : '') + '.</span>';
+              tekstEl.innerHTML = '<span style="color:#34d399; font-weight:600;">✓ Pełna obsada ołtarza</span> ' +
+                '<span style="color:#a1a1aa; font-size:11px;">(wszystkie funkcje obsadzone)</span>';
             } else {
               tekstEl.innerHTML = '<span style="color:#f87171; font-weight:600;">⚠️ Braki:</span> ' +
-                '<span style="color:#fca5a5;">' + valRes.braki.join(', ') + '</span>';
+                '<span style="color:#fca5a5; font-weight:500;">' + valRes.braki.join(', ') + '</span>';
             }
           }
         } else {
@@ -7008,35 +7007,27 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var blizejM = ministranciZFunkcja.filter(function(m) { return m.strona === 'Bliżej'; });
           var oltarzM = ministranciZFunkcja.filter(function(m) { return m.strona === 'Ołtarz' || (!m.strona && m.strona !== 'Dalej' && m.strona !== 'Bliżej'); });
 
-          function generujKartySzkicu(lista, accentColor, bgLight) {
+          function generujKartySzkicu(lista, accentColor, bgDark) {
             if (lista.length === 0) {
-              return '<div style="font-size:11px; color:#94a3b8; font-style:italic; padding:6px; text-align:center;">Brak osób</div>';
+              return '<div style="font-size:11px; color:#71717a; font-style:italic; padding:6px; text-align:center;">Brak osób</div>';
             }
             return lista.map(function(item) {
               var czysteFunkcje = (item.funkcja || '').replace(/ \((Dalej|Bliżej|Ołtarz)\)/g, '');
               var roleTagi = czysteFunkcje.split(/, | i |\+ /).map(function(r) { return r.trim(); }).filter(Boolean);
               var badgeHtml = roleTagi.map(function(t) {
-                var icon = '';
-                if (t.indexOf('Gong') !== -1 || t.indexOf('Dzwonki') !== -1) icon = '';
-                else if (t.indexOf('Dary') !== -1) icon = '';
-                else if (t.indexOf('Nalewanie 1') !== -1) icon = '';
-                else if (t.indexOf('Nalewanie 2') !== -1) icon = '';
-                else if (t.indexOf('Nalewanie') !== -1) icon = '';
-                else if (t.indexOf('Patena') !== -1) icon = '';
-                else if (t.indexOf('Asysta') !== -1) icon = '';
-                return '<span style="display:inline-block; font-size:10px; font-weight:700; padding:1px 5px; border-radius:4px; margin:1px 2px; background:' + bgLight + '; color:' + accentColor + '; border:1px solid ' + accentColor + '40;">' + icon + ' ' + t + '</span>';
+                return '<span style="display:inline-block; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin:2px 2px; background:' + bgDark + '; color:' + accentColor + '; border:1px solid ' + accentColor + '40;">' + t + '</span>';
               }).join('');
 
-              var stopienKrotki = item.stopien ? '<span style="font-size:9px; color:#a1a1aa; font-weight:600; display:block;">' + item.stopien + '</span>' : '';
+              var stopienKrotki = item.stopien ? '<span style="font-size:10px; color:#a1a1aa; font-weight:500; display:block; margin-top:1px;">' + item.stopien + '</span>' : '';
               var safeNazw = (item.nazwisko || '').replace(/'/g, "\\'");
 
-              return '<div onclick="otworzProfilMinistranta(\'' + safeNazw + '\')" style="background:#27272a; border:1px solid #27272a; border-left:3px solid ' + accentColor + '; border-radius:6px; padding:6px 8px; margin-bottom:6px; box-shadow:0 1px 3px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.15s ease;" title="Kliknij, aby otworzyć profil">' +
+              return '<div onclick="otworzModalEdycjiFunkcjiLiturgicznej(\'' + safeNazw + '\')" style="background:#27272a; border:1px solid #3f3f46; border-left:3px solid ' + accentColor + '; border-radius:8px; padding:7px 9px; margin-bottom:7px; box-shadow:0 2px 5px rgba(0,0,0,0.25); cursor:pointer; transition:all 0.15s ease;" title="Kliknij, aby edytować funkcję lub zamienić">' +
                        '<div style="font-weight:700; font-size:12px; color:#fafafa; line-height:1.2; display:flex; justify-content:space-between; align-items:center;">' +
                          '<span>' + item.nazwisko + '</span>' +
-                         '' +
+                         '<span style="font-size:9px; color:#818cf8; background:rgba(99,102,241,0.15); padding:1px 5px; border-radius:4px; font-weight:600; border:1px solid rgba(99,102,241,0.25);">✏️ Zmień</span>' +
                        '</div>' +
                        stopienKrotki +
-                       '<div style="margin-top:3px; line-height:1.3;">' + badgeHtml + '</div>' +
+                       '<div style="margin-top:4px; line-height:1.3;">' + badgeHtml + '</div>' +
                      '</div>';
             }).join('');
           }
@@ -7054,7 +7045,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                        '</div>';
 
           if (oltarzM.length > 0) {
-            htmlSzkic += '<div style="margin-bottom:8px;">' + generujKartySzkicu(oltarzM, '#059669', '#ecfdf5') + '</div>';
+            htmlSzkic += '<div style="margin-bottom:8px;">' + generujKartySzkicu(oltarzM, '#34d399', 'rgba(16,185,129,0.15)') + '</div>';
           }
 
           htmlSzkic += '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">' +
@@ -7062,13 +7053,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
                            '<div style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); font-weight:600; font-size:10px; text-transform:uppercase; text-align:center; padding:4px 6px; border-radius:4px; margin-bottom:6px; letter-spacing:0.05em;">' +
                              'Strona BLIŻEJ' +
                            '</div>' +
-                           generujKartySzkicu(blizejM, '#2563eb', '#f0f7ff') +
+                           generujKartySzkicu(blizejM, '#60a5fa', 'rgba(59,130,246,0.15)') +
                          '</div>' +
                          '<div>' +
                            '<div style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-weight:600; font-size:10px; text-transform:uppercase; text-align:center; padding:4px 6px; border-radius:4px; margin-bottom:6px; letter-spacing:0.05em;">' +
                              'Strona DALEJ' +
                            '</div>' +
-                           generujKartySzkicu(dalejM, '#7e22ce', '#faf5ff') +
+                           generujKartySzkicu(dalejM, '#c084fc', 'rgba(168,85,247,0.15)') +
                          '</div>' +
                        '</div>';
 
@@ -7165,7 +7156,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var st = wyznaczStopienMinistranta(m.nazwisko, tabelaMiesiacaDane ? tabelaMiesiacaDane.wiersze : []);
           m.stopien = st.stopien;
           m.stopienRanga = st.ranga;
-          obecni.push({ m: m, idx: idx });
+          obecni.push(m);
         }
       });
 
@@ -7175,8 +7166,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       zakrystiaStan.ministranci.forEach(function(m) {
-        m.funkcja = null;
-        m.strona = null;
+        m.funkcja = '';
+        m.strona = '';
       });
 
       var N = obecni.length;
@@ -7192,220 +7183,170 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       var maxCzytan = czyNiedziela ? 2 : 1;
 
-      // Rozdziel na czytających (animatorzy i lektorzy) i pozostałych:
-      var obecniLektorzy = [];
-      var obecniInni = [];
+      // 1. Zidentyfikuj lektorów i pozostałych
+      var lektorzy = [];
+      var inni = [];
 
-      obecni.forEach(function(item) {
-        if (czyJestCzytajacym(item.m.nazwisko)) {
-          obecniLektorzy.push(item);
+      obecni.forEach(function(m) {
+        if (czyJestCzytajacym(m.nazwisko)) {
+          lektorzy.push(m);
         } else {
-          obecniInni.push(item);
+          inni.push(m);
         }
       });
 
-      // Sortuj lektorów po randze malejąco (Animator 5 > Lektor 4):
-      obecniLektorzy.sort(function(a, b) {
-        return (b.m.stopienRanga || 4) - (a.m.stopienRanga || 4);
-      });
+      // Sortuj lektorów malejąco po randze (Animator 5 > Lektor 4)
+      lektorzy.sort(function(a, b) { return (b.stopienRanga || 4) - (a.stopienRanga || 4); });
+      // Sortuj innych malejąco po randze (najmłodsi na końcu)
+      inni.sort(function(a, b) { return (b.stopienRanga || 2) - (a.stopienRanga || 2); });
 
-      // Sortuj pozostałych ministrantów po randze malejąco (najmłodsi na końcu):
-      obecniInni.sort(function(a, b) {
-        return (b.m.stopienRanga || 2) - (a.m.stopienRanga || 2);
-      });
-
-      var ileCzyta = Math.min(obecniLektorzy.length, maxCzytan);
-      var czytajacy = obecniLektorzy.slice(0, ileCzyta);
-      var pozostali = obecniLektorzy.slice(ileCzyta).concat(obecniInni);
-      pozostali.sort(function(a, b) {
-        return (b.m.stopienRanga || 2) - (a.m.stopienRanga || 2);
-      });
+      var ileCzyta = Math.min(lektorzy.length, maxCzytan);
+      var czytajacy = lektorzy.slice(0, ileCzyta);
+      var nieczytajacy = lektorzy.slice(ileCzyta).concat(inni);
+      nieczytajacy.sort(function(a, b) { return (b.stopienRanga || 2) - (a.stopienRanga || 2); });
 
       if (N === 1) {
         if (ileCzyta === 1) {
-          czytajacy[0].m.funkcja = 'Czytanie i Służba przy Ołtarzu';
-          czytajacy[0].m.strona = 'Ołtarz';
+          czytajacy[0].funkcja = 'Czytanie i Służba przy Ołtarzu';
+          czytajacy[0].strona = 'Ołtarz';
         } else {
-          pozostali[0].m.funkcja = 'Dzwonki, Gong i Ampułki';
-          pozostali[0].m.strona = 'Ołtarz';
+          nieczytajacy[0].funkcja = 'Dzwonki, Gong i Ampułki';
+          nieczytajacy[0].strona = 'Ołtarz';
         }
       } else if (N === 2) {
-        // 2 osoby:
-        // Dalej: Dzwonki, Gong i Nalewanie 1 (Dalej)
-        // Bliżej: Dary, Nalewanie 1 i 2, Patena (Bliżej) [oraz Czytanie jeśli lektor]
-        if (ileCzyta === 1) {
-          czytajacy[0].m.funkcja = 'Czytanie, Dary, Nalewanie 1 i 2, Patena (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-        } else if (ileCzyta === 2) {
-          czytajacy[0].m.funkcja = 'I Czytanie, Dary, Nalewanie 1 i 2, Patena 1 (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie, Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          czytajacy[1].m.strona = 'Dalej';
+        if (ileCzyta === 2) {
+          czytajacy[0].funkcja = 'I Czytanie, Dary, Nalewanie 1 i 2, Patena 1 (Bliżej)';
+          czytajacy[0].strona = 'Bliżej';
+          czytajacy[1].funkcja = 'II Czytanie, Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          czytajacy[1].strona = 'Dalej';
+        } else if (ileCzyta === 1) {
+          czytajacy[0].funkcja = 'Czytanie, Dary, Nalewanie 1 i 2, Patena (Bliżej)';
+          czytajacy[0].strona = 'Bliżej';
+          nieczytajacy[0].funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          nieczytajacy[0].strona = 'Dalej';
         } else {
-          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dary, Nalewanie 1 i 2, Patena (Bliżej)';
-          pozostali[1].m.strona = 'Bliżej';
-        }
-      } else if (N === 3) {
-        // 3 osoby:
-        // Dalej: Dzwonki, Gong i Nalewanie 1 (Dalej)
-        // Bliżej 1: Czytanie (Bliżej)
-        // Bliżej 2 (najmłodszy): Dary, Nalewanie 1 i 2, Patena (Bliżej)
-        if (ileCzyta === 1) {
-          czytajacy[0].m.funkcja = 'Czytanie (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          // Najmłodszy otrzymuje Dary, Nalewanie 1 i 2 oraz Patenę na stronie Bliżej:
-          pozostali[1].m.funkcja = 'Dary, Nalewanie 1 i 2, Patena (Bliżej)';
-          pozostali[1].m.strona = 'Bliżej';
-        } else if (ileCzyta === 2) {
-          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie, Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          czytajacy[1].m.strona = 'Dalej';
-          // Najmłodszy na Bliżej z Darami i Nalewaniem 1 i 2:
-          pozostali[0].m.funkcja = 'Dary, Nalewanie 1 i 2, Patena 2 (Bliżej)';
-          pozostali[0].m.strona = 'Bliżej';
-        } else {
-          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
-          pozostali[1].m.strona = 'Bliżej';
-          pozostali[2].m.funkcja = 'Nalewanie 2 i Patena (Bliżej)';
-          pozostali[2].m.strona = 'Bliżej';
-        }
-      } else if (N === 4) {
-        if (ileCzyta === 1) {
-          czytajacy[0].m.funkcja = 'Czytanie (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          // Najmłodszy na Bliżej:
-          pozostali[2].m.funkcja = 'Dary, Nalewanie 1 i 2, Patena 1 (Bliżej)';
-          pozostali[2].m.strona = 'Bliżej';
-        } else if (ileCzyta === 2) {
-          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie i Dary (Bliżej)';
-          czytajacy[1].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          // Najmłodszy na Bliżej:
-          pozostali[1].m.funkcja = 'Nalewanie 1 i 2, Patena 2 (Bliżej)';
-          pozostali[1].m.strona = 'Bliżej';
-        } else {
-          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          pozostali[2].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
-          pozostali[2].m.strona = 'Bliżej';
-          pozostali[3].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
-          pozostali[3].m.strona = 'Bliżej';
-        }
-      } else if (N === 5) {
-        if (ileCzyta === 1) {
-          czytajacy[0].m.funkcja = 'Czytanie (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          pozostali[2].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
-          pozostali[2].m.strona = 'Bliżej';
-          // Najmłodszy:
-          pozostali[3].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
-          pozostali[3].m.strona = 'Bliżej';
-        } else if (ileCzyta === 2) {
-          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie (Bliżej)';
-          czytajacy[1].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          // Najmłodszy:
-          pozostali[2].m.funkcja = 'Dary, Nalewanie 1 i 2 (Bliżej)';
-          pozostali[2].m.strona = 'Bliżej';
-        } else {
-          pozostali[0].m.funkcja = 'Gong i Nalewanie 1 (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki i Patena 2 (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          pozostali[2].m.funkcja = 'Dary i Patena 1 (Bliżej)';
-          pozostali[2].m.strona = 'Bliżej';
-          pozostali[3].m.funkcja = 'Nalewanie 1 (Bliżej)';
-          pozostali[3].m.strona = 'Bliżej';
-          // Najmłodszy:
-          pozostali[4].m.funkcja = 'Nalewanie 2 (Bliżej)';
-          pozostali[4].m.strona = 'Bliżej';
+          nieczytajacy[0].funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+          nieczytajacy[0].strona = 'Dalej';
+          nieczytajacy[1].funkcja = 'Dary, Nalewanie 1 i 2, Patena (Bliżej)';
+          nieczytajacy[1].strona = 'Bliżej';
         }
       } else {
-        // N >= 6
+        // N >= 3:
+        var blizejList = [];
+        var dalejList = [];
+
+        var targetDalej = Math.max(1, Math.floor(N / 2));
+
+        var najmlodszy = nieczytajacy.length > 0 ? nieczytajacy.pop() : czytajacy.pop();
+        blizejList.push(najmlodszy);
+
+        czytajacy.forEach(function(m) { blizejList.push(m); });
+
+        while (nieczytajacy.length > 0) {
+          if (dalejList.length < targetDalej) {
+            dalejList.push(nieczytajacy.shift());
+          } else {
+            blizejList.push(nieczytajacy.shift());
+          }
+        }
+
+        if (dalejList.length === 0 && blizejList.length > 1) {
+          var przeniesiony = blizejList.shift();
+          dalejList.push(przeniesiony);
+        }
+
+        blizejList.forEach(function(m) { m.strona = 'Bliżej'; });
+        dalejList.forEach(function(m) { m.strona = 'Dalej'; });
+
+        dalejList.sort(function(a, b) { return (b.stopienRanga || 2) - (a.stopienRanga || 2); });
+        blizejList.sort(function(a, b) {
+          var aCzyta = czytajacy.indexOf(a) !== -1;
+          var bCzyta = czytajacy.indexOf(b) !== -1;
+          if (aCzyta && !bCzyta) return -1;
+          if (!aCzyta && bCzyta) return 1;
+          return (b.stopienRanga || 2) - (a.stopienRanga || 2);
+        });
+
+        // Obsada Strona Dalej:
+        if (dalejList.length === 1) {
+          dalejList[0].funkcja = 'Dzwonki, Gong i Nalewanie 1 (Dalej)';
+        } else if (dalejList.length === 2) {
+          dalejList[0].funkcja = 'Dzwonki i Gong (Dalej)';
+          dalejList[1].funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
+        } else if (dalejList.length >= 3) {
+          dalejList[0].funkcja = 'Dzwonki (Dalej)';
+          dalejList[1].funkcja = 'Gong (Dalej)';
+          dalejList[2].funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
+          for (var d = 3; d < dalejList.length; d++) {
+            dalejList[d].funkcja = 'Asysta liturgiczna (Dalej)';
+          }
+        }
+
+        // Obsada Strona Bliżej:
         if (ileCzyta === 1) {
-          czytajacy[0].m.funkcja = 'Czytanie (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Gong (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          pozostali[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
-          pozostali[2].m.strona = 'Dalej';
-          pozostali[3].m.funkcja = 'Dary (Bliżej)';
-          pozostali[3].m.strona = 'Bliżej';
-          pozostali[4].m.funkcja = 'Nalewanie 1 (Bliżej)';
-          pozostali[4].m.strona = 'Bliżej';
-          var lastIdx = pozostali.length - 1;
-          pozostali[lastIdx].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
-          pozostali[lastIdx].m.strona = 'Bliżej';
-          for (var k = 5; k < lastIdx; k++) {
-            pozostali[k].m.funkcja = 'Asysta liturgiczna';
-            pozostali[k].m.strona = (k % 2 === 1) ? 'Dalej' : 'Bliżej';
-          }
+          czytajacy[0].funkcja = 'Czytanie (Bliżej)';
         } else if (ileCzyta === 2) {
-          czytajacy[0].m.funkcja = 'I Czytanie i Patena 1 (Bliżej)';
-          czytajacy[0].m.strona = 'Bliżej';
-          czytajacy[1].m.funkcja = 'II Czytanie (Bliżej)';
-          czytajacy[1].m.strona = 'Bliżej';
-          pozostali[0].m.funkcja = 'Gong (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          pozostali[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
-          pozostali[2].m.strona = 'Dalej';
-          pozostali[3].m.funkcja = 'Dary i Nalewanie 1 (Bliżej)';
-          pozostali[3].m.strona = 'Bliżej';
-          var lastIdx = pozostali.length - 1;
-          pozostali[lastIdx].m.funkcja = 'Nalewanie 2 (Bliżej)';
-          pozostali[lastIdx].m.strona = 'Bliżej';
-          for (var k = 4; k < lastIdx; k++) {
-            pozostali[k].m.funkcja = 'Asysta liturgiczna';
-            pozostali[k].m.strona = (k % 2 === 0) ? 'Dalej' : 'Bliżej';
+          czytajacy[0].funkcja = 'I Czytanie i Patena 1 (Bliżej)';
+          czytajacy[1].funkcja = 'II Czytanie (Bliżej)';
+        }
+
+        var nieczytajacyBlizej = blizejList.filter(function(m) { return czytajacy.indexOf(m) === -1; });
+
+        if (nieczytajacyBlizej.length === 1) {
+          nieczytajacyBlizej[0].funkcja = 'Dary, Nalewanie 1 i 2, Patena 1 (Bliżej)';
+          if (ileCzyta === 2) {
+            czytajacy[0].funkcja = 'I Czytanie (Bliżej)';
+            czytajacy[1].funkcja = 'II Czytanie i Dary (Bliżej)';
+            nieczytajacyBlizej[0].funkcja = 'Nalewanie 1 i 2, Patena 1 (Bliżej)';
           }
-        } else {
-          pozostali[0].m.funkcja = 'Gong (Dalej)';
-          pozostali[0].m.strona = 'Dalej';
-          pozostali[1].m.funkcja = 'Dzwonki (Dalej)';
-          pozostali[1].m.strona = 'Dalej';
-          pozostali[2].m.funkcja = 'Nalewanie 1 i Patena 2 (Dalej)';
-          pozostali[2].m.strona = 'Dalej';
-          pozostali[3].m.funkcja = 'Dary (Bliżej)';
-          pozostali[3].m.strona = 'Bliżej';
-          pozostali[4].m.funkcja = 'Nalewanie 1 (Bliżej)';
-          pozostali[4].m.strona = 'Bliżej';
-          pozostali[5].m.funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
-          pozostali[5].m.strona = 'Bliżej';
-          for (var k = 6; k < pozostali.length; k++) {
-            pozostali[k].m.funkcja = 'Asysta liturgiczna';
-            pozostali[k].m.strona = (k % 2 === 1) ? 'Dalej' : 'Bliżej';
+        } else if (nieczytajacyBlizej.length === 2) {
+          nieczytajacyBlizej[0].funkcja = 'Dary i Nalewanie 1 (Bliżej)';
+          nieczytajacyBlizej[1].funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
+          if (ileCzyta === 1) {
+            czytajacy[0].funkcja = 'Czytanie i Patena 1 (Bliżej)';
+            nieczytajacyBlizej[1].funkcja = 'Nalewanie 2 (Bliżej)';
           }
+        } else if (nieczytajacyBlizej.length >= 3) {
+          nieczytajacyBlizej[0].funkcja = 'Dary (Bliżej)';
+          nieczytajacyBlizej[1].funkcja = 'Nalewanie 1 (Bliżej)';
+          var lastB = nieczytajacyBlizej.length - 1;
+          nieczytajacyBlizej[lastB].funkcja = 'Nalewanie 2 i Patena 1 (Bliżej)';
+          for (var b = 2; b < lastB; b++) {
+            nieczytajacyBlizej[b].funkcja = 'Asysta liturgiczna (Bliżej)';
+          }
+        }
+
+        // Safety net - upewnij się, że żadna kluczowa funkcja nie pozostała nieprzypisana
+        var check = zakrystiaWalidujObsadeLiturgii();
+        if (!check.sukces) {
+          check.braki.forEach(function(brak) {
+            if (brak.indexOf('Nalewanie 1 (Bliżej)') !== -1) {
+              var target = nieczytajacyBlizej[0] || blizejList[blizejList.length - 1];
+              if (target) {
+                if (target.funkcja.indexOf('Nalewanie 2') !== -1) target.funkcja = target.funkcja.replace('Nalewanie 2', 'Nalewanie 1 i 2');
+                else target.funkcja += ', Nalewanie 1 (Bliżej)';
+              }
+            }
+            if (brak.indexOf('Nalewanie 2') !== -1) {
+              var targetN2 = nieczytajacyBlizej[nieczytajacyBlizej.length - 1] || blizejList[blizejList.length - 1];
+              if (targetN2) {
+                if (targetN2.funkcja.indexOf('Nalewanie 1') !== -1) targetN2.funkcja = targetN2.funkcja.replace('Nalewanie 1', 'Nalewanie 1 i 2');
+                else targetN2.funkcja += ', Nalewanie 2';
+              }
+            }
+            if (brak.indexOf('Dary') !== -1) {
+              var targetDary = blizejList.find(function(m) { return m.funkcja && m.funkcja.indexOf('Dary') === -1; }) || blizejList[0];
+              if (targetDary) targetDary.funkcja += ', Dary';
+            }
+            if (brak.indexOf('Gong') !== -1) {
+              var targetG = dalejList[0] || obecni[0];
+              if (targetG) targetG.funkcja += ', Gong';
+            }
+            if (brak.indexOf('Dzwonki') !== -1) {
+              var targetDz = dalejList[1] || dalejList[0] || obecni[1];
+              if (targetDz) targetDz.funkcja += ', Dzwonki';
+            }
+          });
         }
       }
 
@@ -7414,9 +7355,193 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (wRes.sukces) {
         pokazToast('Funkcje liturgiczne rozdzielone (obsada 100% kompletna)');
       } else {
-        pokazToast('Rozdzielono z uwagami: brak ' + wRes.braki.join(', '));
+        pokazToast('Rozdzielono: braki ' + wRes.braki.join(', '));
       }
       zakrystiaAutoZapiszFunkcje();
+    }
+
+    
+    // ==============================================
+    // RĘCZNA EDYCJA / ZAMIANA FUNKCJI LITURGICZNYCH
+    // ==============================================
+    var mefAktywnyNazwisko = null;
+    var mefWybranaStrona = 'Bliżej';
+    var mefWybraneFunkcje = [];
+
+    var MEF_DOSTEPNE_FUNKCJE = [
+      'I Czytanie',
+      'II Czytanie',
+      'Czytanie',
+      'Patena 1',
+      'Patena 2',
+      'Nalewanie 1',
+      'Nalewanie 2',
+      'Dary',
+      'Dzwonki',
+      'Gong',
+      'Asysta'
+    ];
+
+    function otworzModalEdycjiFunkcjiLiturgicznej(nazwisko) {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci) return;
+      var m = zakrystiaStan.ministranci.find(function(item) { return item.nazwisko === nazwisko; });
+      if (!m) return;
+
+      mefAktywnyNazwisko = nazwisko;
+      mefWybranaStrona = m.strona || 'Bliżej';
+
+      // Rozbij dotychczasową funkcję na tagi:
+      var obecnaFunkcja = (m.funkcja || '').replace(/ \((Dalej|Bliżej|Ołtarz)\)/g, '');
+      var czesci = obecnaFunkcja.split(/, | i |\+ /).map(function(s) { return s.trim(); }).filter(Boolean);
+      mefWybraneFunkcje = [];
+      czesci.forEach(function(c) {
+        if (c.indexOf('Nalewanie 1 i 2') !== -1) {
+          mefWybraneFunkcje.push('Nalewanie 1');
+          mefWybraneFunkcje.push('Nalewanie 2');
+        } else {
+          var dopasowanie = MEF_DOSTEPNE_FUNKCJE.find(function(df) { return c.toLowerCase() === df.toLowerCase(); });
+          if (dopasowanie && mefWybraneFunkcje.indexOf(dopasowanie) === -1) {
+            mefWybraneFunkcje.push(dopasowanie);
+          } else if (!dopasowanie && c) {
+            mefWybraneFunkcje.push(c);
+          }
+        }
+      });
+
+      document.getElementById('mef-nazwisko').innerText = m.nazwisko;
+      document.getElementById('mef-stopien').innerText = (m.stopien || 'Ministrant') + (m.status === 'OBECNY' ? ' • Obecny' : '');
+
+      mefZaktualizujWygladStrony();
+      mefRenderujChipy();
+
+      // Wypełnij listę do zamiany
+      var selZamiana = document.getElementById('mef-select-zamiana');
+      if (selZamiana) {
+        selZamiana.innerHTML = '<option value="">-- Wybierz ministranta --</option>';
+        zakrystiaStan.ministranci.forEach(function(inny) {
+          if (inny.status === 'OBECNY' && inny.nazwisko !== nazwisko) {
+            var fKrotka = inny.funkcja ? ' (' + inny.funkcja + ')' : ' (brak funkcji)';
+            selZamiana.innerHTML += '<option value="' + inny.nazwisko.replace(/"/g, '&quot;') + '">' + inny.nazwisko + fKrotka + '</option>';
+          }
+        });
+      }
+
+      var modal = document.getElementById('modal-edycja-funkcji-liturgicznej');
+      if (modal) modal.classList.add('active');
+    }
+
+    function zamknijModalEdycjiFunkcjiLiturgicznej() {
+      var modal = document.getElementById('modal-edycja-funkcji-liturgicznej');
+      if (modal) modal.classList.remove('active');
+      mefAktywnyNazwisko = null;
+    }
+
+    function mefWybierzStrone(strona) {
+      mefWybranaStrona = strona;
+      mefZaktualizujWygladStrony();
+    }
+
+    function mefZaktualizujWygladStrony() {
+      var btnBlizej = document.getElementById('mef-btn-blizej');
+      var btnDalej = document.getElementById('mef-btn-dalej');
+      if (!btnBlizej || !btnDalej) return;
+
+      if (mefWybranaStrona === 'Bliżej') {
+        btnBlizej.style.background = 'rgba(59,130,246,0.2)';
+        btnBlizej.style.color = '#60a5fa';
+        btnBlizej.style.border = '1px solid #3b82f6';
+        btnDalej.style.background = '#27272a';
+        btnDalej.style.color = '#a1a1aa';
+        btnDalej.style.border = '1px solid #3f3f46';
+      } else {
+        btnDalej.style.background = 'rgba(168,85,247,0.2)';
+        btnDalej.style.color = '#c084fc';
+        btnDalej.style.border = '1px solid #a855f7';
+        btnBlizej.style.background = '#27272a';
+        btnBlizej.style.color = '#a1a1aa';
+        btnBlizej.style.border = '1px solid #3f3f46';
+      }
+    }
+
+    function mefRenderujChipy() {
+      var kontener = document.getElementById('mef-funkcje-chipy');
+      if (!kontener) return;
+
+      var htmlChipy = '';
+      MEF_DOSTEPNE_FUNKCJE.forEach(function(funkcja) {
+        var jestAktywna = mefWybraneFunkcje.indexOf(funkcja) !== -1;
+        var styleAktywny = jestAktywna
+          ? 'background:rgba(99,102,241,0.25); color:#a5b4fc; border:1px solid #6366f1; font-weight:700;'
+          : 'background:#27272a; color:#a1a1aa; border:1px solid #3f3f46; font-weight:500;';
+
+        var safeF = funkcja.replace(/'/g, "\\'");
+        htmlChipy += '<button type="button" onclick="mefPrzelaczFunkcje(\'' + safeF + '\')" style="padding:6px 10px; font-size:11px; border-radius:6px; cursor:pointer; transition:all 0.12s ease; ' + styleAktywny + '">' +
+                       (jestAktywna ? '✓ ' : '') + funkcja +
+                     '</button>';
+      });
+      kontener.innerHTML = htmlChipy;
+    }
+
+    function mefPrzelaczFunkcje(funkcja) {
+      var idx = mefWybraneFunkcje.indexOf(funkcja);
+      if (idx !== -1) {
+        mefWybraneFunkcje.splice(idx, 1);
+      } else {
+        mefWybraneFunkcje.push(funkcja);
+      }
+      mefRenderujChipy();
+    }
+
+    function mefWyczyscFunkcje() {
+      mefWybraneFunkcje = [];
+      mefRenderujChipy();
+    }
+
+    function mefWykonajZamiane() {
+      var selZamiana = document.getElementById('mef-select-zamiana');
+      if (!selZamiana || !selZamiana.value) {
+        pokazToast('Wybierz ministranta do zamiany.');
+        return;
+      }
+      var drugiNazwisko = selZamiana.value;
+      var m1 = zakrystiaStan.ministranci.find(function(item) { return item.nazwisko === mefAktywnyNazwisko; });
+      var m2 = zakrystiaStan.ministranci.find(function(item) { return item.nazwisko === drugiNazwisko; });
+
+      if (!m1 || !m2) return;
+
+      // Zamień funkcje i stronę
+      var tempFunkcja = m1.funkcja;
+      var tempStrona = m1.strona;
+
+      m1.funkcja = m2.funkcja;
+      m1.strona = m2.strona;
+
+      m2.funkcja = tempFunkcja;
+      m2.strona = tempStrona;
+
+      zamknijModalEdycjiFunkcjiLiturgicznej();
+      renderujTrybZakrystia();
+      zakrystiaAutoZapiszFunkcje();
+      pokazToast('Zamieniono funkcje: ' + m1.nazwisko + ' ⇄ ' + m2.nazwisko);
+    }
+
+    function mefZapisz() {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci || !mefAktywnyNazwisko) return;
+      var m = zakrystiaStan.ministranci.find(function(item) { return item.nazwisko === mefAktywnyNazwisko; });
+      if (!m) return;
+
+      m.strona = mefWybranaStrona;
+      if (mefWybraneFunkcje.length === 0) {
+        m.funkcja = '';
+      } else {
+        // Zbuduj czytelny string z zachowaniem strony w nawiasie
+        m.funkcja = mefWybraneFunkcje.join(', ') + ' (' + mefWybranaStrona + ')';
+      }
+
+      zamknijModalEdycjiFunkcjiLiturgicznej();
+      renderujTrybZakrystia();
+      zakrystiaAutoZapiszFunkcje();
+      pokazToast('Zapisano funkcję: ' + m.nazwisko);
     }
 
     function zakrystiaZamienGongDzwonki() {
