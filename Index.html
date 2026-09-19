@@ -8226,20 +8226,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
               }
 
               var stary = parseFloat(wiersz.komorki[colIdx].wartosc) || 0;
-              wiersz.komorki[colIdx].wartosc = (stary > 0 && czyDodatkowa) ? (stary + dodajPkt) : dodajPkt;
-
-              // Jeśli to msza weekendowa (niedziela lub sobota 17:00), skasuj ewentualne -5 z tego weekendu!
-              var czyWeekendLiturgia = (czyNiedziela || zakrystiaStan.godzina === '17:00');
-              if (czyWeekendLiturgia) {
-                if (czyNiedziela && colIdx > 0) {
-                  if (wiersz.komorki[colIdx - 1] && parseFloat(wiersz.komorki[colIdx - 1].wartosc) === -5) {
-                    wiersz.komorki[colIdx - 1].wartosc = null;
-                  }
-                } else if (!czyNiedziela && colIdx + 1 < wiersz.komorki.length) {
-                  if (wiersz.komorki[colIdx + 1] && parseFloat(wiersz.komorki[colIdx + 1].wartosc) === -5) {
-                    wiersz.komorki[colIdx + 1].wartosc = null;
-                  }
-                }
+              if (stary < 0) {
+                wiersz.komorki[colIdx].wartosc = stary + dodajPkt;
+              } else if (stary > 0 && czyDodatkowa) {
+                wiersz.komorki[colIdx].wartosc = stary + dodajPkt;
+              } else {
+                wiersz.komorki[colIdx].wartosc = dodajPkt;
               }
 
               // Jeśli to był zastępca i jest obecny, przyznaj +1 pkt ministrantowi, którego zastępuje!
@@ -8739,10 +8731,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
 
           var content = '';
+          var numWartosc = parseFloat(k.wartosc);
           if (k.wartosc === 5 || k.wartosc === '5') {
             content = '<span class="tabela-badge b-obecny">5</span>';
-          } else if (k.wartosc === -5 || k.wartosc === '-5') {
-            content = '<span class="tabela-badge b-nieobecny">-5</span>';
+          } else if (!isNaN(numWartosc) && numWartosc < 0) {
+            content = '<span class="tabela-badge b-nieobecny">' + k.wartosc + '</span>';
           } else if (k.wartosc === 0 || k.wartosc === '0') {
             content = '<span class="tabela-badge b-uspraw">0</span>';
           } else if (k.wartosc === 4 || k.wartosc === '4') {
@@ -8759,12 +8752,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
             if (isSun && c > 0) {
               var satCell = row.komorki[c - 1];
-              if (satCell && satCell.wartosc !== null && satCell.wartosc !== '') {
+              if (satCell && parseFloat(satCell.wartosc) > 0) {
                 isWeekendServed = true; // Służył w sobotę, niedziela wolna
               }
             } else if (isSat && c < row.komorki.length - 1) {
               var sunCell = row.komorki[c + 1];
-              if (sunCell && sunCell.wartosc !== null && sunCell.wartosc !== '') {
+              if (sunCell && parseFloat(sunCell.wartosc) > 0) {
                 isWeekendServed = true; // Służy w niedzielę, sobota wolna
               }
             }

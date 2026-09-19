@@ -4257,37 +4257,22 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
           }
         }
       } else {
-        cell.setValue(ptsObecny);
-        noteText += " (+" + ptsObecny + " pkt)";
+        var curVal = cell.getValue();
+        var curNum = parseFloat(curVal);
+        var finalPts = ptsObecny;
+        if (!isNaN(curNum) && curNum < 0) {
+          finalPts = curNum + ptsObecny;
+          noteText += " (+" + ptsObecny + " pkt po karze " + curNum + ", łącznie: " + finalPts + " pkt)";
+        } else if (!isNaN(curNum) && curNum > 0 && (typ === "DODATKOWY" || czyDodatkowa)) {
+          finalPts = curNum + ptsObecny;
+          noteText += " (+" + ptsObecny + " pkt, łącznie: " + finalPts + " pkt)";
+        } else {
+          noteText += " (+" + ptsObecny + " pkt)";
+        }
+        cell.setValue(finalPts);
       }
       cell.setNote(noteText);
       zapisano++;
-
-      // Jeśli ministrant przyszedł na mszę weekendową (niedziela lub sobota 17:00 wigilijna),
-      // to ewentualne -5 za opuszczoną mszę z tego samego weekendu zostaje skasowane!
-      try {
-        var dtObj = new Date(rok || 2026, (miesiacIdx !== undefined) ? miesiacIdx : 8, dNum);
-        var dayOfWeek = dtObj.getDay(); // 0 = niedziela, 6 = sobota
-        var czyMszaWeekendowa = (dayOfWeek === 0 || (dayOfWeek === 6 && (godzina === "17:00" || (litNazwa && litNazwa.indexOf("wigil") !== -1))) || (litNazwa && litNazwa.indexOf("niedziel") !== -1));
-        if (czyMszaWeekendowa) {
-          var weekendDays = [];
-          if (dayOfWeek === 0) {
-            weekendDays.push(dNum - 1); // Sobota wigilijna wczoraj
-          } else if (dayOfWeek === 6) {
-            weekendDays.push(dNum + 1); // Niedziela jutro
-          }
-          weekendDays.forEach(function(wD) {
-            if (wD >= 1 && wD <= 31) {
-              var wCell = mSheet.getRange(targetRow, wD + 3);
-              var wVal = wCell.getValue();
-              if (wVal === -5 || wVal === "-5" || parseFloat(wVal) === -5) {
-                wCell.clearContent();
-                wCell.setNote("Anulowano -5 pkt (ministrant stawił się na innej mszy w ten weekend: " + litNazwa + " " + godzina + ")\n" + timeStamp);
-              }
-            }
-          });
-        }
-      } catch(eWknd) {}
       if (logSheet) {
         try {
           logSheet.appendRow([
