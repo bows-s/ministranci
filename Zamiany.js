@@ -2999,6 +2999,37 @@ function przetworzWygasajaceOferty(ss, rok, miesiacIdx, dzisDzien, nazwaMiesiaca
       }
     }
   }
+
+  // Obsługa wygasających ofert weekendowych (Zamiany_Niedziele)
+  var nSheet = ss.getSheetByName("Zamiany_Niedziele");
+  if (nSheet && nSheet.getLastRow() > 1) {
+    var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
+    for (var ni = 0; ni < nData.length; ni++) {
+      var nStatus = nData[ni][8].trim();
+      if (nStatus !== "OCZEKUJE") continue;
+
+      var sunDay = parseInt(nData[ni][2], 10);
+      var nWystawiajacy = nData[ni][3];
+      var nGodzOddawana = cleanTime(nData[ni][4]);
+      var nAkceptowane = nData[ni][5].toString().replace(/'/g, '').split(/[,;]/).map(function(s) { return cleanTime(s); }).filter(function(s) { return s.length > 0; });
+
+      var wlasnaMszaCutoff = czyWeekendMszaPrzeterminowanaGAS(sunDay, nGodzOddawana, rok, miesiacIdx);
+      var aktywneAlternatywy = nAkceptowane.filter(function(g) {
+        return !czyWeekendMszaPrzeterminowanaGAS(sunDay, g, rok, miesiacIdx);
+      });
+
+      var nWygasla = (wlasnaMszaCutoff || aktywneAlternatywy.length === 0);
+      if (nWygasla) {
+        // Nikt się nie wymienił przed upływem cutoffu - ministrant nie może przyjść, więc automatycznie otrzymuje 0 pkt (usprawiedliwienie)
+        nSheet.getRange(ni + 2, 9).setValue("WYGASLA_USPRAWIEDLIWIONA");
+        var realSunDzien = (nGodzOddawana === "17:00") ? (sunDay - 1) : sunDay;
+        wpiszZeroDlaMinistranta(mSheet, nWystawiajacy, realSunDzien);
+        if (realSunDzien !== sunDay) {
+          wpiszZeroDlaMinistranta(mSheet, nWystawiajacy, sunDay);
+        }
+      }
+    }
+  }
 }
 
 function wyznaczNajblizszaSluzba(rok, miesiacIdx, dzisDzien, daysInMonth, mojeDyzuryTydzien, godzinyWeekendy, nazwaMiesiacaGenitive, mojeOddaneZastepstwa, mojePrzejeteZastepstwa) {

@@ -4813,6 +4813,94 @@
       return czyZbytPoznoNaZamiane(dzien, godzClean, rok, miesiacIdx);
     }
 
+    function autoRozliczWygasleOfertyFirestore(data) {
+      if (!data || !dbFirestore) return;
+      var curY = data.rok || (new Date()).getFullYear();
+      var curM = (data.miesiacIdx !== undefined) ? data.miesiacIdx : (new Date()).getMonth();
+      var dirty = false;
+      var wiersze = data.wiersze || [];
+      var gn = data.gieldaNiedziele || [];
+      var gt = data.gieldaTydzien || [];
+
+      // 1. Sprawdź oferty weekendowe (gieldaNiedziele)
+      gn.forEach(function(o) {
+        if (!o || o.status !== 'AKTYWNA') return;
+        var gO = cleanTime(o.godzinaOddawana || o.godzina || '10:00');
+        var akceptowane = o.akceptowaneGodziny || o.godzinyAkceptowane || [];
+        var wlasnaMszaCutoff = czyWeekendMszaPrzeterminowana(o.dzien, gO, curY, curM);
+        var aktywneAlternatywy = akceptowane.filter(function(g) {
+          return !czyWeekendMszaPrzeterminowana(o.dzien, g, curY, curM);
+        });
+
+        if (wlasnaMszaCutoff || aktywneAlternatywy.length === 0) {
+          o.status = 'WYGASLA_USPRAWIEDLIWIONA';
+          dirty = true;
+          // Automatycznie usprawiedliwiamy ministranta (0 pkt zamiast -5 pkt)
+          var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, o.wystawiajacy); });
+          if (row && row.komorki) {
+            var realDay = (gO === '17:00') ? (o.dzien - 1) : o.dzien;
+            if (row.komorki[realDay - 1] && (row.komorki[realDay - 1].wartosc === null || row.komorki[realDay - 1].wartosc === undefined || row.komorki[realDay - 1].wartosc === '')) {
+              row.komorki[realDay - 1].wartosc = 0;
+            }
+            if (realDay !== o.dzien && row.komorki[o.dzien - 1] && (row.komorki[o.dzien - 1].wartosc === null || row.komorki[o.dzien - 1].wartosc === undefined || row.komorki[o.dzien - 1].wartosc === '')) {
+              row.komorki[o.dzien - 1].wartosc = 0;
+            }
+          }
+        }
+      });
+
+      // 2. Sprawdź oferty tygodniowe (gieldaTydzien)
+      gt.forEach(function(o) {
+        if (!o || o.status !== 'AKTYWNA') return;
+        var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
+        var gO = cleanTime(o.godzina) || '18:00';
+        if (czyTydzienMszaPrzeterminowana(dO, gO, curY, curM)) {
+          dirty = true;
+          var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, o.wystawiajacy); });
+          if (row && row.komorki && row.komorki[dO - 1]) {
+            if (row.komorki[dO - 1].wartosc === null || row.komorki[dO - 1].wartosc === undefined || row.komorki[dO - 1].wartosc === '') {
+              row.komorki[dO - 1].wartosc = 0;
+            }
+          }
+          if (o.autoOddaj) {
+            o.status = 'PRZEKSZTALCONA_NA_WOLNY';
+            var wolne = data.wolneZastepstwa || [];
+            var zam = data.zamianyZastepstwa || [];
+            var nowaWolna = {
+              id: 'z_auto_' + dO + '_' + Date.now(),
+              dzien: dO,
+              oddajacy: o.wystawiajacy,
+              godzina: gO,
+              typ: 'Tydzień',
+              status: 'OCZEKUJE',
+              punkty: 4,
+              utworzono: Date.now()
+            };
+            wolne.push(nowaWolna);
+            zam.push(nowaWolna);
+            data.wolneZastepstwa = wolne;
+            data.zamianyZastepstwa = zam;
+          } else {
+            o.status = 'WYGASLA_USPRAWIEDLIWIONA';
+          }
+        }
+      });
+
+      if (dirty) {
+        var docKey = pobierzAktywnyKluczMiesiaca();
+        dbFirestore.collection('stan_grafiku').doc(docKey).update({
+          wiersze: wiersze,
+          gieldaNiedziele: gn,
+          gieldaTydzien: gt,
+          wolneZastepstwa: data.wolneZastepstwa || [],
+          zamianyZastepstwa: data.zamianyZastepstwa || [],
+          zaktualizowano: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(e) {
+          console.warn('Auto-rozliczenie wygasłych ofert sync błąd:', e);
+        });
+      }
+    }
+
     // =============================================================
     // RENDEROWANIE DANYCH GRAFIKU I GIEŁDY
     // =============================================================
@@ -5094,13 +5182,23 @@
             } else if (item.typ === 'tydzien') {
               var godzWTyg = pobierzGodzineDlaDniaTygodnia(res.rok, res.miesiacIdx, item.dzien);
               if (item.ofertaGielda) {
-                htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
-                                '<div class="dyzur-pulpit-info">' +
-                                  '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                  '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wystawiono na giełdę (wymiana 1:1) • Godz. ' + godzWTyg + ' • Oczekuje na chętnego</div>' +
-                                '</div>' +
-                                '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujTydzien(\'' + item.ofertaGielda.id + '\')">Wycofaj z giełdy</button>' +
-                              '</div>';
+                var isExpiredT = czyTydzienMszaPrzeterminowana(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
+                if (isExpiredT || item.ofertaGielda.status === 'WYGASLA_USPRAWIEDLIWIONA' || item.ofertaGielda.status === 'PRZEKSZTALCONA_NA_WOLNY') {
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
+                                  '<div class="dyzur-pulpit-info">' +
+                                    '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wygasła oferta wymiany (brak chętnego) • Usprawiedliwiony (0 pkt, brak minusa)</div>' +
+                                  '</div>' +
+                                '</div>';
+                } else {
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
+                                  '<div class="dyzur-pulpit-info">' +
+                                    '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wystawiono na giełdę (wymiana 1:1) • Godz. ' + godzWTyg + ' • Oczekuje na chętnego</div>' +
+                                  '</div>' +
+                                  '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujTydzien(\'' + item.ofertaGielda.id + '\')">Wycofaj z giełdy</button>' +
+                                '</div>';
+                }
               } else if (item.oddane) {
                 if (item.oddane.status === 'OCZEKUJE') {
                   htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
@@ -5146,13 +5244,23 @@
               var subTekst = item.czyZamienione ? ' (po zamianie)' : '';
               if (item.ofertaGielda) {
                 var gOdd = item.ofertaGielda.godzinaOddawana || item.godzina || '10:00';
-                htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
-                                '<div class="dyzur-pulpit-info">' +
-                                  '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
-                                  '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wystawiono na giełdę (wymiana 1:1) • Godz. ' + gOdd + ' • Oczekuje na chętnego</div>' +
-                                '</div>' +
-                                '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujNiedziele(\'' + item.ofertaGielda.id + '\')">Wycofaj z giełdy</button>' +
-                              '</div>';
+                var isExpiredW = czyWeekendMszaPrzeterminowana(item.dzien, gOdd, res.rok, res.miesiacIdx);
+                if (isExpiredW || item.ofertaGielda.status === 'WYGASLA_USPRAWIEDLIWIONA') {
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
+                                  '<div class="dyzur-pulpit-info">' +
+                                    '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wygasła oferta wymiany (brak chętnego) • Usprawiedliwiony (0 pkt, brak minusa)</div>' +
+                                  '</div>' +
+                                '</div>';
+                } else {
+                  htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
+                                  '<div class="dyzur-pulpit-info">' +
+                                    '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
+                                    '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wystawiono na giełdę (wymiana 1:1) • Godz. ' + gOdd + ' • Oczekuje na chętnego</div>' +
+                                  '</div>' +
+                                  '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujNiedziele(\'' + item.ofertaGielda.id + '\')">Wycofaj z giełdy</button>' +
+                                '</div>';
+                }
               } else if (item.oddane) {
                 if (item.oddane.status === 'OCZEKUJE') {
                   htmlDyzury += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
@@ -5685,6 +5793,54 @@
         }
       });
 
+      // 4c. Automatyczne rozliczenie wygasłych ofert weekendowych na 0 pkt (usprawiedliwienie)
+      var allGN = docData.gieldaNiedziele || (tabelaMiesiacaDane && tabelaMiesiacaDane.gieldaNiedziele) || [];
+      allGN.forEach(function(o) {
+        if (!o || o.status === 'ANULOWANA' || o.status === 'ZAAKCEPTOWANA') return;
+        var gO = cleanTime(o.godzinaOddawana || o.godzina || '10:00');
+        var akceptowane = o.akceptowaneGodziny || o.godzinyAkceptowane || [];
+        var wlasnaMszaCutoff = czyWeekendMszaPrzeterminowana(o.dzien, gO, currentYear, currentMonthIdx);
+        var aktywneAlternatywy = akceptowane.filter(function(g) {
+          return !czyWeekendMszaPrzeterminowana(o.dzien, g, currentYear, currentMonthIdx);
+        });
+
+        if (wlasnaMszaCutoff || aktywneAlternatywy.length === 0 || o.status === 'WYGASLA_USPRAWIEDLIWIONA') {
+          o.status = 'WYGASLA_USPRAWIEDLIWIONA';
+          if (czyToSamoNazwisko(o.wystawiajacy, nazwisko)) {
+            if (godzinyWeekendy[o.dzien]) {
+              godzinyWeekendy[o.dzien].czyUsprawiedliwiony = true;
+            }
+            if (userRow && userRow.komorki) {
+              var realSunDay = (gO === '17:00') ? (o.dzien - 1) : o.dzien;
+              if (userRow.komorki[realSunDay - 1] && (userRow.komorki[realSunDay - 1].wartosc === null || userRow.komorki[realSunDay - 1].wartosc === undefined || userRow.komorki[realSunDay - 1].wartosc === '')) {
+                userRow.komorki[realSunDay - 1].wartosc = 0;
+              }
+              if (realSunDay !== o.dzien && userRow.komorki[o.dzien - 1] && (userRow.komorki[o.dzien - 1].wartosc === null || userRow.komorki[o.dzien - 1].wartosc === undefined || userRow.komorki[o.dzien - 1].wartosc === '')) {
+                userRow.komorki[o.dzien - 1].wartosc = 0;
+              }
+            }
+          }
+        }
+      });
+
+      // 4d. Automatyczne rozliczenie wygasłych ofert w tygodniu na 0 pkt (usprawiedliwienie)
+      var allGT = docData.gieldaTydzien || (tabelaMiesiacaDane && tabelaMiesiacaDane.gieldaTydzien) || [];
+      allGT.forEach(function(o) {
+        if (!o || o.status === 'ANULOWANA' || o.status === 'ZAAKCEPTOWANA') return;
+        var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
+        var gO = cleanTime(o.godzina) || '18:00';
+        var isCutoffPassed = czyTydzienMszaPrzeterminowana(dO, gO, currentYear, currentMonthIdx);
+        if (isCutoffPassed || o.status === 'WYGASLA_USPRAWIEDLIWIONA' || o.status === 'PRZEKSZTALCONA_NA_WOLNY') {
+          if (czyToSamoNazwisko(o.wystawiajacy, nazwisko)) {
+            if (userRow && userRow.komorki && userRow.komorki[dO - 1]) {
+              if (userRow.komorki[dO - 1].wartosc === null || userRow.komorki[dO - 1].wartosc === undefined || userRow.komorki[dO - 1].wartosc === '') {
+                userRow.komorki[dO - 1].wartosc = 0;
+              }
+            }
+          }
+        }
+      });
+
       // 5. Najbliższa służba
       function czyMszaJuzMinaDzisLocal(godzinaStr) {
         if (!godzinaStr) return false;
@@ -5923,6 +6079,7 @@
           if (doc.exists && doc.data()) {
             tabelaMiesiacaDane = doc.data();
             try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+            autoRozliczWygasleOfertyFirestore(doc.data());
 
             var widokTabeli = document.getElementById('widok-tabela-miesiaca');
             if (widokTabeli && widokTabeli.style.display !== 'none') {
@@ -8370,6 +8527,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         dbFirestore.collection('stan_grafiku').doc(docId).get().then(function(doc) {
           if (doc.exists && doc.data() && doc.data().wiersze && doc.data().wiersze.length) {
             var fData = doc.data();
+            autoRozliczWygasleOfertyFirestore(fData);
             tabelaPrzegladanyMiesiacDane = Object.assign({}, tabelaPrzegladanyMiesiacDane || {}, fData);
             if (docId === pobierzAktywnyKluczMiesiaca()) {
               tabelaMiesiacaDane = Object.assign({}, tabelaMiesiacaDane || {}, fData);
