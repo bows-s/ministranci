@@ -5332,7 +5332,7 @@
                              '<span style="font-size:12px; font-weight:600; color:#e4e4e7; text-transform:uppercase; letter-spacing:0.04em;">Nadchodzące służby (' + (res.dyzuryKolejnegoMiesiaca[0].nazwaMiesiacaGen || 'nowy miesiąc') + ')</span>' +
                              '<span style="font-size:11px; color:#71717a;">Grafik na nowy miesiąc</span>' +
                            '</div>';
-            res.dyzuryKolejnegoMiesiaca.forEach(function(item) {
+            res.dyzuryKolejnegoMiesiaca.slice(0, 5).forEach(function(item) {
               var nazwaDniaTyg = item.dzienTygodnia || pobierzDzienTygodnia(item.rok, item.miesiacIdx, item.dzien);
               var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (nazwaDniaTyg ? ' (' + nazwaDniaTyg + ')' : '');
               var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
@@ -5381,8 +5381,10 @@
             listaMoichDyzurowDiv.innerHTML = brakMsg;
           }
         } else {
+          var MAX_DYZURY = 5;
           var htmlDyzury = '';
-          mojeDyzuryDoWyswietlenia.forEach(function(item) {
+          var dyzuryBiezace = mojeDyzuryDoWyswietlenia.slice(0, MAX_DYZURY);
+          dyzuryBiezace.forEach(function(item) {
             var nazwaDniaTyg = pobierzDzienTygodnia(res.rok, res.miesiacIdx, item.dzien);
             var pelnaData = item.dzien + ' ' + res.nazwaMiesiaca + ' (' + nazwaDniaTyg + ')';
 
@@ -5534,12 +5536,13 @@
               }
             }
           });
-          if (res.dzisDzien >= 24 && res.dyzuryKolejnegoMiesiaca && res.dyzuryKolejnegoMiesiaca.length > 0) {
+          if (res.dyzuryKolejnegoMiesiaca && res.dyzuryKolejnegoMiesiaca.length > 0 && dyzuryBiezace.length < MAX_DYZURY) {
             htmlDyzury += '<div style="margin-top:14px; margin-bottom:8px; padding:8px 12px; background:#18181b; border:1px solid #27272a; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">' +
                             '<span style="font-size:12px; font-weight:600; color:#e4e4e7; text-transform:uppercase; letter-spacing:0.04em;">Nadchodzące służby (' + (res.dyzuryKolejnegoMiesiaca[0].nazwaMiesiacaGen || 'nowy miesiąc') + ')</span>' +
                             '<span style="font-size:11px; color:#71717a;">Grafik na nowy miesiąc</span>' +
                           '</div>';
-            res.dyzuryKolejnegoMiesiaca.slice(0, 3).forEach(function(item) {
+            var slotLeft = MAX_DYZURY - dyzuryBiezace.length;
+            res.dyzuryKolejnegoMiesiaca.slice(0, slotLeft).forEach(function(item) {
               var nazwaDniaTyg = item.dzienTygodnia || pobierzDzienTygodnia(item.rok, item.miesiacIdx, item.dzien);
               var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (nazwaDniaTyg ? ' (' + nazwaDniaTyg + ')' : '');
               var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
@@ -5973,14 +5976,16 @@
       var listaWolneDiv = document.getElementById('lista-wolne-zastepstwa');
       var badgeWolneCount = document.getElementById('badge-wolne-count');
       if (listaWolneDiv) {
-        var curW = (res.wolneZastepstwa || []).filter(function(z) { return !z.typ || z.typ === 'Tydzień'; });
+        var curW = (res.wolneZastepstwa || []).filter(function(z) {
+          return (!z.typ || z.typ === 'Tydzień') && (z.status === 'OCZEKUJE' || !z.status);
+        });
         var nextW = [];
         if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wolneZastepstwa) {
           var nM = (daneKolejnegoMiesiaca.miesiacIdx !== undefined) ? daneKolejnegoMiesiaca.miesiacIdx : (res.miesiacIdx + 1) % 12;
           var nY = daneKolejnegoMiesiaca.rok || res.rok;
           var nextKeyWz = wyznaczKluczMiesiaca(new Date(nY, nM, 1));
           nextW = daneKolejnegoMiesiaca.wolneZastepstwa.filter(function(z) {
-            return !z.typ || z.typ === 'Tydzień';
+            return (!z.typ || z.typ === 'Tydzień') && (z.status === 'OCZEKUJE' || !z.status);
           }).map(function(z) {
             var zOdd = (z.oddajacy || "").trim().toLowerCase();
             var isMine = !!(zOdd && (zOdd === myNamePulpit || zOdd.indexOf(myNamePulpit) !== -1 || myNamePulpit.indexOf(zOdd) !== -1));
