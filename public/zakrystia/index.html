@@ -4793,10 +4793,10 @@
 
       var currentLogged = (globalUser.nazwisko || "").trim().toLowerCase();
 
-      var html = '<table class="ranking-table"><thead><tr>' +
-                 '<th style="width:48px; text-align:center;">#</th>' +
-                 '<th>Ministrant</th>' +
-                 '<th style="text-align:right; width:85px;">' + (tab === 'minus' ? 'Minusy' : 'Punkty') + '</th>' +
+      var html = '<table class="ranking-table" style="table-layout:fixed; width:100%;"><thead><tr>' +
+                 '<th style="width:40px; text-align:center;">#</th>' +
+                 '<th style="text-align:left;">Ministrant</th>' +
+                 '<th style="text-align:right; width:115px; padding-right:14px; white-space:nowrap;">' + (tab === 'minus' ? 'Minusy' : 'Punkty') + '</th>' +
                  '</tr></thead><tbody>';
 
       var list = [];
@@ -4863,23 +4863,25 @@
           if (tab === 'minus') {
             var minVal = (item.minusy !== undefined && item.minusy !== null) ? item.minusy : ((item.punkty !== undefined) ? item.punkty : 0);
             if (minVal < 0) {
-              ptsDisplay = '<span style="color:#f87171; font-weight:bold;">' + minVal + ' pkt</span>';
+              ptsDisplay = '<span style="color:#f87171; font-weight:700; font-variant-numeric:tabular-nums;">' + minVal + ' pkt</span>';
             } else {
-              ptsDisplay = '<span style="color:#059669; font-weight:bold;">0 pkt</span>';
+              ptsDisplay = '<span style="color:#34d399; font-weight:700; font-variant-numeric:tabular-nums;">0 pkt</span>';
             }
           } else {
-            ptsDisplay = '<span style="font-weight:bold; color:var(--primary);">' + (itemPunkty > 0 ? '+' : '') + itemPunkty + ' pkt</span>';
+            ptsDisplay = '<span style="font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums;">' + (itemPunkty > 0 ? '+' : '') + itemPunkty + ' pkt</span>';
           }
 
           var safeName = (item.nazwisko || "").replace(/'/g, "\\'");
           var rowClickAttr = ' onclick="otworzProfilMinistranta(\'' + safeName + '\')" title="Kliknij, aby otworzyć profil ministranta"';
           var rowCursor = 'cursor:pointer; ';
-          var arrowCta = ' <span style="color:#a1a1aa; font-size:11px; margin-left:5px;">›</span>';
+          var arrowCta = '<span style="color:#71717a; font-size:12px; margin-left:6px; display:inline-block; width:8px; text-align:center;">›</span>';
 
           html += '<tr class="' + rowClass + '" style="' + rowCursor + '"' + rowClickAttr + '>' +
                   '<td style="text-align:center; font-weight:bold;">' + posIcon + '</td>' +
-                  '<td>' + item.nazwisko + (isUser ? ' <span class="tag-you">Ty</span>' : '') + '</td>' +
-                  '<td style="text-align:right;">' + ptsDisplay + arrowCta + '</td>' +
+                  '<td style="text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + item.nazwisko + (isUser ? ' <span class="tag-you">Ty</span>' : '') + '</td>' +
+                  '<td style="text-align:right; padding-right:14px; white-space:nowrap;">' +
+                    '<div style="display:inline-flex; align-items:center; justify-content:flex-end; width:100%;">' + ptsDisplay + arrowCta + '</div>' +
+                  '</td>' +
                   '</tr>';
         }
       }
@@ -5307,7 +5309,8 @@
                              '<span style="font-size:11px; color:#71717a;">Grafik na nowy miesiąc</span>' +
                            '</div>';
             res.dyzuryKolejnegoMiesiaca.forEach(function(item) {
-              var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (item.skrotDnia ? ' (' + item.skrotDnia + ')' : '');
+              var nazwaDniaTyg = item.dzienTygodnia || pobierzDzienTygodnia(item.rok, item.miesiacIdx, item.dzien);
+              var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (nazwaDniaTyg ? ' (' + nazwaDniaTyg + ')' : '');
               var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
               htmlNext += '<div class="dyzur-pulpit-item">' +
                             '<div class="dyzur-pulpit-info">' +
@@ -5481,7 +5484,8 @@
                             '<span style="font-size:11px; color:#71717a;">Grafik na nowy miesiąc</span>' +
                           '</div>';
             res.dyzuryKolejnegoMiesiaca.slice(0, 3).forEach(function(item) {
-              var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (item.skrotDnia ? ' (' + item.skrotDnia + ')' : '');
+              var nazwaDniaTyg = item.dzienTygodnia || pobierzDzienTygodnia(item.rok, item.miesiacIdx, item.dzien);
+              var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (nazwaDniaTyg ? ' (' + nazwaDniaTyg + ')' : '');
               var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
               htmlDyzury += '<div class="dyzur-pulpit-item">' +
                               '<div class="dyzur-pulpit-info">' +
@@ -6122,19 +6126,18 @@
               if (isNextSun) {
                 var actualDay = nd;
                 var gNext = cleanTime(nextGodzinaWknd);
-                var skrotW = nSkrot || 'Nd';
                 if (gNext === '17:00') {
                   // Msza weekendowa w sobotę o 17:00!
                   actualDay = nd - 1;
-                  var satNagl = (actualDay >= 1 && daneKolejnegoMiesiaca.dniNaglowek && daneKolejnegoMiesiaca.dniNaglowek[actualDay - 1]) ? daneKolejnegoMiesiaca.dniNaglowek[actualDay - 1] : null;
-                  skrotW = satNagl ? satNagl.skrotDnia : 'Sb';
                 }
+                var dName = pobierzDzienTygodnia(nextYear, nextMonthIdx, actualDay);
                 dyzuryKolejnegoMiesiaca.push({
                   dzien: actualDay,
                   dzienTabeli: nd,
                   godzina: gNext,
                   typ: 'Msza niedzielna',
-                  skrotDnia: skrotW,
+                  skrotDnia: dName,
+                  dzienTygodnia: dName,
                   nazwaMiesiacaGen: nextMonthNameGen,
                   rok: nextYear,
                   miesiacIdx: nextMonthIdx,
@@ -6142,12 +6145,14 @@
                 });
               } else if (ndow >= 1 && ndow <= 5) {
                 var godzWTygNext = pobierzGodzineDlaDniaTygodnia(nextYear, nextMonthIdx, nd);
+                var dName = pobierzDzienTygodnia(nextYear, nextMonthIdx, nd);
                 dyzuryKolejnegoMiesiaca.push({
                   dzien: nd,
                   dzienTabeli: nd,
                   godzina: godzWTygNext,
                   typ: 'Służba w tygodniu',
-                  skrotDnia: nSkrot || '',
+                  skrotDnia: dName,
+                  dzienTygodnia: dName,
                   nazwaMiesiacaGen: nextMonthNameGen,
                   rok: nextYear,
                   miesiacIdx: nextMonthIdx,
@@ -6162,10 +6167,11 @@
 
       if (!najblizszaSluzba.jest && dyzuryKolejnegoMiesiaca.length > 0) {
         var firstNext = dyzuryKolejnegoMiesiaca[0];
+        var dName = firstNext.dzienTygodnia || pobierzDzienTygodnia(firstNext.rok, firstNext.miesiacIdx, firstNext.dzien);
         najblizszaSluzba = {
           jest: true,
           dzien: firstNext.dzien,
-          tekst: firstNext.dzien + ' ' + firstNext.nazwaMiesiacaGen + (firstNext.skrotDnia ? ' (' + firstNext.skrotDnia + ')' : ''),
+          tekst: firstNext.dzien + ' ' + firstNext.nazwaMiesiacaGen + (dName ? ' (' + dName + ')' : ''),
           typ: firstNext.typ,
           godzina: firstNext.godzina,
           kolejnyMiesiac: true

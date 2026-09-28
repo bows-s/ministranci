@@ -5463,7 +5463,7 @@ function naprawJakubBrytnerIPogrzeb() {
         var lRodz = (lData[li][5] || "").toString().trim().toLowerCase();
 
         var is29Pogrzeb = (lDzien === 29 && lGodz === "11:00" && lRodz.indexOf("pogrzeb") !== -1);
-        if (lId === "LIT_1790433775971" || (is29Pogrzeb && seen29Pogrzeb)) {
+        if (is29Pogrzeb && seen29Pogrzeb) {
           var rowDel = li + 2;
           lSheet.deleteRow(rowDel);
           zmiany.push("Usunięto duplikat pogrzebu z wiersza " + rowDel);
