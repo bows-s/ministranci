@@ -4917,20 +4917,20 @@
       var now = new Date();
       var curY = rok || now.getFullYear();
       var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : now.getMonth();
-      var curD = now.getDate();
 
-      if (dzien < curD) return true;
-      if (dzien > curD) return false;
-
-      if (!godzinaStr) return false;
-      var parts = godzinaStr.split(':');
-      if (parts.length < 2) return false;
-      var h = parseInt(parts[0], 10);
-      var m = parseInt(parts[1], 10);
-      if (isNaN(h) || isNaN(m)) return false;
+      // Wyznacz pełny timestamp mszy (lub południe jeśli brak godziny)
+      var h = 12, m = 0;
+      if (godzinaStr) {
+        var parts = godzinaStr.split(':');
+        if (parts.length >= 2) {
+          var ph = parseInt(parts[0], 10);
+          var pm = parseInt(parts[1], 10);
+          if (!isNaN(ph) && !isNaN(pm)) { h = ph; m = pm; }
+        }
+      }
 
       var mszaTime = new Date(curY, curM, dzien, h, m, 0, 0).getTime();
-      var cutoffTime = mszaTime - (2 * 60 * 60 * 1000); // 2h przed rozpoczęciem mszy
+      var cutoffTime = mszaTime - (2 * 60 * 60 * 1000); // 2h przed mszą
       return now.getTime() >= cutoffTime;
     }
 
