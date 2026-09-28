@@ -5403,6 +5403,9 @@ function oglosDodatkowaLiturgie(liturgia) {
       }
     }
 
+    SpreadsheetApp.flush();
+    try { synchronizujDoFirestore(ss); } catch(eSync) { Logger.log("Błąd sync: " + eSync.message); }
+
     return {
       sukces: true,
       liturgiaId: id,
