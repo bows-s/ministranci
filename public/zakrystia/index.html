@@ -2551,6 +2551,11 @@
       appId: "1:1017347967393:web:aaf5c6a0e7d51c103663e0"
     };
 
+    var polishMonthsGenitive = [
+      "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
+      "lipca", "sierpnia", "września", "października", "listopada", "grudnia"
+    ];
+
     var dbFirestore = null;
     var messaging = null;
 
@@ -10432,37 +10437,41 @@ function czyMaDostepDoZakrystii(nazwisko) {
     }
 
     function otworzModalWezDyzur(ofertaId, dzien, oddajacy, optRok, optMiesiacIdx, optDocKey) {
-      wybranaOfertaDoWziecia = {
-        id: ofertaId,
-        dzien: dzien,
-        oddajacy: oddajacy,
-        rok: optRok,
-        miesiacIdx: optMiesiacIdx,
-        docKey: optDocKey
-      };
-      var curStan = (globalUser && globalUser.stan) ? globalUser.stan : {};
-      var r = optRok || curStan.rok || 2026;
-      var m = (optMiesiacIdx !== undefined) ? optMiesiacIdx : (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : 8);
-      var dataStr = formatujDateDnia(dzien, curStan, r, m);
-      var dt = new Date(r, m, dzien);
-      var isSunday = (dt.getDay() === 0);
-      var pts = isSunday ? 3 : 4;
+      try {
+        wybranaOfertaDoWziecia = {
+          id: ofertaId,
+          dzien: dzien,
+          oddajacy: oddajacy,
+          rok: optRok,
+          miesiacIdx: optMiesiacIdx,
+          docKey: optDocKey
+        };
+        var curStan = (globalUser && globalUser.stan) ? globalUser.stan : {};
+        var r = optRok || curStan.rok || 2026;
+        var m = (optMiesiacIdx !== undefined) ? optMiesiacIdx : (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : 8);
+        var dataStr = formatujDateDnia(dzien, curStan, r, m);
+        var dt = new Date(r, m, dzien);
+        var isSunday = (dt.getDay() === 0);
+        var pts = isSunday ? 3 : 4;
 
-      document.getElementById('modal-wez-opis').innerHTML = 'Czy chcesz przejąć wolny dyżur w dniu <b>' + dataStr + '</b> od ministranta <b>' + oddajacy + '</b>?';
-      var badge = document.querySelector('#modal-wez-dyzur .badge-plus4');
-      if (badge) badge.innerText = '+' + pts + ' PKT';
-      var btnP = document.getElementById('btn-potwierdz-wez');
-      if (btnP) btnP.innerText = 'Weź dyżur (+' + pts + ' pkt)';
+        document.getElementById('modal-wez-opis').innerHTML = 'Czy chcesz przejąć wolny dyżur w dniu <b>' + dataStr + '</b> od ministranta <b>' + oddajacy + '</b>?';
+        var badge = document.querySelector('#modal-wez-dyzur .badge-plus4');
+        if (badge) badge.innerText = '+' + pts + ' PKT';
+        var btnP = document.getElementById('btn-potwierdz-wez');
+        if (btnP) btnP.innerText = 'Weź dyżur (+' + pts + ' pkt)';
 
-      var boxSzczegoly = document.querySelector('#modal-wez-dyzur .modal-content > div:first-of-type');
-      if (boxSzczegoly) {
-        if (isSunday) {
-          boxSzczegoly.innerHTML = '<div>• <b>Punkty za mszę:</b> za obecność na tej mszy niedzielnej otrzymasz <b>+3 punkty</b>!</div><div>• Zostaniesz wpisany jako oficjalny zastępca.</div>';
-        } else {
-          boxSzczegoly.innerHTML = '<div>• <b>Bonus punktowy:</b> za obecność na tej mszy otrzymasz <b>+4 punkty</b> (zamiast standardowych 2 pkt)!</div><div>• Zostaniesz wpisany jako oficjalny zastępca.</div>';
+        var boxSzczegoly = document.querySelector('#modal-wez-dyzur .modal-content > div:first-of-type');
+        if (boxSzczegoly) {
+          if (isSunday) {
+            boxSzczegoly.innerHTML = '<div>• <b>Punkty za mszę:</b> za obecność na tej mszy niedzielnej otrzymasz <b>+3 punkty</b>!</div><div>• Zostaniesz wpisany jako oficjalny zastępca.</div>';
+          } else {
+            boxSzczegoly.innerHTML = '<div>• <b>Bonus punktowy:</b> za obecność na tej mszy otrzymasz <b>+4 punkty</b> (zamiast standardowych 2 pkt)!</div><div>• Zostaniesz wpisany jako oficjalny zastępca.</div>';
+          }
         }
+        document.getElementById('modal-wez-dyzur').style.display = 'flex';
+      } catch(err) {
+        alert('BŁĄD otworzModalWezDyzur: ' + err.message);
       }
-      document.getElementById('modal-wez-dyzur').style.display = 'flex';
     }
 
     function zamknijModalWezDyzur() {
