@@ -5837,10 +5837,15 @@
       var currentDay = now.getDate();
       var daysInMonth = (docData.dniNaglowek && docData.dniNaglowek.length) || new Date(currentYear, currentMonthIdx + 1, 0).getDate();
 
+      var polishMonthsAll = [
+        "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+        "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+      ];
       var polishMonthsGenitive = [
         "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
         "lipca", "sierpnia", "września", "października", "listopada", "grudnia"
       ];
+      var currentMonthName = docData.nazwaMiesiaca || polishMonthsAll[currentMonthIdx] || "Wrzesień";
       var currentMonthNameGenitive = polishMonthsGenitive[currentMonthIdx];
 
       var nClean = (nazwisko || "").trim();
