@@ -10454,7 +10454,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var btnP = document.getElementById('btn-potwierdz-wez');
       if (btnP) btnP.innerText = 'Weź dyżur (+' + pts + ' pkt)';
 
-      var boxSzczegoly = document.querySelector('#modal-wez-dyzur .modal-content div[style*="background:rgbacfdf5"]');
+      var boxSzczegoly = document.querySelector('#modal-wez-dyzur .modal-content > div:first-of-type');
       if (boxSzczegoly) {
         if (isSunday) {
           boxSzczegoly.innerHTML = '<div>• <b>Punkty za mszę:</b> za obecność na tej mszy niedzielnej otrzymasz <b>+3 punkty</b>!</div><div>• Zostaniesz wpisany jako oficjalny zastępca.</div>';
