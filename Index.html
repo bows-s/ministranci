@@ -605,7 +605,7 @@
     }
     .btn-wez-dyzur {
       background: #18181b;
-      color: #09090b;
+      color: #fafafa;
       font-weight: 500;
       font-size: 13px;
       border: 1px solid #fafafa;
@@ -5331,13 +5331,45 @@
               var nazwaDniaTyg = item.dzienTygodnia || pobierzDzienTygodnia(item.rok, item.miesiacIdx, item.dzien);
               var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (nazwaDniaTyg ? ' (' + nazwaDniaTyg + ')' : '');
               var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
-              htmlNext += '<div class="dyzur-pulpit-item">' +
-                            '<div class="dyzur-pulpit-info">' +
-                              '<div class="dyzur-pulpit-data">' + pelnaDataNext + '</div>' +
-                              '<div class="dyzur-pulpit-opis">Godz. ' + item.godzina + ' • ' + pktNext + '</div>' +
-                            '</div>' +
-                            '<div style="font-size:11px; color:#a1a1aa; padding:4px 8px; background:#27272a; border-radius:6px; font-weight:500;">Nowy miesiąc</div>' +
-                          '</div>';
+              var isWkndNext = (item.typ === 'Msza niedzielna');
+              var typStrNext = isWkndNext ? 'Weekend' : 'Tydzień';
+
+              if (item.oddane) {
+                if (item.oddane.status === 'OCZEKUJE') {
+                  htmlNext += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #fbbf24; background:#18181b;">' +
+                                '<div class="dyzur-pulpit-info">' +
+                                  '<div class="dyzur-pulpit-data">' + pelnaDataNext + ' <span style="font-size:10px; font-weight:700; color:#93c5fd; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:4px; margin-left:4px; text-transform:uppercase;">Nowy miesiąc</span></div>' +
+                                  '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Wystawiono na giełdę wolnych • Czeka na zastępcę (+1 pkt dla Ciebie)</div>' +
+                                '</div>' +
+                                '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujMojeZastepstwo(\'' + item.oddane.id + '\', ' + item.dzien + ', \'' + (item.docKey || '') + '\')">Wycofaj z giełdy</button>' +
+                              '</div>';
+                } else if (item.oddane.status === 'PRZEJETE') {
+                  htmlNext += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #34d399; background:#18181b;">' +
+                                '<div class="dyzur-pulpit-info">' +
+                                  '<div class="dyzur-pulpit-data">' + pelnaDataNext + ' <span style="font-size:10px; font-weight:700; color:#93c5fd; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:4px; margin-left:4px; text-transform:uppercase;">Nowy miesiąc</span></div>' +
+                                  '<div class="dyzur-pulpit-opis" style="color:#34d399; font-weight:500;">Przejęte przez: <b>' + item.oddane.przejmujacy + '</b> • Otrzymasz +1 pkt po mszy</div>' +
+                                '</div>' +
+                              '</div>';
+                }
+              } else if (item.czyUsprawiedliwiony) {
+                htmlNext += '<div class="dyzur-pulpit-item" style="border-left: 3px solid #f59e0b; background:#18181b;">' +
+                              '<div class="dyzur-pulpit-info">' +
+                                '<div class="dyzur-pulpit-data">' + pelnaDataNext + ' <span style="font-size:10px; font-weight:700; color:#93c5fd; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:4px; margin-left:4px; text-transform:uppercase;">Nowy miesiąc</span></div>' +
+                                '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Zgłoszono nieobecność • Usprawiedliwiony (0 pkt, brak minusa)</div>' +
+                              '</div>' +
+                              '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + item.dzien + ', \'' + (item.docKey || '') + '\')">Wycofaj zgłoszenie</button>' +
+                            '</div>';
+              } else {
+                htmlNext += '<div class="dyzur-pulpit-item">' +
+                              '<div class="dyzur-pulpit-info">' +
+                                '<div class="dyzur-pulpit-data">' + pelnaDataNext + '</div>' +
+                                '<div class="dyzur-pulpit-opis">Godz. ' + item.godzina + ' • ' + pktNext + '</div>' +
+                              '</div>' +
+                              '<div style="display:flex; align-items:center; gap:8px;">' +
+                                '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'' + typStrNext + '\', \'' + item.godzina + '\', ' + item.rok + ', ' + item.miesiacIdx + ')">Nie mogę przyjść</button>' +
+                              '</div>' +
+                            '</div>';
+              }
             });
             listaMoichDyzurowDiv.innerHTML = brakMsg + htmlNext;
           } else {
