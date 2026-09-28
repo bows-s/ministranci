@@ -2528,7 +2528,7 @@
       </div>
       <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
         <button type="button" onclick="zamknijModalOglosLiturgie()" class="btn-secondary" style="width:auto; padding:9px 16px; margin:0; font-size:13px;">Anuluj</button>
-        <button type="button" id="btn-oglos-zatwierdz" onclick="zatwierdzOgloszenieLiturgii()" style="width:auto; padding:9px 18px; margin:0; font-size:13px; background:#4f46e5; color:white; font-weight:700;">Wyślij PUSH i ogłoś</button>
+        <button type="button" id="btn-oglos-zatwierdz" onclick="this.disabled=false; zatwierdzOgloszenieLiturgii()" style="width:auto; padding:9px 18px; margin:0; font-size:13px; background:#4f46e5; color:white; font-weight:700;">Wyślij PUSH i ogłoś</button>
       </div>
     </div>
   </div>
@@ -7572,6 +7572,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
         pokazToast('Brak uprawnień. Ogłaszanie nabożeństw jest dostępne dla Kościelnego i animatorów.');
         return;
       }
+
+      // Resetuj przycisk na wypadek gdyby był zablokowany po błędzie
+      var btnZ = document.getElementById('btn-oglos-zatwierdz');
+      if (btnZ) { btnZ.disabled = false; btnZ.innerText = 'Wyślij PUSH i ogłoś'; }
 
       var selD = document.getElementById('sel-oglos-dzien');
       if (selD) {
