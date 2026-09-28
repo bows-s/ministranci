@@ -755,21 +755,31 @@
     /* Toast */
     #toast {
       visibility: hidden;
-      min-width: 240px;
+      opacity: 0;
+      min-width: 260px;
+      max-width: 90vw;
       background-color: #18181b;
       color: #fafafa;
-      border: 1px solid #27272a;
+      border: 1px solid #3f3f46;
+      border-left: 4px solid #10b981;
       text-align: center;
-      border-radius: 6px;
-      padding: 10px 16px;
+      border-radius: 8px;
+      padding: 12px 20px;
       position: fixed;
       z-index: 100000;
       left: 50%;
       bottom: 24px;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(20px);
       font-size: 13px;
-      font-weight: 500;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      font-weight: 600;
+      box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7);
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+      pointer-events: none;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
 
     /* Odznaki na kafelkach */
@@ -2756,11 +2766,16 @@
     var pelneNazwyDni = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
     var deferredPrompt = null;
 
-    function pokazToast(tresc) {
+    var toastTimeout = null;
+    function pokazToast(tresc, czasMs) {
       var t = document.getElementById("toast");
+      if (!t) return;
       t.innerText = tresc;
-      t.className = "show";
-      setTimeout(function() { t.className = t.className.replace("show", ""); }, 3000);
+      t.classList.add("show");
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(function() {
+        t.classList.remove("show");
+      }, czasMs || 4000);
     }
 
     function pokazSpinner(tekst) {
@@ -7772,24 +7787,24 @@ function czyMaDostepDoZakrystii(nazwisko) {
           btn.disabled = false;
           btn.innerText = 'Wyślij PUSH i ogłoś';
         }
-        pokazToast('Ogłoszono ' + rodzaj + ' na godz. ' + gStr + '! Wysyłanie powiadomień PUSH...');
+        pokazToast('✅ Ogłoszono ' + rodzaj + ' na ' + liturgia.dataTekst + ' godz. ' + gStr + '! Zapisano w grafiku.', 6000);
 
         // 2. Wysłanie powiadomień PUSH w tle przez Apps Script
         callBackend('oglosDodatkowaLiturgie', [liturgia], function(res) {
           if (res && res.sukces) {
-            pokazToast('Wysłano ' + (res.powiadomionoLiczba || 'wszystkie') + ' powiadomień PUSH do ministrantów!');
+            pokazToast('✅ PUSH wysłany do ' + (res.powiadomionoLiczba || 'wszystkich') + ' ministrantów!', 4000);
           }
         }, function(err) {
           console.warn('Backend push notification warning:', err);
         });
 
-        // Odśwież UI na pulpicie i w zakrystii
+        // Odśwież UI natychmiast na pulpicie i w zakrystii
         if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
           wczytajDaneDlaZakrystii(zakrystiaStan.dzien, zakrystiaStan.godzina, true);
         } else {
           wczytajDaneDlaZakrystii(null, null, true);
         }
-        if (globalUser && globalUser.nazwisko) {
+        if (globalUser && globalUser.nazwisko && tabelaMiesiacaDane) {
           var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
           if (stan) renderujDane(stan);
         }
