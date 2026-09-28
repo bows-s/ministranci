@@ -7577,14 +7577,18 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (selD) {
         selD.innerHTML = '';
         var now = new Date();
-        var curD = now.getDate();
-        var daysInMonth = (tabelaMiesiacaDane && tabelaMiesiacaDane.dniNaglowek) ? tabelaMiesiacaDane.dniNaglowek.length : 30;
-        for (var d = curD; d <= Math.min(curD + 14, daysInMonth); d++) {
+        // Generuj 14 dni do przodu, przekraczając granicę miesiąca
+        for (var i = 0; i <= 14; i++) {
+          var dt = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+          var dDay   = dt.getDate();
+          var dMonth = dt.getMonth();
+          var dYear  = dt.getFullYear();
+          var dayName = pobierzDzienTygodnia(dYear, dMonth, dDay);
+          var miesiacNazwa = polishMonthsGenitive[dMonth] || '';
+          var prefix = (i === 0 ? 'DZIŚ • ' : (i === 1 ? 'JUTRO • ' : ''));
           var opt = document.createElement('option');
-          opt.value = d;
-          var dayName = pobierzDzienTygodnia(2026, 8, d);
-          var prefix = (d === curD ? 'DZIŚ • ' : (d === curD + 1 ? 'JUTRO • ' : ''));
-          opt.innerText = prefix + d + ' września (' + dayName + ')';
+          opt.value = dDay + '|' + dMonth + '|' + dYear;
+          opt.innerText = prefix + dDay + ' ' + miesiacNazwa + ' (' + dayName + ')';
           selD.appendChild(opt);
         }
       }
@@ -7603,7 +7607,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       if (!selD || !inputG || !selR) return;
 
-      var dNum = parseInt(selD.value, 10);
+      var dParts = selD.value.split('|');
+      var dNum    = parseInt(dParts[0], 10);
+      var dMonth  = dParts.length > 1 ? parseInt(dParts[1], 10) : (new Date().getMonth());
+      var dYear   = dParts.length > 2 ? parseInt(dParts[2], 10) : (new Date().getFullYear());
+      var targetDocKey = wyznaczKluczMiesiaca(new Date(dYear, dMonth, 1));
       var gStr = cleanTime(inputG.value);
       var rodzaj = selR.value;
       var punkty = 3;
@@ -7621,12 +7629,15 @@ function czyMaDostepDoZakrystii(nazwisko) {
         return;
       }
 
-      if (!tabelaMiesiacaDane) tabelaMiesiacaDane = {};
-      if (!tabelaMiesiacaDane.liturgieDodatkowe) tabelaMiesiacaDane.liturgieDodatkowe = [];
+      // Ustal źródło liturgii do sprawdzenia duplikatów
+      var isCurrentMonthDup = (targetDocKey === pobierzAktywnyKluczMiesiaca());
+      var liturgieDoSprawdzenia = isCurrentMonthDup
+        ? ((tabelaMiesiacaDane && tabelaMiesiacaDane.liturgieDodatkowe) || [])
+        : ((daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.liturgieDodatkowe) || []);
 
       // Blokada duplikatów:
-      var isDuplicate = tabelaMiesiacaDane.liturgieDodatkowe.some(function(l) {
-        return l.dzien === dNum && cleanTime(l.godzina) === gStr && (l.rodzaj || '').toLowerCase() === rodzaj.toLowerCase();
+      var isDuplicate = liturgieDoSprawdzenia.some(function(l) {
+        return l.dzien === dNum && l.miesiacIdx === dMonth && cleanTime(l.godzina) === gStr && (l.rodzaj || '').toLowerCase() === rodzaj.toLowerCase();
       });
       if (isDuplicate) {
         alert('Uwaga: liturgia tego typu (' + rodzaj + ') na ten dzień i godzinę (' + gStr + ') została już wcześniej ogłoszona!');
@@ -7652,8 +7663,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       var liturgia = {
         id: 'LIT_' + Date.now(),
-        rok: 2026,
-        miesiacIdx: 8,
+        rok: dYear,
+        miesiacIdx: dMonth,
         dzien: dNum,
         godzina: gStr,
         rodzaj: rodzaj,
@@ -7665,14 +7676,25 @@ function czyMaDostepDoZakrystii(nazwisko) {
         utworzono: new Date().toISOString()
       };
 
-      tabelaMiesiacaDane.liturgieDodatkowe.push(liturgia);
-      try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+      // Dla liturgii z bieżącego miesiąca aktualizuj lokalny cache
+      var isCurrentMonth = (targetDocKey === pobierzAktywnyKluczMiesiaca());
+      if (isCurrentMonth) {
+        if (!tabelaMiesiacaDane) tabelaMiesiacaDane = {};
+        if (!tabelaMiesiacaDane.liturgieDodatkowe) tabelaMiesiacaDane.liturgieDodatkowe = [];
+        tabelaMiesiacaDane.liturgieDodatkowe.push(liturgia);
+        try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+      }
 
-      // 1. Zapis do bazy Firestore w Warszawie (15 ms)
+      // 1. Zapis do bazy Firestore do właściwego dokumentu miesiąca
       if (dbFirestore) {
-        dbFirestore.collection('stan_grafiku').doc(pobierzAktywnyKluczMiesiaca()).set({
-          liturgieDodatkowe: tabelaMiesiacaDane.liturgieDodatkowe
-        }, { merge: true }).catch(function(e) {
+        // Pobierz aktualne liturgieDodatkowe z docelowego dokumentu i dołącz nową
+        dbFirestore.collection('stan_grafiku').doc(targetDocKey).get().then(function(snap) {
+          var istniejace = (snap.exists && snap.data().liturgieDodatkowe) ? snap.data().liturgieDodatkowe : [];
+          istniejace.push(liturgia);
+          return dbFirestore.collection('stan_grafiku').doc(targetDocKey).set({
+            liturgieDodatkowe: istniejace
+          }, { merge: true });
+        }).catch(function(e) {
           console.warn('Firestore set liturgia error:', e);
         });
       }
