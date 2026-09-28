@@ -2615,6 +2615,38 @@
       return wybranyMiesiacTabeli || wyznaczKluczMiesiaca(new Date());
     }
 
+    var daneKolejnegoMiesiaca = (function() {
+      try {
+        var nowD = new Date();
+        var nDt = new Date(nowD.getFullYear(), nowD.getMonth() + 1, 1);
+        var nDocId = wyznaczKluczMiesiaca(nDt);
+        var cNext = localStorage.getItem('min_cached_tabela_' + nDocId);
+        if (cNext) return JSON.parse(cNext);
+      } catch(e) {}
+      return null;
+    })();
+
+    function wczytajKolejnyMiesiacJesliKoniecMiesiaca() {
+      if (!dbFirestore) return;
+      var nowD = new Date();
+      if (nowD.getDate() >= 20) {
+        var nDt = new Date(nowD.getFullYear(), nowD.getMonth() + 1, 1);
+        var nDocId = wyznaczKluczMiesiaca(nDt);
+        dbFirestore.collection('stan_grafiku').doc(nDocId).get().then(function(docN) {
+          if (docN.exists && docN.data()) {
+            daneKolejnegoMiesiaca = docN.data();
+            try { localStorage.setItem('min_cached_tabela_' + nDocId, JSON.stringify(daneKolejnegoMiesiaca)); } catch(e) {}
+            if (globalUser && globalUser.nazwisko && tabelaMiesiacaDane) {
+              var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
+              if (stan) renderujDane(stan);
+            }
+          }
+        }).catch(function(e) {
+          console.warn('Brak grafiku kolejnego miesiąca:', e);
+        });
+      }
+    }
+
     // =============================================================
     // INTEGRACJA APPS SCRIPT DLA POWIADOMIEŃ PUSH (FCM)
     // =============================================================
@@ -3439,6 +3471,7 @@
         });
 
         uruchomNasluchiwanieFirestore();
+        wczytajKolejnyMiesiacJesliKoniecMiesiaca();
       } else {
         ukryjSpinner();
         pokazMiniRefresh(false);
@@ -3701,6 +3734,7 @@
             if (widokZakrystia && widokZakrystia.style.display !== 'none') {
               wczytajDaneDlaZakrystii();
             }
+            wczytajKolejnyMiesiacJesliKoniecMiesiaca();
             pokazToast('Grafik zaktualizowany');
           }
         }).catch(function(e) {
@@ -4813,6 +4847,39 @@
       return czyZbytPoznoNaZamiane(dzien, godzClean, rok, miesiacIdx);
     }
 
+    // Walidacja dla zgłaszania nieobecności (wzięcia wolnego z 0 pkt) - dozwolone aż do momentu startu mszy!
+    function czyMszaJuzSieRozpoczela(dzien, godzinaStr, rok, miesiacIdx) {
+      if (!dzien) return false;
+      var now = new Date();
+      var curY = rok || now.getFullYear();
+      var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : now.getMonth();
+      var curD = now.getDate();
+
+      if (dzien < curD) return true;
+      if (dzien > curD) return false;
+
+      if (!godzinaStr) return false;
+      var parts = godzinaStr.split(':');
+      if (parts.length < 2) return false;
+      var h = parseInt(parts[0], 10);
+      var m = parseInt(parts[1], 10);
+      if (isNaN(h) || isNaN(m)) return false;
+
+      var mszaTime = new Date(curY, curM, dzien, h, m, 0, 0).getTime();
+      return now.getTime() >= mszaTime;
+    }
+
+    function czyWeekendZgloszeniePrzeterminowane(niedzielaDzien, godzinaStr, rok, miesiacIdx) {
+      var godzClean = cleanTime(godzinaStr);
+      var realDay = (godzClean === '17:00') ? (niedzielaDzien - 1) : niedzielaDzien;
+      return czyMszaJuzSieRozpoczela(realDay, godzClean, rok, miesiacIdx);
+    }
+
+    function czyTydzienZgloszeniePrzeterminowane(dzien, godzinaStr, rok, miesiacIdx) {
+      var godzClean = cleanTime(godzinaStr) || '18:00';
+      return czyMszaJuzSieRozpoczela(dzien, godzClean, rok, miesiacIdx);
+    }
+
     function autoRozliczWygasleOfertyFirestore(data) {
       if (!data || !dbFirestore) return;
       var curY = data.rok || (new Date()).getFullYear();
@@ -4965,7 +5032,7 @@
       var ns = res.najblizszaSluzba;
       if (ns && ns.jest) {
         document.getElementById('sluzba-termin').innerText = ns.tekst;
-        document.getElementById('sluzba-detale').innerText = ns.typ + (ns.godzina && ns.godzina !== 'Dyżur stały' ? ' • Godz. ' + ns.godzina : '');
+        document.getElementById('sluzba-detale').innerText = ns.typ + (ns.godzina && ns.godzina !== 'Dyżur stały' ? ' • Godz. ' + ns.godzina : '') + (ns.kolejnyMiesiac ? ' (nowy miesiąc)' : '');
       } else {
         document.getElementById('sluzba-termin').innerText = 'Brak zaplanowanych służb';
         document.getElementById('sluzba-detale').innerText = (ns && ns.tekst) ? ns.tekst : 'Nie masz zaplanowanych dyżurów w tym miesiącu.';
@@ -5156,7 +5223,27 @@
         mojeDyzuryDoWyswietlenia.sort(function(a, b) { return a.dzien - b.dzien; });
 
         if (mojeDyzuryDoWyswietlenia.length === 0) {
-          listaMoichDyzurowDiv.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding:10px 0;">Brak zaplanowanych służb w tym miesiącu.</div>';
+          var brakMsg = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding:10px 0;">Brak dalszych służb w tym miesiącu.</div>';
+          if (res.dyzuryKolejnegoMiesiaca && res.dyzuryKolejnegoMiesiaca.length > 0) {
+            var htmlNext = '<div style="margin-top:10px; margin-bottom:8px; padding:8px 12px; background:#18181b; border:1px solid #27272a; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">' +
+                             '<span style="font-size:12px; font-weight:600; color:#e4e4e7; text-transform:uppercase; letter-spacing:0.04em;">Nadchodzące służby (' + (res.dyzuryKolejnegoMiesiaca[0].nazwaMiesiacaGen || 'nowy miesiąc') + ')</span>' +
+                             '<span style="font-size:11px; color:#71717a;">Grafik na nowy miesiąc</span>' +
+                           '</div>';
+            res.dyzuryKolejnegoMiesiaca.forEach(function(item) {
+              var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (item.skrotDnia ? ' (' + item.skrotDnia + ')' : '');
+              var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
+              htmlNext += '<div class="dyzur-pulpit-item">' +
+                            '<div class="dyzur-pulpit-info">' +
+                              '<div class="dyzur-pulpit-data">' + pelnaDataNext + '</div>' +
+                              '<div class="dyzur-pulpit-opis">Godz. ' + item.godzina + ' • ' + pktNext + '</div>' +
+                            '</div>' +
+                            '<div style="font-size:11px; color:#a1a1aa; padding:4px 8px; background:#27272a; border-radius:6px; font-weight:500;">Nowy miesiąc</div>' +
+                          '</div>';
+            });
+            listaMoichDyzurowDiv.innerHTML = brakMsg + htmlNext;
+          } else {
+            listaMoichDyzurowDiv.innerHTML = brakMsg;
+          }
         } else {
           var htmlDyzury = '';
           mojeDyzuryDoWyswietlenia.forEach(function(item) {
@@ -5311,6 +5398,23 @@
               }
             }
           });
+          if (res.dzisDzien >= 24 && res.dyzuryKolejnegoMiesiaca && res.dyzuryKolejnegoMiesiaca.length > 0) {
+            htmlDyzury += '<div style="margin-top:14px; margin-bottom:8px; padding:8px 12px; background:#18181b; border:1px solid #27272a; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">' +
+                            '<span style="font-size:12px; font-weight:600; color:#e4e4e7; text-transform:uppercase; letter-spacing:0.04em;">Nadchodzące służby (' + (res.dyzuryKolejnegoMiesiaca[0].nazwaMiesiacaGen || 'nowy miesiąc') + ')</span>' +
+                            '<span style="font-size:11px; color:#71717a;">Grafik na nowy miesiąc</span>' +
+                          '</div>';
+            res.dyzuryKolejnegoMiesiaca.slice(0, 3).forEach(function(item) {
+              var pelnaDataNext = item.dzien + ' ' + item.nazwaMiesiacaGen + (item.skrotDnia ? ' (' + item.skrotDnia + ')' : '');
+              var pktNext = (item.typ === 'Msza niedzielna') ? '3 pkt' : '5 pkt';
+              htmlDyzury += '<div class="dyzur-pulpit-item">' +
+                              '<div class="dyzur-pulpit-info">' +
+                                '<div class="dyzur-pulpit-data">' + pelnaDataNext + '</div>' +
+                                '<div class="dyzur-pulpit-opis">Godz. ' + item.godzina + ' • ' + pktNext + '</div>' +
+                              '</div>' +
+                              '<div style="font-size:11px; color:#a1a1aa; padding:4px 8px; background:#27272a; border-radius:6px; font-weight:500;">Nowy miesiąc</div>' +
+                            '</div>';
+            });
+          }
           listaMoichDyzurowDiv.innerHTML = htmlDyzury;
         }
       }
@@ -5901,6 +6005,91 @@
         }
       }
 
+      // 5b. Dyżury w kolejnym miesiącu (gdy zbliża się przełom miesięcy lub brak dalszych służb)
+      var dyzuryKolejnegoMiesiaca = [];
+      if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wiersze) {
+        var nextRows = daneKolejnegoMiesiaca.wiersze || [];
+        var nextUserRow = nextRows.find(function(w) {
+          var nw = (w.nazwisko || "").trim().toLowerCase();
+          return nw && (nw === nLower || nw.indexOf(nLower) !== -1 || nLower.indexOf(nw) !== -1);
+        });
+        if (nextUserRow && nextUserRow.komorki) {
+          var nextYear = daneKolejnegoMiesiaca.rok || (currentMonthIdx === 11 ? currentYear + 1 : currentYear);
+          var nextMonthIdx = (daneKolejnegoMiesiaca.miesiacIdx !== undefined) ? daneKolejnegoMiesiaca.miesiacIdx : (currentMonthIdx + 1) % 12;
+          var nextDaysInMonth = (daneKolejnegoMiesiaca.dniNaglowek && daneKolejnegoMiesiaca.dniNaglowek.length) || new Date(nextYear, nextMonthIdx + 1, 0).getDate();
+          var nextMonthNameGen = polishMonthsGenitive[nextMonthIdx] || "kolejnego miesiąca";
+          var nextGrupa = (nextUserRow.grupa || userGrupa || "").toUpperCase();
+          var rotNext = wyznaczRotowaneGodzinyGrup(nextYear, nextMonthIdx);
+          var nextGodzinaWknd = "10:00";
+          for (var rk in rotNext) {
+            if (nextGrupa.indexOf(rk.toUpperCase()) !== -1 || rk.toUpperCase().indexOf(nextGrupa) !== -1 || dopasujGrupe(rk, nextGrupa)) {
+              nextGodzinaWknd = rotNext[rk];
+              break;
+            }
+          }
+
+          for (var nd = 1; nd <= nextDaysInMonth; nd++) {
+            var nk = nextUserRow.komorki[nd - 1];
+            if (nk && nk.maDyzur) {
+              var ndt = new Date(nextYear, nextMonthIdx, nd);
+              var ndow = ndt.getDay(); // 0: Sun, 1..5: Mon..Fri, 6: Sat
+              var isNextSun = (ndow === 0);
+              var nNagl = (daneKolejnegoMiesiaca.dniNaglowek && daneKolejnegoMiesiaca.dniNaglowek[nd - 1]) ? daneKolejnegoMiesiaca.dniNaglowek[nd - 1] : null;
+              var nSkrot = nNagl ? nNagl.skrotDnia : '';
+
+              if (isNextSun) {
+                var actualDay = nd;
+                var gNext = cleanTime(nextGodzinaWknd);
+                var skrotW = nSkrot || 'Nd';
+                if (gNext === '17:00') {
+                  // Msza weekendowa w sobotę o 17:00!
+                  actualDay = nd - 1;
+                  var satNagl = (actualDay >= 1 && daneKolejnegoMiesiaca.dniNaglowek && daneKolejnegoMiesiaca.dniNaglowek[actualDay - 1]) ? daneKolejnegoMiesiaca.dniNaglowek[actualDay - 1] : null;
+                  skrotW = satNagl ? satNagl.skrotDnia : 'Sb';
+                }
+                dyzuryKolejnegoMiesiaca.push({
+                  dzien: actualDay,
+                  dzienTabeli: nd,
+                  godzina: gNext,
+                  typ: 'Msza niedzielna',
+                  skrotDnia: skrotW,
+                  nazwaMiesiacaGen: nextMonthNameGen,
+                  rok: nextYear,
+                  miesiacIdx: nextMonthIdx,
+                  kolejnyMiesiac: true
+                });
+              } else if (ndow >= 1 && ndow <= 5) {
+                var godzWTygNext = pobierzGodzineDlaDniaTygodnia(nextYear, nextMonthIdx, nd);
+                dyzuryKolejnegoMiesiaca.push({
+                  dzien: nd,
+                  dzienTabeli: nd,
+                  godzina: godzWTygNext,
+                  typ: 'Służba w tygodniu',
+                  skrotDnia: nSkrot || '',
+                  nazwaMiesiacaGen: nextMonthNameGen,
+                  rok: nextYear,
+                  miesiacIdx: nextMonthIdx,
+                  kolejnyMiesiac: true
+                });
+              }
+            }
+          }
+          dyzuryKolejnegoMiesiaca.sort(function(a, b) { return a.dzien - b.dzien; });
+        }
+      }
+
+      if (!najblizszaSluzba.jest && dyzuryKolejnegoMiesiaca.length > 0) {
+        var firstNext = dyzuryKolejnegoMiesiaca[0];
+        najblizszaSluzba = {
+          jest: true,
+          dzien: firstNext.dzien,
+          tekst: firstNext.dzien + ' ' + firstNext.nazwaMiesiacaGen + (firstNext.skrotDnia ? ' (' + firstNext.skrotDnia + ')' : ''),
+          typ: firstNext.typ,
+          godzina: firstNext.godzina,
+          kolejnyMiesiac: true
+        };
+      }
+
       // 6. Rankingi i punkty (zabezpieczone przed nadpisaniem pustymi danymi)
       var rawMiesiac = (docData.rankingMiesiac && docData.rankingMiesiac.length)
         ? docData.rankingMiesiac
@@ -6067,7 +6256,8 @@
         rankingMiesiac: rankingMiesiac,
         rankingRok: rankingRok,
         rankingMinusy: rankingMinusy,
-        najblizszaSluzba: najblizszaSluzba
+        najblizszaSluzba: najblizszaSluzba,
+        dyzuryKolejnegoMiesiaca: dyzuryKolejnegoMiesiaca
       };
     }
 
@@ -6381,7 +6571,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
               if (!dispH || dispH.indexOf('24') !== -1 || dispH === '19:24' || dispH === '20:24') {
                 dispH = (Number(ul.dzien) === 14) ? '10:00' : '11:00';
               }
-              hL += '<div style="font-size:13px; color:#fafafa; margin-top:4px;"><b>' + ul.rodzaj + '</b> — ' + ul.dataTekst + ' godz. ' + dispH + ' (+ ' + (ul.punkty || 3) + ' pkt) • Zgłoszeni: <span style="color:#2563eb; font-weight:600;">' + zg + '</span></div>';
+              hL += '<div style="font-size:13px; color:#fafafa; margin-top:5px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:6px;">' +
+                '<div><b>' + ul.rodzaj + '</b> — ' + ul.dataTekst + ' godz. ' + dispH + ' (+ ' + (ul.punkty || 3) + ' pkt) • Zgłoszeni: <span style="color:#60a5fa; font-weight:600;">' + zg + '</span></div>' +
+                '<button onclick="usunLiturgie(\'' + ul.id + '\')" style="background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35); border-radius:4px; padding:3px 8px; font-size:11px; cursor:pointer; font-weight:600; margin-left:8px;" title="Usuń tę liturgię">Usuń</button>' +
+              '</div>';
             });
             hL += '</div>';
             boxZakLits.innerHTML = hL;
@@ -6659,8 +6852,16 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 }
               }
 
-              if (cellVal !== null && cellVal !== undefined && cellVal !== '') {
-                var nVal = parseFloat(cellVal);
+              var checkVal = cellVal;
+              // Jeśli to sobota 17:00, a komórka soboty jest pusta, sprawdź czy ministrant nie miał wpisanego 0 w niedzieli:
+              if (isWeekendMass && dow === 6 && (checkVal === null || checkVal === undefined || checkVal === '')) {
+                if (kSun && (kSun.wartosc === 0 || kSun.wartosc === '0')) {
+                  checkVal = 0;
+                }
+              }
+
+              if (checkVal !== null && checkVal !== undefined && checkVal !== '') {
+                var nVal = parseFloat(checkVal);
                 if (domyslnyStatus === 'ODDANY') {
                   // Jeśli oddał dyżur, wartość 1 oznacza zrealizowane oddanie dyżuru (+1 pkt). Status pozostaje ODDANY!
                   if (nVal >= 3) {
@@ -6956,6 +7157,18 @@ function czyMaDostepDoZakrystii(nazwisko) {
         return;
       }
 
+      if (!tabelaMiesiacaDane) tabelaMiesiacaDane = {};
+      if (!tabelaMiesiacaDane.liturgieDodatkowe) tabelaMiesiacaDane.liturgieDodatkowe = [];
+
+      // Blokada duplikatów:
+      var isDuplicate = tabelaMiesiacaDane.liturgieDodatkowe.some(function(l) {
+        return l.dzien === dNum && cleanTime(l.godzina) === gStr && (l.rodzaj || '').toLowerCase() === rodzaj.toLowerCase();
+      });
+      if (isDuplicate) {
+        alert('Uwaga: liturgia tego typu (' + rodzaj + ') na ten dzień i godzinę (' + gStr + ') została już wcześniej ogłoszona!');
+        return;
+      }
+
       if (rodzaj === 'Pogrzeb' && (hNum >= 17 || hNum < 8)) {
         if (!confirm('Uwaga: wybrano pogrzeb na nietypową porę: ' + gStr + '.\nPogrzeby w parafii odbywają się zwykle w godzinach przedpołudniowych (09:00 - 15:00).\n\nCzy na pewno zatwierdzić tę godzinę?')) {
           return;
@@ -6966,6 +7179,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (!confirm('Uwaga: minuta ' + match[2] + ' w godzinie ' + gStr + ' jest nietypowa (msze i nabożeństwa są zwykle o pełnej godzinie lub w połówkach, np. 10:00, 11:30).\n\nCzy na pewno zatwierdzić godzinę ' + gStr + '?')) {
           return;
         }
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = '⏳ Zapisywanie...';
       }
 
       var liturgia = {
@@ -6983,10 +7201,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         utworzono: new Date().toISOString()
       };
 
-      if (!tabelaMiesiacaDane) tabelaMiesiacaDane = {};
-      if (!tabelaMiesiacaDane.liturgieDodatkowe) tabelaMiesiacaDane.liturgieDodatkowe = [];
       tabelaMiesiacaDane.liturgieDodatkowe.push(liturgia);
-
       try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
 
       // 1. Zapis do bazy Firestore w Warszawie (15 ms)
@@ -6999,26 +7214,68 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       zamknijModalOglosLiturgie();
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'Wyślij PUSH i ogłoś';
+      }
       pokazToast('Ogłoszono ' + rodzaj + ' na godz. ' + gStr + '! Wysyłanie powiadomień PUSH...');
 
       // 2. Wysłanie powiadomień PUSH w tle przez Apps Script
-      if (btn) btn.disabled = true;
       callBackend('oglosDodatkowaLiturgie', [liturgia], function(res) {
-        if (btn) btn.disabled = false;
         if (res && res.sukces) {
           pokazToast('Wysłano ' + (res.powiadomionoLiczba || 'wszystkie') + ' powiadomień PUSH do ministrantów!');
         }
       }, function(err) {
-        if (btn) btn.disabled = false;
         console.warn('Backend push notification warning:', err);
       });
 
-      // Odśwież UI na pulpicie
+      // Odśwież UI na pulpicie i w zakrystii
+      if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
+        wczytajDaneDlaZakrystii(zakrystiaStan.dzien, zakrystiaStan.godzina, true);
+      } else {
+        wczytajDaneDlaZakrystii(null, null, true);
+      }
       if (globalUser && globalUser.nazwisko) {
         var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
         if (stan) renderujDane(stan);
       }
     }
+
+    function usunLiturgie(litId) {
+      if (!czyMaDostepDoZakrystii(globalUser ? globalUser.nazwisko : '')) {
+        pokazToast('Brak uprawnień do usuwania liturgii.');
+        return;
+      }
+      if (!confirm('Czy na pewno chcesz usunąć tę liturgię?')) return;
+      if (!tabelaMiesiacaDane || !tabelaMiesiacaDane.liturgieDodatkowe) return;
+
+      tabelaMiesiacaDane.liturgieDodatkowe = tabelaMiesiacaDane.liturgieDodatkowe.filter(function(l) { return l.id !== litId; });
+      try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+
+      if (dbFirestore) {
+        dbFirestore.collection('stan_grafiku').doc(pobierzAktywnyKluczMiesiaca()).set({
+          liturgieDodatkowe: tabelaMiesiacaDane.liturgieDodatkowe
+        }, { merge: true }).catch(function(e) { console.warn('Firestore usun liturgia error:', e); });
+      }
+
+      callBackend('usunDodatkowaLiturgie', [litId], function(res) {
+        if (res && res.sukces) {
+          console.log('Liturgia usunięta z arkusza.');
+        }
+      });
+
+      pokazToast('Liturgia została usunięta.');
+      if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
+        wczytajDaneDlaZakrystii(zakrystiaStan.dzien, zakrystiaStan.godzina, true);
+      } else {
+        wczytajDaneDlaZakrystii(null, null, true);
+      }
+      if (globalUser && globalUser.nazwisko) {
+        var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
+        if (stan) renderujDane(stan);
+      }
+    }
+    window.usunLiturgie = usunLiturgie;
 
     function przelaczZgloszenieLiturgia(litId) {
       if (!globalUser || !globalUser.nazwisko) {
@@ -8248,10 +8505,20 @@ function czyMaDostepDoZakrystii(nazwisko) {
             } else if (m.status === 'NIEOBECNY') {
               if (!czyDodatkowa) {
                 wiersz.komorki[colIdx].wartosc = -5;
+                if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
+                  if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
+                    wiersz.komorki[colIdx + 1].wartosc = null;
+                  }
+                }
               }
             } else if (m.status === 'USPRAWIEDLIWIONY') {
               if (!czyDodatkowa) {
                 wiersz.komorki[colIdx].wartosc = 0;
+                if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
+                  if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
+                    wiersz.komorki[colIdx + 1].wartosc = null;
+                  }
+                }
               }
             } else if (m.status === 'ODDANY') {
               wiersz.komorki[colIdx].wartosc = 1;
@@ -8486,35 +8753,35 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
       var cacheKey = 'min_cached_tabela_' + docId;
 
-      // 1. Jeśli to Wrzesień i mamy już tabelaMiesiacaDane w pamięci:
+      // 1. Natychmiastowy render z pamięci lub localStorage (0 ms!)
+      var hasRenderedFromCache = false;
       if (docId === pobierzAktywnyKluczMiesiaca() && tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze && tabelaMiesiacaDane.wiersze.length) {
         tabelaPrzegladanyMiesiacDane = tabelaMiesiacaDane;
         renderujFiltryTabeli();
         renderujTabeleMiesiaca();
-        if (!wymus) return;
+        hasRenderedFromCache = true;
+      } else {
+        try {
+          var cTbl = localStorage.getItem(cacheKey);
+          if (!cTbl && docId === pobierzAktywnyKluczMiesiaca()) cTbl = localStorage.getItem('min_cached_tabela');
+          if (cTbl) {
+            var parsed = JSON.parse(cTbl);
+            if (parsed && parsed.wiersze && parsed.wiersze.length) {
+              tabelaPrzegladanyMiesiacDane = parsed;
+              if (docId === pobierzAktywnyKluczMiesiaca()) tabelaMiesiacaDane = parsed;
+              renderujFiltryTabeli();
+              renderujTabeleMiesiaca();
+              hasRenderedFromCache = true;
+            }
+          }
+        } catch(e) {}
       }
 
-      // 2. Sprawdź natychmiastowy cache w localStorage (0 ms!)
-      try {
-        var cTbl = localStorage.getItem(cacheKey);
-        if (!cTbl && docId === pobierzAktywnyKluczMiesiaca()) cTbl = localStorage.getItem('min_cached_tabela');
-        if (cTbl) {
-          var parsed = JSON.parse(cTbl);
-          if (parsed && parsed.wiersze && parsed.wiersze.length) {
-            tabelaPrzegladanyMiesiacDane = parsed;
-            if (docId === pobierzAktywnyKluczMiesiaca()) tabelaMiesiacaDane = parsed;
-            renderujFiltryTabeli();
-            renderujTabeleMiesiaca();
-            if (!wymus) return;
-          }
-        }
-      } catch(e) {}
-
-      if (!tabelaPrzegladanyMiesiacDane) {
+      if (!hasRenderedFromCache) {
         kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#38bdf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie grafiku ' + docId.replace('_', ' ') + '...</div>';
       }
 
-      // 3. Pobierz najnowsze dane z bazy Firestore (Warszawa - 20 ms)
+      // 2. ZAWSZE pobierz najnowsze dane z bazy Firestore w tle (Stale-While-Revalidate - gwarancja aktualności!)
       if (dbFirestore) {
         dbFirestore.collection('stan_grafiku').doc(docId).get().then(function(doc) {
           if (doc.exists && doc.data() && doc.data().wiersze && doc.data().wiersze.length) {
@@ -8530,13 +8797,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
             renderujTabeleMiesiaca();
             return;
           }
-          pobierzTabeleZBackendu(docId);
+          if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
         }).catch(function(e) {
           console.warn('Firestore tabela fallback:', e);
-          pobierzTabeleZBackendu(docId);
+          if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
         });
       } else {
-        pobierzTabeleZBackendu(docId);
+        if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
       }
     }
 
@@ -9334,15 +9601,15 @@ function czyMaDostepDoZakrystii(nazwisko) {
         return;
       }
 
-      // 2. Sprawdź cutoff czasu
+      // 2. Sprawdź czy msza się już rozpoczęła (nieobecność można zgłosić do samego początku mszy!)
       if (isWeekend) {
-        if (czyWeekendMszaPrzeterminowana(dzien, godzina, stanOdd.rok, stanOdd.miesiacIdx)) {
-          alert('Czas na zgłoszenie nieobecności minął (mniej niż 2h do mszy lub msza już się odbyła).');
+        if (czyWeekendZgloszeniePrzeterminowane(dzien, godzina, stanOdd.rok, stanOdd.miesiacIdx)) {
+          alert('Czas na zgłoszenie nieobecności minął (msza święta już się rozpoczęła lub odbyła).');
           return;
         }
       } else {
-        if (czyTydzienMszaPrzeterminowana(dzien, godzina, stanOdd.rok, stanOdd.miesiacIdx)) {
-          alert('Czas na zgłoszenie nieobecności minął (mniej niż 2h do mszy lub msza już się odbyła).');
+        if (czyTydzienZgloszeniePrzeterminowane(dzien, godzina, stanOdd.rok, stanOdd.miesiacIdx)) {
+          alert('Czas na zgłoszenie nieobecności minął (msza święta już się rozpoczęła lub odbyła).');
           return;
         }
       }
@@ -9399,19 +9666,30 @@ function czyMaDostepDoZakrystii(nazwisko) {
           if (!sfDoc.exists) throw new Error('Brak grafiku w bazie.');
           var data = sfDoc.data();
           if (isWeekend) {
-            if (czyWeekendMszaPrzeterminowana(dOdd, godz, data.rok, data.miesiacIdx)) {
-              throw new Error('Czas na zgłoszenie nieobecności minął (mniej niż 2h do mszy).');
+            if (czyWeekendZgloszeniePrzeterminowane(dOdd, godz, data.rok, data.miesiacIdx)) {
+              throw new Error('Czas na zgłoszenie nieobecności minął (msza święta już się rozpoczęła).');
             }
           } else {
-            if (czyTydzienMszaPrzeterminowana(dOdd, godz, data.rok, data.miesiacIdx)) {
-              throw new Error('Czas na zgłoszenie nieobecności minął (mniej niż 2h do mszy).');
+            if (czyTydzienZgloszeniePrzeterminowane(dOdd, godz, data.rok, data.miesiacIdx)) {
+              throw new Error('Czas na zgłoszenie nieobecności minął (msza święta już się rozpoczęła).');
             }
           }
 
           var wiersze = data.wiersze || [];
           var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
-          if (row && row.komorki && row.komorki[dOdd - 1]) {
-            row.komorki[dOdd - 1].wartosc = 0; // Usprawiedliwienie 0 pkt
+          if (row && row.komorki) {
+            var targetIdx = dOdd - 1;
+            if (isWeekend && cleanTime(godz) === '17:00') {
+              // Rzeczywista msza jest w sobotę o 17:00 (dOdd to niedziela)! Wpisujemy 0 w sobotę:
+              targetIdx = dOdd - 2;
+              // Niedziela ma pozostać pusta / czysta
+              if (row.komorki[dOdd - 1] && (row.komorki[dOdd - 1].wartosc === 0 || row.komorki[dOdd - 1].wartosc === '0')) {
+                row.komorki[dOdd - 1].wartosc = null;
+              }
+            }
+            if (targetIdx >= 0 && row.komorki[targetIdx]) {
+              row.komorki[targetIdx].wartosc = 0; // Usprawiedliwienie 0 pkt na właściwy dzień mszy!
+            }
           }
 
           var updates = {
@@ -9468,9 +9746,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var data = sfDoc.data();
           var wiersze = data.wiersze || [];
           var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
-          if (row && row.komorki && row.komorki[dNum - 1]) {
-            if (row.komorki[dNum - 1].wartosc === 0 || row.komorki[dNum - 1].wartosc === '0') {
+          if (row && row.komorki) {
+            if (row.komorki[dNum - 1] && (row.komorki[dNum - 1].wartosc === 0 || row.komorki[dNum - 1].wartosc === '0')) {
               row.komorki[dNum - 1].wartosc = null;
+            }
+            if (dNum > 1 && row.komorki[dNum - 2] && (row.komorki[dNum - 2].wartosc === 0 || row.komorki[dNum - 2].wartosc === '0')) {
+              row.komorki[dNum - 2].wartosc = null;
             }
           }
           transaction.update(docRef, {

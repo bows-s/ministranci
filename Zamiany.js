@@ -113,6 +113,10 @@ function obsluzZapytanieAPI(e) {
       wynik = { sukces: true, historia: pobierzHistorieWpisowZakrystii(ssH, args[0] || 60) };
     } else if (funkcja === "oglosDodatkowaLiturgie") {
       wynik = oglosDodatkowaLiturgie(args[0]);
+    } else if (funkcja === "usunDodatkowaLiturgie") {
+      wynik = usunDodatkowaLiturgie(args[0]);
+    } else if (funkcja === "naprawJakubBrytnerIPogrzeb") {
+      wynik = naprawJakubBrytnerIPogrzeb();
     } else if (funkcja === "synchronizujFirestore") {
       wynik = synchronizujDoFirestore();
     } else if (funkcja === "testFCM") {
@@ -2901,6 +2905,45 @@ function czyTydzienMszaPrzeterminowanaGAS(dzien, godzinaStr, rok, miesiacIdx) {
   return czyMszaPrzeterminowanaGAS(dzien, godzClean, rok, miesiacIdx);
 }
 
+function czyMszaJuzSieRozpoczelaGAS(dzien, godzinaStr, rok, miesiacIdx) {
+  if (!dzien) return false;
+  var now = new Date();
+  var curY = rok || now.getFullYear();
+  var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : now.getMonth();
+  var curD = now.getDate();
+
+  if (dzien < curD) return true;
+  if (dzien > curD) return false;
+
+  if (!godzinaStr) return false;
+  var parts = godzinaStr.split(':');
+  if (parts.length < 2) return false;
+  var h = parseInt(parts[0], 10);
+  var m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return false;
+
+  var mszaTime = new Date(curY, curM, dzien, h, m, 0, 0).getTime();
+  return now.getTime() >= mszaTime;
+}
+
+function czyWeekendZgloszeniePrzeterminowaneGAS(niedzielaDzien, godzinaStr, rok, miesiacIdx) {
+  var godzClean = cleanTime(godzinaStr);
+  var realDay = (godzClean === '17:00') ? (niedzielaDzien - 1) : niedzielaDzien;
+  return czyMszaJuzSieRozpoczelaGAS(realDay, godzClean, rok, miesiacIdx);
+}
+
+function czyTydzienZgloszeniePrzeterminowaneGAS(dzien, godzinaStr, rok, miesiacIdx) {
+  var godzClean = cleanTime(godzinaStr);
+  if (!godzClean) {
+    var dt = new Date(rok, miesiacIdx, dzien);
+    var dow = dt.getDay();
+    if (dow === 3) godzClean = '08:00';
+    else if (dow === 4) godzClean = '17:00';
+    else godzClean = '18:00';
+  }
+  return czyMszaJuzSieRozpoczelaGAS(dzien, godzClean, rok, miesiacIdx);
+}
+
 function wpiszZeroDlaMinistranta(mSheet, nazwisko, dzien) {
   if (!mSheet) return;
   var maxRows = Math.min(mSheet.getLastRow(), 32);
@@ -3555,8 +3598,8 @@ function wystawZastepstwo(nazwisko, pin, dzien, typGrafiku, godzina) {
     typGrafiku = "Tydzień";
   }
 
-  if (czyTydzienMszaPrzeterminowanaGAS(dzien, godzina, stan.rok, stan.miesiacIdx)) {
-    return { sukces: false, wiadomosc: "Czas na oddanie dyżuru minął (mniej niż 2h do mszy lub msza minęła)." };
+  if (czyTydzienZgloszeniePrzeterminowaneGAS(dzien, godzina, stan.rok, stan.miesiacIdx)) {
+    return { sukces: false, wiadomosc: "Czas na oddanie dyżuru minął (msza święta już się rozpoczęła lub odbyła)." };
   }
 
   var tSheetCheck = ss.getSheetByName("Zamiany_Tydzien");
@@ -3802,8 +3845,8 @@ function usprawiedliwNiedziele(nazwisko, pin, dzien) {
   var mojaGodzinaWtedy = (stan.godzinyWeekendy && stan.godzinyWeekendy[dzien])
     ? stan.godzinyWeekendy[dzien].godzina
     : (stan.mojaGodzinaNiedziela || "10:00");
-  if (czyWeekendMszaPrzeterminowanaGAS(dzien, mojaGodzinaWtedy, stan.rok, stan.miesiacIdx)) {
-    return { sukces: false, wiadomosc: "Czas na zgłoszenie nieobecności minął (mniej niż 2h do mszy lub msza minęła)." };
+  if (czyWeekendZgloszeniePrzeterminowaneGAS(dzien, mojaGodzinaWtedy, stan.rok, stan.miesiacIdx)) {
+    return { sukces: false, wiadomosc: "Czas na zgłoszenie nieobecności minął (msza święta już się rozpoczęła lub odbyła)." };
   }
 
   var nSheetCheck = ss.getSheetByName("Zamiany_Niedziele");
@@ -3831,16 +3874,27 @@ function usprawiedliwNiedziele(nazwisko, pin, dzien) {
     return { sukces: false, wiadomosc: "Nie znaleziono Twojego nazwiska w arkuszu." };
   }
 
-  var colDzien = dzien + 3;
-  var targetCell = mSheet.getRange(targetRow, colDzien);
+  var isSat17 = (cleanTime(mojaGodzinaWtedy) === "17:00");
+  var targetCol = isSat17 ? ((dzien - 1) + 3) : (dzien + 3);
+
+  // Jeśli to sobota 17:00, czyścimy ewentualne zbędne 0 z niedzieli
+  if (isSat17) {
+    var sunCell = mSheet.getRange(targetRow, dzien + 3);
+    if (sunCell.getValue() === 0 || sunCell.getValue() === "0") {
+      sunCell.clearContent();
+    }
+  }
+
+  var targetCell = mSheet.getRange(targetRow, targetCol);
   targetCell.setValue(0);
 
   SpreadsheetApp.flush();
   try { synchronizujDoFirestore(ss); } catch (eSync) { Logger.log("Błąd sync: " + eSync.message); }
 
+  var dzienTekst = isSat17 ? ("sobotę " + (dzien - 1) + " (godz. 17:00)") : ("niedzielę " + dzien);
   return {
     sukces: true,
-    wiadomosc: "Zgłoszono nieobecność na niedzielę " + dzien + " " + stan.nazwaMiesiaca + ". Masz wpisane 0 pkt (ochrona przed -5 pkt)."
+    wiadomosc: "Zgłoszono nieobecność na " + dzienTekst + " " + stan.nazwaMiesiaca + ". Masz wpisane 0 pkt (ochrona przed -5 pkt)."
   };
 }
 
@@ -3862,10 +3916,17 @@ function anulujUsprawiedliwienieNiedziela(nazwisko, pin, dzien) {
   }
 
   if (targetRow !== -1) {
-    var colDzien = dzien + 3;
-    var targetCell = mSheet.getRange(targetRow, colDzien);
-    if (targetCell.getValue() === 0 || targetCell.getValue() === "0") {
-      targetCell.setValue("");
+    var colSun = dzien + 3;
+    var targetCellSun = mSheet.getRange(targetRow, colSun);
+    if (targetCellSun.getValue() === 0 || targetCellSun.getValue() === "0") {
+      targetCellSun.setValue("");
+    }
+    if (dzien > 1) {
+      var colSat = (dzien - 1) + 3;
+      var targetCellSat = mSheet.getRange(targetRow, colSat);
+      if (targetCellSat.getValue() === 0 || targetCellSat.getValue() === "0") {
+        targetCellSat.setValue("");
+      }
     }
   }
 
@@ -5167,6 +5228,28 @@ function oglosDodatkowaLiturgie(liturgia) {
     sheet.appendRow([id, rok, miesiac, dzien, "'" + godzina, rodzaj, punkty, dataTekst, opis, utworzyl, zgloszeni, utworzono]);
     sheet.getRange(sheet.getLastRow(), 5).setNumberFormat("@").setValue("'" + godzina);
 
+    // Sprawdzenie czy identyczna liturgia już nie została ogłoszona (ochrona przed duplikatami)
+    if (sheet.getLastRow() > 2) {
+      var existingRows = sheet.getRange(2, 1, sheet.getLastRow() - 2, 6).getValues();
+      for (var er = 0; er < existingRows.length; er++) {
+        var eRok = parseInt(existingRows[er][1], 10);
+        var eMies = parseInt(existingRows[er][2], 10);
+        var eDzien = parseInt(existingRows[er][3], 10);
+        var eGodz = cleanTime(existingRows[er][4]);
+        var eRodz = (existingRows[er][5] || "").toString().trim().toLowerCase();
+        if (eRok === rok && eMies === miesiac && eDzien === dzien && eGodz === cleanTime(godzina) && eRodz === rodzaj.toLowerCase()) {
+          // Usuń właśnie dodany nadmiarowy wiersz
+          sheet.deleteRow(sheet.getLastRow());
+          return {
+            sukces: true,
+            liturgiaId: existingRows[er][0],
+            powiadomionoLiczba: 0,
+            wiadomosc: "Liturgia o tym terminie została już wcześniej ogłoszona."
+          };
+        }
+      }
+    }
+
     // Wysłanie powiadomień PUSH (FCM) do ministrantów
     var tSheet = ss.getSheetByName("Powiadomienia_Tokeny");
     var powiadomionoLiczba = 0;
@@ -5201,6 +5284,95 @@ function oglosDodatkowaLiturgie(liturgia) {
     };
   } catch (err) {
     Logger.log("Błąd oglosDodatkowaLiturgie: " + err.message);
+    return { sukces: false, wiadomosc: err.message };
+  }
+}
+
+function usunDodatkowaLiturgie(liturgiaId) {
+  try {
+    if (!liturgiaId) return { sukces: false, wiadomosc: "Brak ID liturgii." };
+    var ss = pobierzAktywnyArkusz();
+    var sheet = ss.getSheetByName("Liturgie_Dodatkowe");
+    if (!sheet || sheet.getLastRow() <= 1) return { sukces: false, wiadomosc: "Brak tabeli liturgii dodatkowych." };
+
+    var rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getValues();
+    var rowIndexToDelete = -1;
+    for (var i = 0; i < rows.length; i++) {
+      if (String(rows[i][0]).trim() === String(liturgiaId).trim()) {
+        rowIndexToDelete = i + 2;
+        break;
+      }
+    }
+
+    if (rowIndexToDelete === -1) {
+      return { sukces: false, wiadomosc: "Nie znaleziono liturgii o podanym ID." };
+    }
+
+    sheet.deleteRow(rowIndexToDelete);
+    SpreadsheetApp.flush();
+    try { synchronizujDoFirestore(ss); } catch(eSync) { Logger.log("Błąd sync: " + eSync.message); }
+    return { sukces: true, wiadomosc: "Pomyślnie usunięto liturgię." };
+  } catch(err) {
+    Logger.log("Błąd usunDodatkowaLiturgie: " + err.message);
+    return { sukces: false, wiadomosc: err.message };
+  }
+}
+
+function naprawJakubBrytnerIPogrzeb() {
+  try {
+    var ss = pobierzAktywnyArkusz();
+    var mSheet = pobierzBiezacyArkuszMiesiaca(ss);
+    var zmiany = [];
+
+    // 1. Usunięcie zduplikowanego pogrzebu z 29 września w Liturgie_Dodatkowe
+    var lSheet = ss.getSheetByName("Liturgie_Dodatkowe");
+    if (lSheet && lSheet.getLastRow() > 1) {
+      var lData = lSheet.getRange(2, 1, lSheet.getLastRow() - 1, 6).getValues();
+      var seen29Pogrzeb = false;
+      for (var li = 0; li < lData.length; li++) {
+        var lId = String(lData[li][0]).trim();
+        var lDzien = parseInt(lData[li][3], 10);
+        var lGodz = cleanTime(lData[li][4]);
+        var lRodz = (lData[li][5] || "").toString().trim().toLowerCase();
+
+        var is29Pogrzeb = (lDzien === 29 && lGodz === "11:00" && lRodz.indexOf("pogrzeb") !== -1);
+        if (lId === "LIT_1790433775971" || (is29Pogrzeb && seen29Pogrzeb)) {
+          var rowDel = li + 2;
+          lSheet.deleteRow(rowDel);
+          zmiany.push("Usunięto duplikat pogrzebu z wiersza " + rowDel);
+          break;
+        }
+        if (is29Pogrzeb) seen29Pogrzeb = true;
+      }
+    }
+
+    // 2. Korekta Jakuba Brytnera w bieżącym arkuszu (Wrzesień 2026)
+    if (mSheet) {
+      var maxRows = Math.min(mSheet.getLastRow(), 45);
+      var colB = mSheet.getRange(1, 2, maxRows, 1).getValues();
+      for (var r = 2; r < maxRows; r++) {
+        var rawName = (colB[r][0] || "").toString().trim();
+        if (rawName.toLowerCase().indexOf("brytner") !== -1) {
+          var targetRow = r + 1;
+          // Dzień 19 (sobota): kolumna 19 + 3 = 22
+          var cellD19 = mSheet.getRange(targetRow, 22);
+          cellD19.setValue(0);
+          // Dzień 20 (niedziela): kolumna 20 + 3 = 23
+          var cellD20 = mSheet.getRange(targetRow, 23);
+          if (cellD20.getValue() === 0 || cellD20.getValue() === "0") {
+            cellD20.clearContent();
+          }
+          zmiany.push("Skorygowano Jakuba Brytnera: dzień 19 = 0, dzień 20 wyczyszczony");
+          break;
+        }
+      }
+    }
+
+    SpreadsheetApp.flush();
+    try { synchronizujDoFirestore(ss); } catch(eSync) { Logger.log("Błąd sync: " + eSync.message); }
+    return { sukces: true, zmiany: zmiany, wiadomosc: "Pomyślnie naprawiono dane Jakuba Brytnera i pogrzeb." };
+  } catch(err) {
+    Logger.log("Błąd naprawJakubBrytnerIPogrzeb: " + err.message);
     return { sukces: false, wiadomosc: err.message };
   }
 }
