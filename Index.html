@@ -7600,130 +7600,139 @@ function czyMaDostepDoZakrystii(nazwisko) {
     }
 
     function zatwierdzOgloszenieLiturgii() {
-      var selD = document.getElementById('sel-oglos-dzien');
-      var inputG = document.getElementById('input-oglos-godzina');
-      var selR = document.getElementById('sel-oglos-rodzaj');
-      var btn = document.getElementById('btn-oglos-zatwierdz');
+      try {
+        var selD = document.getElementById('sel-oglos-dzien');
+        var inputG = document.getElementById('input-oglos-godzina');
+        var selR = document.getElementById('sel-oglos-rodzaj');
+        var btn = document.getElementById('btn-oglos-zatwierdz');
 
-      if (!selD || !inputG || !selR) return;
+        if (!selD || !inputG || !selR) return;
 
-      var dParts = selD.value.split('|');
-      var dNum    = parseInt(dParts[0], 10);
-      var dMonth  = dParts.length > 1 ? parseInt(dParts[1], 10) : (new Date().getMonth());
-      var dYear   = dParts.length > 2 ? parseInt(dParts[2], 10) : (new Date().getFullYear());
-      var targetDocKey = wyznaczKluczMiesiaca(new Date(dYear, dMonth, 1));
-      var gStr = cleanTime(inputG.value);
-      var rodzaj = selR.value;
-      var punkty = 3;
+        var dParts = selD.value.split('|');
+        var dNum    = parseInt(dParts[0], 10);
+        var dMonth  = dParts.length > 1 ? parseInt(dParts[1], 10) : (new Date().getMonth());
+        var dYear   = dParts.length > 2 ? parseInt(dParts[2], 10) : (new Date().getFullYear());
+        var targetDocKey = wyznaczKluczMiesiaca(new Date(dYear, dMonth, 1));
+        var gStr = cleanTime(inputG.value) || '';
+        var rodzaj = selR.value;
+        var punkty = 3;
 
-      var match = gStr.match(/^(\d{1,2}):(\d{2})$/);
-      if (!match) {
-        alert('Podaj prawidłową godzinę nabożeństwa w formacie GG:MM (np. 10:00 lub 11:30).');
-        return;
-      }
-
-      var hNum = parseInt(match[1], 10);
-      var mNum = parseInt(match[2], 10);
-      if (hNum < 6 || hNum > 21 || mNum < 0 || mNum > 59) {
-        alert('Podano nieprawidłową godzinę (' + gStr + '). Dopuszczalny zakres to 06:00 - 21:00.');
-        return;
-      }
-
-      // Ustal źródło liturgii do sprawdzenia duplikatów
-      var isCurrentMonthDup = (targetDocKey === pobierzAktywnyKluczMiesiaca());
-      var liturgieDoSprawdzenia = isCurrentMonthDup
-        ? ((tabelaMiesiacaDane && tabelaMiesiacaDane.liturgieDodatkowe) || [])
-        : ((daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.liturgieDodatkowe) || []);
-
-      // Blokada duplikatów:
-      var isDuplicate = liturgieDoSprawdzenia.some(function(l) {
-        return l.dzien === dNum && l.miesiacIdx === dMonth && cleanTime(l.godzina) === gStr && (l.rodzaj || '').toLowerCase() === rodzaj.toLowerCase();
-      });
-      if (isDuplicate) {
-        alert('Uwaga: liturgia tego typu (' + rodzaj + ') na ten dzień i godzinę (' + gStr + ') została już wcześniej ogłoszona!');
-        return;
-      }
-
-      if (rodzaj === 'Pogrzeb' && (hNum >= 17 || hNum < 8)) {
-        if (!confirm('Uwaga: wybrano pogrzeb na nietypową porę: ' + gStr + '.\nPogrzeby w parafii odbywają się zwykle w godzinach przedpołudniowych (09:00 - 15:00).\n\nCzy na pewno zatwierdzić tę godzinę?')) {
+        var match = gStr.match(/^(\d{1,2}):(\d{2})$/);
+        if (!match) {
+          alert('Podaj prawidłową godzinę nabożeństwa w formacie GG:MM (np. 10:00 lub 11:30).');
           return;
         }
-      }
 
-      if (mNum % 5 !== 0) {
-        if (!confirm('Uwaga: minuta ' + match[2] + ' w godzinie ' + gStr + ' jest nietypowa (msze i nabożeństwa są zwykle o pełnej godzinie lub w połówkach, np. 10:00, 11:30).\n\nCzy na pewno zatwierdzić godzinę ' + gStr + '?')) {
+        var hNum = parseInt(match[1], 10);
+        var mNum = parseInt(match[2], 10);
+        if (hNum < 6 || hNum > 21 || mNum < 0 || mNum > 59) {
+          alert('Podano nieprawidłową godzinę (' + gStr + '). Dopuszczalny zakres to 06:00 - 21:00.');
           return;
         }
-      }
 
-      if (btn) {
-        btn.disabled = true;
-        btn.innerText = '⏳ Zapisywanie...';
-      }
+        // Ustal źródło liturgii do sprawdzenia duplikatów
+        var isCurrentMonth = (targetDocKey === pobierzAktywnyKluczMiesiaca());
+        var liturgieDoSprawdzenia = [];
+        try {
+          liturgieDoSprawdzenia = isCurrentMonth
+            ? ((tabelaMiesiacaDane && tabelaMiesiacaDane.liturgieDodatkowe) || [])
+            : ((daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.liturgieDodatkowe) || []);
+        } catch(e2) { liturgieDoSprawdzenia = []; }
 
-      var liturgia = {
-        id: 'LIT_' + Date.now(),
-        rok: dYear,
-        miesiacIdx: dMonth,
-        dzien: dNum,
-        godzina: gStr,
-        rodzaj: rodzaj,
-        punkty: punkty,
-        dataTekst: selD.options[selD.selectedIndex].text,
-        opis: rodzaj,
-        utworzyl: (globalUser && globalUser.nazwisko) ? globalUser.nazwisko : 'Kościelny',
-        zgloszeni: [],
-        utworzono: new Date().toISOString()
-      };
-
-      // Dla liturgii z bieżącego miesiąca aktualizuj lokalny cache
-      var isCurrentMonth = (targetDocKey === pobierzAktywnyKluczMiesiaca());
-      if (isCurrentMonth) {
-        if (!tabelaMiesiacaDane) tabelaMiesiacaDane = {};
-        if (!tabelaMiesiacaDane.liturgieDodatkowe) tabelaMiesiacaDane.liturgieDodatkowe = [];
-        tabelaMiesiacaDane.liturgieDodatkowe.push(liturgia);
-        try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
-      }
-
-      // 1. Zapis do bazy Firestore do właściwego dokumentu miesiąca
-      if (dbFirestore) {
-        // Pobierz aktualne liturgieDodatkowe z docelowego dokumentu i dołącz nową
-        dbFirestore.collection('stan_grafiku').doc(targetDocKey).get().then(function(snap) {
-          var istniejace = (snap.exists && snap.data().liturgieDodatkowe) ? snap.data().liturgieDodatkowe : [];
-          istniejace.push(liturgia);
-          return dbFirestore.collection('stan_grafiku').doc(targetDocKey).set({
-            liturgieDodatkowe: istniejace
-          }, { merge: true });
-        }).catch(function(e) {
-          console.warn('Firestore set liturgia error:', e);
+        // Blokada duplikatów:
+        var isDuplicate = liturgieDoSprawdzenia.some(function(l) {
+          return l.dzien === dNum && l.miesiacIdx === dMonth && cleanTime(l.godzina) === gStr && (l.rodzaj || '').toLowerCase() === rodzaj.toLowerCase();
         });
-      }
-
-      zamknijModalOglosLiturgie();
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = 'Wyślij PUSH i ogłoś';
-      }
-      pokazToast('Ogłoszono ' + rodzaj + ' na godz. ' + gStr + '! Wysyłanie powiadomień PUSH...');
-
-      // 2. Wysłanie powiadomień PUSH w tle przez Apps Script
-      callBackend('oglosDodatkowaLiturgie', [liturgia], function(res) {
-        if (res && res.sukces) {
-          pokazToast('Wysłano ' + (res.powiadomionoLiczba || 'wszystkie') + ' powiadomień PUSH do ministrantów!');
+        if (isDuplicate) {
+          alert('Uwaga: liturgia tego typu (' + rodzaj + ') na ten dzień i godzinę (' + gStr + ') została już wcześniej ogłoszona!');
+          return;
         }
-      }, function(err) {
-        console.warn('Backend push notification warning:', err);
-      });
 
-      // Odśwież UI na pulpicie i w zakrystii
-      if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
-        wczytajDaneDlaZakrystii(zakrystiaStan.dzien, zakrystiaStan.godzina, true);
-      } else {
-        wczytajDaneDlaZakrystii(null, null, true);
-      }
-      if (globalUser && globalUser.nazwisko) {
-        var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
-        if (stan) renderujDane(stan);
+        if (rodzaj === 'Pogrzeb' && (hNum >= 17 || hNum < 8)) {
+          if (!confirm('Uwaga: wybrano pogrzeb na nietypową porę: ' + gStr + '.\nPogrzeby w parafii odbywają się zwykle w godzinach przedpołudniowych (09:00 - 15:00).\n\nCzy na pewno zatwierdzić tę godzinę?')) {
+            return;
+          }
+        }
+
+        if (mNum % 5 !== 0) {
+          if (!confirm('Uwaga: minuta ' + match[2] + ' w godzinie ' + gStr + ' jest nietypowa.\n\nCzy na pewno zatwierdzić godzinę ' + gStr + '?')) {
+            return;
+          }
+        }
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerText = '⏳ Zapisywanie...';
+        }
+
+        var liturgia = {
+          id: 'LIT_' + Date.now(),
+          rok: dYear,
+          miesiacIdx: dMonth,
+          dzien: dNum,
+          godzina: gStr,
+          rodzaj: rodzaj,
+          punkty: punkty,
+          dataTekst: selD.options[selD.selectedIndex].text,
+          opis: rodzaj,
+          utworzyl: (globalUser && globalUser.nazwisko) ? globalUser.nazwisko : 'Kościelny',
+          zgloszeni: [],
+          utworzono: new Date().toISOString()
+        };
+
+        // Dla liturgii z bieżącego miesiąca aktualizuj lokalny cache
+        if (isCurrentMonth) {
+          if (!tabelaMiesiacaDane) tabelaMiesiacaDane = {};
+          if (!tabelaMiesiacaDane.liturgieDodatkowe) tabelaMiesiacaDane.liturgieDodatkowe = [];
+          tabelaMiesiacaDane.liturgieDodatkowe.push(liturgia);
+          try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+        }
+
+        // 1. Zapis do bazy Firestore do właściwego dokumentu miesiąca
+        if (dbFirestore) {
+          dbFirestore.collection('stan_grafiku').doc(targetDocKey).get().then(function(snap) {
+            var istniejace = (snap.exists && snap.data().liturgieDodatkowe) ? snap.data().liturgieDodatkowe : [];
+            istniejace.push(liturgia);
+            return dbFirestore.collection('stan_grafiku').doc(targetDocKey).set({
+              liturgieDodatkowe: istniejace
+            }, { merge: true });
+          }).then(function() {
+            pokazToast('✅ ' + rodzaj + ' godz. ' + gStr + ' zapisano w Firestore!');
+          }).catch(function(e) {
+            alert('Błąd zapisu Firestore: ' + (e.message || e));
+          });
+        }
+
+        zamknijModalOglosLiturgie();
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = 'Wyślij PUSH i ogłoś';
+        }
+        pokazToast('Ogłoszono ' + rodzaj + ' na godz. ' + gStr + '! Wysyłanie powiadomień PUSH...');
+
+        // 2. Wysłanie powiadomień PUSH w tle przez Apps Script
+        callBackend('oglosDodatkowaLiturgie', [liturgia], function(res) {
+          if (res && res.sukces) {
+            pokazToast('Wysłano ' + (res.powiadomionoLiczba || 'wszystkie') + ' powiadomień PUSH do ministrantów!');
+          }
+        }, function(err) {
+          console.warn('Backend push notification warning:', err);
+        });
+
+        // Odśwież UI na pulpicie i w zakrystii
+        if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
+          wczytajDaneDlaZakrystii(zakrystiaStan.dzien, zakrystiaStan.godzina, true);
+        } else {
+          wczytajDaneDlaZakrystii(null, null, true);
+        }
+        if (globalUser && globalUser.nazwisko) {
+          var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
+          if (stan) renderujDane(stan);
+        }
+      } catch(err) {
+        alert('BŁĄD zatwierdzOgloszenieLiturgii: ' + err.message);
+        var btn2 = document.getElementById('btn-oglos-zatwierdz');
+        if (btn2) { btn2.disabled = false; btn2.innerText = 'Wyślij PUSH i ogłoś'; }
       }
     }
 
