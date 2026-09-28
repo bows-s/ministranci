@@ -119,6 +119,8 @@ function obsluzZapytanieAPI(e) {
       wynik = naprawJakubBrytnerIPogrzeb();
     } else if (funkcja === "synchronizujFirestore") {
       wynik = synchronizujDoFirestore();
+    } else if (funkcja === "synchronizujZFirestoreDoArkusza") {
+      wynik = synchronizujZFirestoreDoArkusza(args[0]);
     } else if (funkcja === "testFCM") {
       wynik = testowePowiadomienieFCM(args[0]);
     } else if (funkcja === "aktywujWyzwalaczPoranny") {
@@ -4723,6 +4725,20 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
     21: "IV GRUPA (ŻÓŁTA)", 22: "IV GRUPA (ŻÓŁTA)", 23: "IV GRUPA (ŻÓŁTA)", 24: "IV GRUPA (ŻÓŁTA)", 25: "IV GRUPA (ŻÓŁTA)", 26: "IV GRUPA (ŻÓŁTA)"
   };
 
+  var fsExisting = null;
+  try {
+    fsExisting = pobierzDokumentFirestore("stan_grafiku", sheetName);
+  } catch(eFse) {}
+  var fsWierszeMap = {};
+  if (fsExisting && fsExisting.wiersze && Array.isArray(fsExisting.wiersze)) {
+    for (var fsi = 0; fsi < fsExisting.wiersze.length; fsi++) {
+      var fw = fsExisting.wiersze[fsi];
+      if (fw.nazwisko) {
+        fsWierszeMap[fw.nazwisko.toLowerCase().trim()] = fw;
+      }
+    }
+  }
+
   for (var r = 0; r < maxRows - 2; r++) {
     var rowNum = r + 3; // Wiersz w arkuszu (1-indexed)
     var rawName = colB[r + 2][0].toString().trim();
@@ -4763,12 +4779,24 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
     var userGroup = groupsByRow[rowNum] || currentGroup;
 
     var komorki = [];
+    var normClean = cleanName.toLowerCase().trim();
     for (var dIdx = 0; dIdx < daysInMonth; dIdx++) {
       var bg = (backgrounds[r][dIdx] || "").toLowerCase();
       var isColored = (bg !== "#ffffff" && bg !== "" && bg !== "transparent");
       var val = values[r][dIdx];
       var hasVal = (val !== "" && val !== null && typeof val !== "undefined");
       var numVal = hasVal ? parseFloat(val) : null;
+
+      // Ochrona przed nadpisaniem obecności wpisanej w zakrystii przez puste komórki arkusza:
+      if (!hasVal && fsWierszeMap[normClean] && fsWierszeMap[normClean].komorki && fsWierszeMap[normClean].komorki[dIdx]) {
+        var fsVal = fsWierszeMap[normClean].komorki[dIdx].wartosc;
+        if (fsVal !== null && fsVal !== undefined && fsVal !== "") {
+          val = fsVal;
+          hasVal = true;
+          numVal = (typeof fsVal === "number") ? fsVal : parseFloat(fsVal);
+          try { mSheet.getRange(rowNum, dIdx + 4).setValue(fsVal); } catch(eSyncVal) {}
+        }
+      }
 
       komorki.push({
         dzien: dIdx + 1,
@@ -4911,8 +4939,10 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
     wiersze: wiersze,
     ranking: (rankingiInfo && rankingiInfo.rankingMiesiac) || [],
     rankingMiesiac: (rankingiInfo && rankingiInfo.rankingMiesiac) || [],
-    rankingRok: (rankingiInfo && rankingiInfo.rankingRok) || [],
-    rankingMinusy: (rankingiInfo && rankingiInfo.rankingMinusy) || [],
+    rankingRok: (rankingiInfo && rankingiInfo.rankingRok) || (fsExisting && fsExisting.rankingRok) || [],
+    rankingMinusy: (fsExisting && fsExisting.rankingMinusy) || (rankingiInfo && rankingiInfo.rankingMinusy) || [],
+    rankingMinusyRok: (fsExisting && fsExisting.rankingMinusyRok) || (fsExisting && fsExisting.rankingMinusy) || (rankingiInfo && rankingiInfo.rankingMinusy) || [],
+    rankingMinusyMiesiac: (fsExisting && fsExisting.rankingMinusyMiesiac) || [],
     rankingiMiesiecy: (rankingiInfo && rankingiInfo.rankingiMiesiecy) || {},
     zamianyZastepstwa: zamianyZastepstwa,
     wolneZastepstwa: wolneZastepstwa,
@@ -5034,6 +5064,101 @@ function zapiszDokumentFirestore(kolekcja, docId, obiektDanych) {
     return { sukces: (resp.getResponseCode() === 200), kod: resp.getResponseCode() };
   } catch (e) {
     Logger.log("Błąd zapiszDokumentFirestore: " + e.message);
+    return { sukces: false, blad: e.message };
+  }
+}
+
+function fromFirestoreValue(val) {
+  if (!val) return null;
+  if (val.stringValue !== undefined) return val.stringValue;
+  if (val.integerValue !== undefined) return parseInt(val.integerValue, 10);
+  if (val.doubleValue !== undefined) return parseFloat(val.doubleValue);
+  if (val.booleanValue !== undefined) return val.booleanValue;
+  if (val.nullValue !== undefined) return null;
+  if (val.arrayValue !== undefined) {
+    return (val.arrayValue.values || []).map(fromFirestoreValue);
+  }
+  if (val.mapValue !== undefined) {
+    var res = {};
+    var f = val.mapValue.fields || {};
+    for (var k in f) {
+      res[k] = fromFirestoreValue(f[k]);
+    }
+    return res;
+  }
+  return null;
+}
+
+function pobierzDokumentFirestore(kolekcja, docId) {
+  try {
+    var apiKey = "AIzaSyAsgkKWXr-L3fDHQODxioVssvIGL9SQePk";
+    var projectId = "makole-85f32";
+    var url = "https://firestore.googleapis.com/v1/projects/" + projectId + "/databases/(default)/documents/" + encodeURIComponent(kolekcja) + "/" + encodeURIComponent(docId) + "?key=" + apiKey;
+    var resp = UrlFetchApp.fetch(url, { method: "get", muteHttpExceptions: true });
+    if (resp.getResponseCode() !== 200) return null;
+    var json = JSON.parse(resp.getContentText());
+    if (!json.fields) return null;
+    var res = {};
+    for (var k in json.fields) {
+      res[k] = fromFirestoreValue(json.fields[k]);
+    }
+    return res;
+  } catch(e) {
+    Logger.log("Błąd pobierzDokumentFirestore: " + e.message);
+    return null;
+  }
+}
+
+function synchronizujZFirestoreDoArkusza(nazwaMiesiaca, optionalSs) {
+  try {
+    var ss = optionalSs || pobierzAktywnyArkusz();
+    var mNazwa = nazwaMiesiaca || "Wrzesień_2026";
+    var sheet = ss.getSheetByName(mNazwa);
+    if (!sheet) return { sukces: false, wiadomosc: "Brak arkusza " + mNazwa };
+
+    var fsData = pobierzDokumentFirestore("stan_grafiku", mNazwa);
+    if (!fsData || !fsData.wiersze) {
+      return { sukces: false, wiadomosc: "Brak danych w Firestore dla " + mNazwa };
+    }
+
+    var maxRows = Math.min(sheet.getLastRow(), 40);
+    var colB = sheet.getRange(1, 2, maxRows, 1).getValues();
+    var zaktualizowano = 0;
+
+    for (var i = 0; i < fsData.wiersze.length; i++) {
+      var fsW = fsData.wiersze[i];
+      var fsNazwisko = fsW.nazwisko;
+      if (!fsNazwisko) continue;
+
+      var targetRow = -1;
+      for (var r = 0; r < maxRows; r++) {
+        var nArk = (colB[r][0] || "").toString().trim();
+        if (czyToTenSamMinistrant(nArk, fsNazwisko)) {
+          targetRow = r + 1;
+          break;
+        }
+      }
+
+      if (targetRow === -1) continue;
+
+      var komorki = fsW.komorki || [];
+      for (var d = 0; d < komorki.length; d++) {
+        var k = komorki[d];
+        var dzien = k.dzien || (d + 1);
+        var colIdx = dzien + 3;
+        var val = k.wartosc;
+
+        if (val !== null && val !== undefined && val !== "") {
+          sheet.getRange(targetRow, colIdx).setValue(val);
+          zaktualizowano++;
+        }
+      }
+    }
+
+    SpreadsheetApp.flush();
+    return { sukces: true, wiadomosc: "Zaktualizowano " + zaktualizowano + " komórek w arkuszu " + mNazwa };
+  } catch (e) {
+    Logger.log("Błąd synchronizujZFirestoreDoArkusza: " + e.message);
     return { sukces: false, blad: e.message };
   }
 }
@@ -5175,10 +5300,12 @@ function synchronizujDoFirestore(optionalSs) {
       grupy: (tabelaRes && tabelaRes.grupy) || [],
       dniNaglowek: (tabelaRes && tabelaRes.dniNaglowek) || [],
       wiersze: (tabelaRes && tabelaRes.wiersze) || [],
-      ranking: (rankingiInfo && rankingiInfo.rankingMiesiac) || [],
-      rankingMiesiac: (rankingiInfo && rankingiInfo.rankingMiesiac) || [],
-      rankingRok: (rankingiInfo && rankingiInfo.rankingRok) || [],
-      rankingMinusy: (rankingiInfo && rankingiInfo.rankingMinusy) || [],
+      ranking: (rankingiInfo && rankingiInfo.rankingMiesiac) || (tabelaRes && tabelaRes.rankingMiesiac) || [],
+      rankingMiesiac: (rankingiInfo && rankingiInfo.rankingMiesiac) || (tabelaRes && tabelaRes.rankingMiesiac) || [],
+      rankingRok: (rankingiInfo && rankingiInfo.rankingRok) || (tabelaRes && tabelaRes.rankingRok) || [],
+      rankingMinusy: (tabelaRes && tabelaRes.rankingMinusy) || (rankingiInfo && rankingiInfo.rankingMinusy) || [],
+      rankingMinusyRok: (tabelaRes && tabelaRes.rankingMinusyRok) || (rankingiInfo && rankingiInfo.rankingMinusy) || [],
+      rankingMinusyMiesiac: (tabelaRes && tabelaRes.rankingMinusyMiesiac) || [],
       rankingiMiesiecy: (rankingiInfo && rankingiInfo.rankingiMiesiecy) || {},
       gieldaTydzien: gieldaTydzien,
       gieldaNiedziele: gieldaNiedziele,

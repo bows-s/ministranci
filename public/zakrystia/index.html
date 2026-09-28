@@ -1990,6 +1990,12 @@
         </select>
       </div>
 
+      <!-- Przełącznik okresu w rankingu minusów (Od początku roku vs W tym miesiącu) -->
+      <div id="ranking-minusy-okres-box" style="display:none; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; padding:4px; background:#18181b; border:1px solid #27272a; border-radius:8px;">
+        <button id="btn-minus-okres-rok" onclick="przelaczOkresMinusow('rok')" class="tab-btn active" style="flex:1; padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; cursor:pointer;">Od początku roku</button>
+        <button id="btn-minus-okres-miesiac" onclick="przelaczOkresMinusow('miesiac')" class="tab-btn" style="flex:1; padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; cursor:pointer;">W tym miesiącu</button>
+      </div>
+
       <div id="ranking-opis" style="font-size:12px; color:var(--text-muted); margin-bottom:10px; line-height:1.35;">
         Aktualna klasyfikacja punktowa w bieżącym miesiącu.
       </div>
@@ -2138,10 +2144,10 @@
               </div>
               <div style="flex:1; min-width:0;">
                 <div class="badge-header">
-                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Żelazna Tarcza</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Tarcza Beskaru</span>
                   <span id="badge-status-zelazna-tarcza" class="badge-status-pill">W toku</span>
                 </div>
-                <div id="badge-desc-zelazna-tarcza" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Czyste konto: 0 nieusprawiedliwionych minusów (usprawiedliwienia dozwolone).</div>
+                <div id="badge-desc-zelazna-tarcza" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Nieprzebijalna zbroja: 0 nieusprawiedliwionych minusów w miesiącu (usprawiedliwienia dozwolone).</div>
               </div>
             </div>
 
@@ -2152,10 +2158,10 @@
               </div>
               <div style="flex:1; min-width:0;">
                 <div class="badge-header">
-                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niezawodny</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Strażnik Świątyni</span>
                   <span id="badge-status-niezawodny" class="badge-status-pill">W toku</span>
                 </div>
-                <div id="badge-desc-niezawodny" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">100% fizycznej obecności na wszystkich swoich dyżurach (brak absencji).</div>
+                <div id="badge-desc-niezawodny" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Zawsze na posterunku: 100% fizycznej obecności na wyznaczonych dyżurach (brak absencji).</div>
               </div>
             </div>
 
@@ -2166,10 +2172,10 @@
               </div>
               <div style="flex:1; min-width:0;">
                 <div class="badge-header">
-                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Niedzielny Rycerz</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Rycerz Jedi</span>
                   <span id="badge-status-niedzielny-rycerz" class="badge-status-pill">W toku</span>
                 </div>
-                <div id="badge-desc-niedzielny-rycerz" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Obecność na mszach niedzielnych bez nieusprawiedliwionych opuszczeń.</div>
+                <div id="badge-desc-niedzielny-rycerz" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Wierność Kodeksowi: obecność na mszach niedzielnych bez nieusprawiedliwionych opuszczeń.</div>
               </div>
             </div>
 
@@ -2180,10 +2186,10 @@
               </div>
               <div style="flex:1; min-width:0;">
                 <div class="badge-header">
-                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Ratownik Służby</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Wsparcie Eskadry</span>
                   <span id="badge-status-przejecie-dyzuru" class="badge-status-pill">W toku</span>
                 </div>
-                <div id="badge-desc-przejecie-dyzuru" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Przejęcie dyżuru od innego ministranta z giełdy wolnych służb.</div>
+                <div id="badge-desc-przejecie-dyzuru" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Pomoc w potrzebie: przejęcie dyżuru od innego ministranta z giełdy wolnych służb.</div>
               </div>
             </div>
 
@@ -2194,10 +2200,10 @@
               </div>
               <div style="flex:1; min-width:0;">
                 <div class="badge-header">
-                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Mistrz Wymiany</span>
+                  <span style="font-weight:600; font-size:13px; color:#fafafa; letter-spacing:-0.01em;">Łowca Nagród</span>
                   <span id="badge-status-udana-wymiana" class="badge-status-pill">W toku</span>
                 </div>
-                <div id="badge-desc-udana-wymiana" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Oddanie dyżuru na giełdę ze skutecznym znalezieniem zastępcy.</div>
+                <div id="badge-desc-udana-wymiana" class="badge-desc" style="font-size:11px; color:#a1a1aa; margin-top:2px; line-height:1.35;">Misja giełdowa: oddanie dyżuru na giełdę ze skutecznym znalezieniem zastępcy.</div>
               </div>
             </div>
 
@@ -2221,6 +2227,13 @@
           <div style="background:#09090b; border:1px solid #27272a; border-radius:12px; padding:10px 12px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
             <div style="font-size:11px; font-weight:500; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.02em;">Łączne XP</div>
             <div id="profil-stat-total-xp" style="font-size:16px; font-weight:800; color:#fafafa; letter-spacing:-0.02em; margin-top:2px;">0 XP</div>
+          </div>
+          <div style="grid-column: span 2; background:#18181b; border:1px solid #27272a; border-radius:6px; padding:9px 12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="zamknijProfilMinistranta(); otworzModalMinusy(aktualnyProfilNazwisko);" title="Kliknij, aby zobaczyć daty minusów">
+            <div style="text-align:left;">
+              <div style="font-size:11px; font-weight:500; color:#71717a; text-transform:uppercase; letter-spacing:0.02em;">Punkty minusowe (rok)</div>
+              <div id="profil-stat-minus-opis" style="font-size:11px; color:#a1a1aa; margin-top:1px;">Wszystkie nieobecności od początku roku</div>
+            </div>
+            <div id="profil-stat-minus-rok" style="font-size:15px; font-weight:800; color:#f87171; letter-spacing:-0.02em;">0 pkt</div>
           </div>
         </div>
 
@@ -3827,6 +3840,11 @@
       var itemMiesiac = listMiesiac.find(function(it) { return it && it.nazwisko && czyToSamoNazwisko(it.nazwisko, nClean); });
       var punktyMiesiac = (itemMiesiac && itemMiesiac.punkty !== undefined) ? itemMiesiac.punkty : 0;
 
+      // 2b. Punkty minusowe od początku roku
+      var listMinusRok = (stan.rankingMinusyRok && stan.rankingMinusyRok.length) ? stan.rankingMinusyRok : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyRok) || stan.rankingMinusy || []);
+      var itemMinusRok = listMinusRok.find(function(it) { return it && it.nazwisko && czyToSamoNazwisko(it.nazwisko, nClean); });
+      var minusyRok = (itemMinusRok && itemMinusRok.minusy !== undefined) ? itemMinusRok.minusy : 0;
+
       // 3. Wiersz obecności z tabeli miesiąca bieżącego
       var wiersze = (stan.wiersze && stan.wiersze.length) ? stan.wiersze : ((tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) || []);
       var userRow = wiersze.find(function(w) { return w && w.nazwisko && czyToSamoNazwisko(w.nazwisko, nClean); });
@@ -4142,6 +4160,7 @@
         bazaXp: bazaXp,
         bonusXp: bonusXp,
         punktyMiesiac: punktyMiesiac,
+        minusyRok: minusyRok,
         passa: passaLicznik,
         wZagrozeniu: wZagrozeniu,
         odznakiZdobyteBiezacy: odznakiZdobyteBiezacy,
@@ -4165,8 +4184,11 @@
       };
     }
 
+    var aktualnyProfilNazwisko = "";
+
     function otworzProfilMinistranta(nazwisko) {
       if (!nazwisko) return;
+      aktualnyProfilNazwisko = nazwisko;
       var g = null;
       try {
         g = obliczGamifikacjeMinistranta(nazwisko);
@@ -4305,13 +4327,13 @@
         var rp = g.rocznePodsumowanie || {};
         var badgesHtml = '';
         if (rp.tarczaCount > 0) {
-          badgesHtml += '<div style="background:rgba(30,41,59,0.4); border:1px solid rgba(148,163,184,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#cbd5e1; display:inline-flex; align-items:center; gap:6px;">Żelazna Tarcza <span style="background:#0f172a; color:#f8fafc; border:1px solid rgba(148,163,184,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.tarczaCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(30,41,59,0.4); border:1px solid rgba(148,163,184,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#cbd5e1; display:inline-flex; align-items:center; gap:6px;">Tarcza Beskaru <span style="background:#0f172a; color:#f8fafc; border:1px solid rgba(148,163,184,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.tarczaCount + '</span></div>';
         }
         if (rp.niezawodnyCount > 0) {
-          badgesHtml += '<div style="background:rgba(6,78,59,0.35); border:1px solid rgba(16,185,129,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#6ee7b7; display:inline-flex; align-items:center; gap:6px;">Niezawodny <span style="background:#064e3b; color:#a7f3d0; border:1px solid rgba(16,185,129,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.niezawodnyCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(6,78,59,0.35); border:1px solid rgba(16,185,129,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#6ee7b7; display:inline-flex; align-items:center; gap:6px;">Strażnik Świątyni <span style="background:#064e3b; color:#a7f3d0; border:1px solid rgba(16,185,129,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.niezawodnyCount + '</span></div>';
         }
         if (rp.rycerzCount > 0) {
-          badgesHtml += '<div style="background:rgba(76,29,149,0.35); border:1px solid rgba(139,92,246,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#c4b5fd; display:inline-flex; align-items:center; gap:6px;">Niedzielny Rycerz <span style="background:#4c1d95; color:#ddd6fe; border:1px solid rgba(139,92,246,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.rycerzCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(76,29,149,0.35); border:1px solid rgba(139,92,246,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#c4b5fd; display:inline-flex; align-items:center; gap:6px;">Rycerz Jedi <span style="background:#4c1d95; color:#ddd6fe; border:1px solid rgba(139,92,246,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.rycerzCount + '</span></div>';
         }
         if (rp.zlotoCount > 0) {
           badgesHtml += '<div style="background:rgba(120,53,15,0.35); border:1px solid rgba(245,158,11,0.5); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#fcd34d; display:inline-flex; align-items:center; gap:6px;">Mistrz Miesiąca <span style="background:#78350f; color:#fef08a; border:1px solid rgba(245,158,11,0.4); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.zlotoCount + '</span></div>';
@@ -4320,10 +4342,10 @@
           badgesHtml += '<div style="background:rgba(88,28,135,0.35); border:1px solid rgba(168,85,247,0.5); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#e9d5ff; display:inline-flex; align-items:center; gap:6px;">Na Podium <span style="background:#581c87; color:#f5d0fe; border:1px solid rgba(168,85,247,0.4); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.podiumCount + '</span></div>';
         }
         if (rp.przejeciaCount > 0) {
-          badgesHtml += '<div style="background:rgba(30,58,138,0.35); border:1px solid rgba(59,130,246,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#93c5fd; display:inline-flex; align-items:center; gap:6px;">Ratownik Służby <span style="background:#1e3a8a; color:#bfdbfe; border:1px solid rgba(59,130,246,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.przejeciaCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(30,58,138,0.35); border:1px solid rgba(59,130,246,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#93c5fd; display:inline-flex; align-items:center; gap:6px;">Wsparcie Eskadry <span style="background:#1e3a8a; color:#bfdbfe; border:1px solid rgba(59,130,246,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.przejeciaCount + '</span></div>';
         }
         if (rp.wymianyCount > 0) {
-          badgesHtml += '<div style="background:rgba(131,24,67,0.35); border:1px solid rgba(236,72,153,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#f472b6; display:inline-flex; align-items:center; gap:6px;">Mistrz Wymiany <span style="background:#831843; color:#fbcfe8; border:1px solid rgba(236,72,153,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.wymianyCount + '</span></div>';
+          badgesHtml += '<div style="background:rgba(131,24,67,0.35); border:1px solid rgba(236,72,153,0.45); border-radius:6px; padding:4px 8px; font-size:11px; font-weight:600; color:#f472b6; display:inline-flex; align-items:center; gap:6px;">Łowca Nagród <span style="background:#831843; color:#fbcfe8; border:1px solid rgba(236,72,153,0.3); border-radius:9999px; padding:0 6px; font-size:10px; font-weight:700;">x' + rp.wymianyCount + '</span></div>';
         }
         if (!badgesHtml) {
           badgesHtml = '<span style="font-size:11px; color:#71717a; font-style:italic;">Brak odznak w tym sezonie — służ regularnie, aby je zdobyć!</span>';
@@ -4387,6 +4409,21 @@
       if (elStatRok) elStatRok.innerText = (g.bazaXp > 0 ? '+' : '') + g.bazaXp + ' XP';
       if (elStatBonus) elStatBonus.innerText = '+' + (g.bonusXp || 0) + ' XP';
       if (elStatTotal) elStatTotal.innerText = g.calkowiteXp + ' XP';
+
+      var elStatMinus = document.getElementById('profil-stat-minus-rok');
+      var elStatMinusOpis = document.getElementById('profil-stat-minus-opis');
+      if (elStatMinus) {
+        var uMinus = (g.minusyRok !== undefined) ? g.minusyRok : 0;
+        if (uMinus < 0) {
+          elStatMinus.innerText = uMinus + ' pkt';
+          elStatMinus.style.color = '#f87171';
+          if (elStatMinusOpis) elStatMinusOpis.innerText = 'Nieobecności i minusy od początku roku';
+        } else {
+          elStatMinus.innerText = '0 pkt';
+          elStatMinus.style.color = '#34d399';
+          if (elStatMinusOpis) elStatMinusOpis.innerText = 'Czyste konto w całym roku!';
+        }
+      }
 
       // 6. Przycisk historii miesięcy
       var btnHist = document.getElementById('btn-profil-historia-roku');
@@ -4625,19 +4662,40 @@
       zmienWybranyMiesiacRankingu(nazwaMiesiaca);
     }
 
-    function otworzModalMinusy() {
+    function otworzModalMinusy(opcjonalneNazwisko) {
       var modal = document.getElementById('modal-minusy');
       var listaDiv = document.getElementById('modal-minusy-lista');
       if (!modal || !listaDiv) return;
 
-      var minusy = (globalUser.stan && globalUser.stan.szczegolyMinusow) ? globalUser.stan.szczegolyMinusow : [];
+      var profileModal = document.getElementById('modal-profil-ministranta');
+      var isProfileOpen = profileModal && profileModal.style.display === 'flex';
+      var targetName = opcjonalneNazwisko || (isProfileOpen ? aktualnyProfilNazwisko : null) || (globalUser && globalUser.nazwisko) || '';
+
+      var stan = (globalUser && globalUser.stan) || (typeof tabelaMiesiacaDane !== 'undefined' ? tabelaMiesiacaDane : null) || {};
+      var listMinusRok = (stan.rankingMinusyRok && stan.rankingMinusyRok.length) ? stan.rankingMinusyRok : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyRok) || stan.rankingMinusy || []);
+      
+      var minusy = [];
+      if (targetName) {
+        var itemUser = listMinusRok.find(function(it) { return it && it.nazwisko && czyToSamoNazwisko(it.nazwisko, targetName); });
+        if (itemUser && itemUser.szczegolyMinusow && itemUser.szczegolyMinusow.length) {
+          minusy = itemUser.szczegolyMinusow;
+        } else if (globalUser && globalUser.stan && globalUser.stan.szczegolyMinusow && czyToSamoNazwisko(globalUser.nazwisko, targetName)) {
+          minusy = globalUser.stan.szczegolyMinusow;
+        }
+      } else {
+        minusy = (globalUser && globalUser.stan && globalUser.stan.szczegolyMinusow) ? globalUser.stan.szczegolyMinusow : [];
+      }
+
+      var modalTytul = document.querySelector('#modal-minusy h3 span');
+      if (modalTytul) {
+        modalTytul.innerText = targetName ? ('Punkty ujemne: ' + targetName) : 'Punkty ujemne (cały rok)';
+      }
 
       if (!minusy || minusy.length === 0) {
         listaDiv.innerHTML = 
           '<div style="text-align:center; padding:28px 12px; color:#34d399;">' +
-            '' +
             '<div style="font-weight:700; font-size:15px; color:#34d399;">Czyste konto!</div>' +
-            '<div style="font-size:13px; color:#a1a1aa; margin-top:4px;">Brak punktów ujemnych.</div>' +
+            '<div style="font-size:13px; color:#a1a1aa; margin-top:4px;">Brak punktów ujemnych w całym roku.</div>' +
           '</div>';
       } else {
         var html = '<div style="display:flex; flex-direction:column; gap:8px;">';
@@ -4645,13 +4703,14 @@
         var posortowane = minusy.slice().reverse();
         posortowane.forEach(function(item) {
           var dataStr = item.dzien + ' ' + (item.miesiacGen || item.miesiac || '') + ' ' + (item.rok || '');
+          var ptsVal = (item.punkty !== undefined ? item.punkty : (item.wartosc || -5));
           html += 
-            '<div style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; background:#18181b; border:1px solid #27272a; border-radius:8px; margin-bottom:8px;kground:#fff5f5; border-left:3px solid #ef4444; border-radius:8px;">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; background:#18181b; border:1px solid #27272a; border-radius:8px; border-left:3px solid #ef4444;">' +
               '<div>' +
                 '<div style="font-weight:700; font-size:13px; color:#fafafa;">' + dataStr.trim() + '</div>' +
-                '<div style="font-size:12px; color:#a1a1aa; text-transform:capitalize; margin-top:2px;">' + item.dzienTygodnia + '</div>' +
+                '<div style="font-size:12px; color:#a1a1aa; text-transform:capitalize; margin-top:2px;">' + (item.dzienTygodnia || '') + '</div>' +
               '</div>' +
-              '<div style="font-size:14px; font-weight:800; color:#f87171;">' + item.punkty + ' pkt</div>' +
+              '<div style="font-size:14px; font-weight:800; color:#f87171;">' + ptsVal + ' pkt</div>' +
             '</div>';
         });
         html += '</div>';
@@ -4667,10 +4726,20 @@
     }
 
     var wybranyMiesiacRankingu = null;
+    var okresMinusow = 'rok'; // Domyślnie ranking minusów otwiera się od początku roku
 
     function zmienWybranyMiesiacRankingu(mName) {
       wybranyMiesiacRankingu = mName;
       przelaczTabRankingu('miesiac');
+    }
+
+    function przelaczOkresMinusow(okres) {
+      okresMinusow = okres;
+      var bRok = document.getElementById('btn-minus-okres-rok');
+      var bMies = document.getElementById('btn-minus-okres-miesiac');
+      if (bRok) bRok.className = 'tab-btn' + (okres === 'rok' ? ' active' : '');
+      if (bMies) bMies.className = 'tab-btn' + (okres === 'miesiac' ? ' active' : '');
+      przelaczTabRankingu('minus');
     }
 
     function przelaczTabRankingu(tab) {
@@ -4686,6 +4755,9 @@
 
       var selBox = document.getElementById('ranking-miesiac-wybor-box');
       if (selBox) selBox.style.display = (tab === 'miesiac' ? 'flex' : 'none');
+
+      var minBox = document.getElementById('ranking-minusy-okres-box');
+      if (minBox) minBox.style.display = (tab === 'minus' ? 'flex' : 'none');
 
       var stan = globalUser.stan || (typeof tabelaMiesiacaDane !== 'undefined' ? tabelaMiesiacaDane : null);
       if (!stan) return;
@@ -4743,8 +4815,13 @@
         if (desc) desc.innerText = 'Klasyfikacja generalna od początku roku ' + (stan.rok || 2026) + '.';
         list = (stan.rankingRok && stan.rankingRok.length) ? stan.rankingRok : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingRok) || []);
       } else if (tab === 'minus') {
-        if (desc) desc.innerText = 'Ranking punktów ujemnych (kto zebrał najwięcej minusów lub ma czyste konto).';
-        list = (stan.rankingMinusy && stan.rankingMinusy.length) ? stan.rankingMinusy : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusy) || []);
+        if (okresMinusow === 'rok') {
+          if (desc) desc.innerText = 'Ranking punktów ujemnych od początku roku ' + (stan.rok || 2026) + ' (kto ma czyste konto, a kto zebrał najwięcej minusów).';
+          list = (stan.rankingMinusyRok && stan.rankingMinusyRok.length) ? stan.rankingMinusyRok : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyRok) || stan.rankingMinusy || []);
+        } else {
+          if (desc) desc.innerText = 'Ranking punktów ujemnych w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || 2026) + ').';
+          list = (stan.rankingMinusyMiesiac && stan.rankingMinusyMiesiac.length) ? stan.rankingMinusyMiesiac : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyMiesiac) || []);
+        }
       }
 
       // Bez kościelnego w Lidze Ministrantów
@@ -6126,31 +6203,76 @@
         if (!r || !r.nazwisko) return false;
         var n = r.nazwisko.toLowerCase().trim();
         return n !== 'kościelny' && n !== 'koscielny';
-      }).map(function(r, idx) {
-        var p = (r.punkty !== undefined && r.punkty !== null) ? r.punkty : ((r.suma !== undefined && r.suma !== null) ? r.suma : 0);
-        var poz = (r.pozycja !== undefined && r.pozycja !== null) ? r.pozycja : ((r.miejsce !== undefined && r.miejsce !== null) ? r.miejsce : (idx + 1));
+      }).map(function(r) {
+        var rNorm = r.nazwisko.toLowerCase().trim();
+        var matchW = wiersze.find(function(w) {
+          var nw = (w.nazwisko || '').toLowerCase().trim();
+          return nw === rNorm || nw.indexOf(rNorm) !== -1 || rNorm.indexOf(nw) !== -1;
+        });
+        var biezacePunkty = matchW ? (matchW.suma || 0) : 0;
+        
+        var sumaPoprzednich = 0;
+        var foundCur = false;
+        var pmList = (r.punktyPoMiesiacach && Array.isArray(r.punktyPoMiesiacach)) ? r.punktyPoMiesiacach.slice() : [];
+        for (var pi = 0; pi < pmList.length; pi++) {
+          var pItem = pmList[pi];
+          var isCurM = (pItem.miesiacIdx === currentMonthIdx || (pItem.miesiac && pItem.miesiac.toLowerCase() === currentMonthName.toLowerCase()));
+          if (isCurM) {
+            pItem.punkty = biezacePunkty;
+            foundCur = true;
+          } else {
+            sumaPoprzednich += (pItem.punkty || 0);
+          }
+        }
+        if (!foundCur && pmList.length > 0) {
+          pmList.push({
+            miesiacIdx: currentMonthIdx,
+            miesiac: currentMonthName,
+            rok: currentYear,
+            punkty: biezacePunkty
+          });
+        }
+        var totalRok = (pmList.length > 0) ? (sumaPoprzednich + biezacePunkty) : ((r.punkty !== undefined ? r.punkty : (r.suma || 0)));
+        totalRok = Math.round(totalRok * 10) / 10;
+
         return {
           nazwisko: r.nazwisko,
-          punkty: p,
-          suma: p,
-          pozycja: poz,
-          miejsce: poz,
+          punkty: totalRok,
+          suma: totalRok,
           grupa: r.grupa,
-          punktyPoMiesiacach: r.punktyPoMiesiacach || []
+          punktyPoMiesiacach: pmList
         };
       });
 
-      var rawMinusy = (docData.rankingMinusy && docData.rankingMinusy.length)
-        ? docData.rankingMinusy
-        : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusy && tabelaMiesiacaDane.rankingMinusy.length)
-            ? tabelaMiesiacaDane.rankingMinusy
-            : []);
+      rankingRok.sort(function(a, b) { return b.punkty - a.punkty; });
+      var pozRk = 1;
+      rankingRok.forEach(function(r, idx) {
+        if (idx > 0 && r.punkty < rankingRok[idx - 1].punkty) pozRk = idx + 1;
+        r.pozycja = pozRk;
+        r.miejsce = pozRk;
+      });
 
-      var rankingMinusy = rawMinusy.filter(function(r) {
+      var rawMinusyRok = (docData.rankingMinusyRok && docData.rankingMinusyRok.length)
+        ? docData.rankingMinusyRok
+        : ((docData.rankingMinusy && docData.rankingMinusy.length) ? docData.rankingMinusy : []);
+
+      var rankingMinusyRok = rawMinusyRok.filter(function(r) {
         if (!r || !r.nazwisko) return false;
         var n = r.nazwisko.toLowerCase().trim();
         return n !== 'kościelny' && n !== 'koscielny';
       });
+
+      var rawMinusyMiesiac = (docData.rankingMinusyMiesiac && docData.rankingMinusyMiesiac.length)
+        ? docData.rankingMinusyMiesiac
+        : [];
+
+      var rankingMinusyMiesiac = rawMinusyMiesiac.filter(function(r) {
+        if (!r || !r.nazwisko) return false;
+        var n = r.nazwisko.toLowerCase().trim();
+        return n !== 'kościelny' && n !== 'koscielny';
+      });
+
+      var rankingMinusy = rankingMinusyRok.length ? rankingMinusyRok : rankingMinusyMiesiac;
 
       var punktyMiesiac = userRow ? (userRow.suma || 0) : 0;
       var pozycjaMiesiac = 0;
@@ -6178,13 +6300,25 @@
       }
 
       var szczegolyMinusow = [];
-      for (var rmn = 0; rmn < rankingMinusy.length; rmn++) {
-        var rmnName = (rankingMinusy[rmn].nazwisko || "").trim().toLowerCase();
+      var szczegolyMinusowMiesiac = [];
+
+      for (var rmn = 0; rmn < rankingMinusyRok.length; rmn++) {
+        var rmnName = (rankingMinusyRok[rmn].nazwisko || "").trim().toLowerCase();
         if (rmnName && (rmnName === nLower || rmnName.indexOf(nLower) !== -1 || nLower.indexOf(rmnName) !== -1)) {
-          punktyMinus = rankingMinusy[rmn].minusy !== undefined ? rankingMinusy[rmn].minusy : 0;
-          pozycjaMinus = rankingMinusy[rmn].pozycja || (rmn + 1);
-          if (rankingMinusy[rmn].szczegolyMinusow && Array.isArray(rankingMinusy[rmn].szczegolyMinusow)) {
-            szczegolyMinusow = rankingMinusy[rmn].szczegolyMinusow.slice();
+          punktyMinus = rankingMinusyRok[rmn].minusy !== undefined ? rankingMinusyRok[rmn].minusy : 0;
+          pozycjaMinus = rankingMinusyRok[rmn].pozycja || (rmn + 1);
+          if (rankingMinusyRok[rmn].szczegolyMinusow && Array.isArray(rankingMinusyRok[rmn].szczegolyMinusow)) {
+            szczegolyMinusow = rankingMinusyRok[rmn].szczegolyMinusow.slice();
+          }
+          break;
+        }
+      }
+
+      for (var rmm = 0; rmm < rankingMinusyMiesiac.length; rmm++) {
+        var rmmName = (rankingMinusyMiesiac[rmm].nazwisko || "").trim().toLowerCase();
+        if (rmmName && (rmmName === nLower || rmmName.indexOf(nLower) !== -1 || nLower.indexOf(rmmName) !== -1)) {
+          if (rankingMinusyMiesiac[rmm].szczegolyMinusow && Array.isArray(rankingMinusyMiesiac[rmm].szczegolyMinusow)) {
+            szczegolyMinusowMiesiac = rankingMinusyMiesiac[rmm].szczegolyMinusow.slice();
           }
           break;
         }
@@ -6253,9 +6387,13 @@
         punktyMinusoweSuma: punktyMinus,
         pozycjaMinusy: pozycjaMinus,
         szczegolyMinusow: szczegolyMinusow,
+        szczegolyMinusowRok: szczegolyMinusow,
+        szczegolyMinusowMiesiac: szczegolyMinusowMiesiac,
         rankingMiesiac: rankingMiesiac,
         rankingRok: rankingRok,
         rankingMinusy: rankingMinusy,
+        rankingMinusyRok: rankingMinusyRok,
+        rankingMinusyMiesiac: rankingMinusyMiesiac,
         najblizszaSluzba: najblizszaSluzba,
         dyzuryKolejnegoMiesiaca: dyzuryKolejnegoMiesiaca
       };
@@ -8559,6 +8697,42 @@ function czyMaDostepDoZakrystii(nazwisko) {
         });
         tabelaMiesiacaDane.ranking = rankingNowy;
         tabelaMiesiacaDane.rankingMiesiac = rankingNowy;
+
+        // Dynamiczne przeliczenie rankingu rocznego w locie:
+        if (tabelaMiesiacaDane.rankingRok && Array.isArray(tabelaMiesiacaDane.rankingRok)) {
+          tabelaMiesiacaDane.rankingRok.forEach(function(r) {
+            var rNorm = (r.nazwisko || '').toLowerCase().trim();
+            var matchW = tabelaMiesiacaDane.wiersze.find(function(w) {
+              var nw = (w.nazwisko || '').toLowerCase().trim();
+              return nw === rNorm || nw.indexOf(rNorm) !== -1 || rNorm.indexOf(nw) !== -1;
+            });
+            var mPts = matchW ? (matchW.suma || 0) : 0;
+            var sumPrev = 0;
+            var foundM = false;
+            if (r.punktyPoMiesiacach && Array.isArray(r.punktyPoMiesiacach)) {
+              r.punktyPoMiesiacach.forEach(function(pm) {
+                if (pm.miesiac === 'Wrzesień' || pm.miesiacIdx === 8) {
+                  pm.punkty = mPts;
+                  foundM = true;
+                } else {
+                  sumPrev += (pm.punkty || 0);
+                }
+              });
+            }
+            if (!foundM && r.punktyPoMiesiacach) {
+              r.punktyPoMiesiacach.push({ miesiac: 'Wrzesień', miesiacIdx: 8, rok: 2026, punkty: mPts });
+            }
+            r.punkty = Math.round((sumPrev + mPts) * 10) / 10;
+            r.suma = r.punkty;
+          });
+          tabelaMiesiacaDane.rankingRok.sort(function(a, b) { return b.punkty - a.punkty; });
+          var pozRok = 1;
+          tabelaMiesiacaDane.rankingRok.forEach(function(r, idx) {
+            if (idx > 0 && r.punkty < tabelaMiesiacaDane.rankingRok[idx - 1].punkty) pozRok = idx + 1;
+            r.pozycja = pozRok;
+            r.miejsce = pozRok;
+          });
+        }
 
         // Błyskawiczny zapis do lokalnej historii wpisów
         if (!tabelaMiesiacaDane.historiaWpisow) tabelaMiesiacaDane.historiaWpisow = [];
