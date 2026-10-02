@@ -220,8 +220,8 @@ async function generujMiesiac(docelowyKlucz) {
     }
 
     // Ustalenie stałego dnia tygodnia z poprzedniego miesiąca (Pn-Pt)
-    let stalyDzienTygodnia = -1; // 1=Pn, 2=Wt, 3=Śr, 4=Cz, 5=Pt
-    if (w.komorki && w.komorki.length) {
+    let stalyDzienTygodnia = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia > 0) ? w.stalyDzienTygodnia : -1;
+    if (stalyDzienTygodnia === -1 && w.komorki && w.komorki.length) {
       for (let dayIdx = 0; dayIdx < w.komorki.length; dayIdx++) {
         const dtPrev = new Date(baza.rok || 2026, baza.miesiacIdx !== undefined ? baza.miesiacIdx : 8, dayIdx + 1);
         const dowPrev = dtPrev.getDay();
@@ -259,6 +259,8 @@ async function generujMiesiac(docelowyKlucz) {
       grupa: w.grupa || "Ogólna",
       stopien: w.stopien || "Ministrant",
       stopienRanga: w.stopienRanga || 1,
+      stalyDzienTygodnia: stalyDzienTygodnia,
+      ostatniaZmianaDnia: w.ostatniaZmianaDnia || null,
       komorki: noweKomorki,
       suma: 0
     });

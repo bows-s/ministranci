@@ -452,6 +452,36 @@
       cursor: pointer;
     }
 
+    /* Przycisk Różaniec / Nabożeństwo w Zakrystii */
+    .btn-rozaniec-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #27272a;
+      color: #d8b4fe;
+      border: 1px solid #3f3f46;
+      transition: all 0.15s ease;
+    }
+    .btn-rozaniec-toggle:hover {
+      background: #3f3f46;
+      color: #fafafa;
+    }
+    .btn-rozaniec-toggle.active {
+      background: rgba(168, 85, 247, 0.25);
+      color: #f3e8ff;
+      border: 1px solid #c084fc;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+    }
+    .zakrystia-card.is-rozaniec {
+      border-left: 4px solid #c084fc;
+      background: rgba(168, 85, 247, 0.04);
+    }
+
     #ios-install-banner {
       display: none;
       background: #18181b;
@@ -1588,10 +1618,14 @@
 
         <!-- Karta Twoich Dyżurów z opcją Nie mogę przyjść -->
         <div class="card" id="karta-moje-dyzury">
-          <h3 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span>Twoje dyżury w tym miesiącu</span>
-            <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">Zgłoś nieobecność</span>
-          </h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <h3 style="margin:0; font-size:15px; color:#fafafa; display:flex; align-items:center; gap:8px;">
+              <span>Twoje dyżury w tym miesiącu</span>
+            </h3>
+            <button type="button" onclick="otworzModalZmienStalyDzien()" class="btn-secondary" style="font-size:11px; padding:4px 10px; width:auto; display:inline-flex; align-items:center; gap:5px; background:#27272a; border:1px solid #3f3f46; color:#fafafa; border-radius:6px; cursor:pointer;" title="Zmień stały dzień służby w tygodniu (od zaraz, raz na 30 dni)">
+              ⚙ Zmień stały dzień
+            </button>
+          </div>
           <div id="lista-moich-dyzurow-pulpit" style="font-size:13px; color:#a1a1aa;">Ładowanie dyżurów...</div>
         </div>
 
@@ -1846,6 +1880,9 @@
         <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
           <button onclick="zakrystiaZaznaczWszystkichObecnych()" style="flex:1; min-width:130px; padding:10px; font-size:13px; font-weight:600; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(16,185,129,0.35); border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
             ✓ Wszyscy obecni
+          </button>
+          <button onclick="zakrystiaZaznaczWszystkichRozaniec()" id="btn-zakrystia-wszyscy-rozaniec" style="display:none; flex:1.2; min-width:145px; padding:10px; font-size:13px; font-weight:600; background:rgba(168,85,247,0.15); color:#d8b4fe; border:1px solid rgba(168,85,247,0.4); border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
+            📿 Wszyscy na różańcu
           </button>
           <button onclick="zakrystiaRozdzielFunkcje()" id="btn-zakrystia-rozdziel-funkcje" style="flex:1.2; min-width:145px; padding:10px; font-size:13px; font-weight:600; background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); border-radius:6px; cursor:pointer; transition:all 0.15s ease;">
             ⚡ Rozdziel funkcje
@@ -2497,6 +2534,42 @@
       <button onclick="zamknijIosModal()" style="width:100%; padding:10px; font-size:14px; font-weight:bold;">
         Rozumiem
       </button>
+    </div>
+  </div>
+
+
+  <!-- Modal Zmiany Stałego Dnia Służby w Tygodniu -->
+  <div id="modal-zmien-staly-dzien" class="modal-overlay" onclick="if(event.target === this) zamknijModalZmienStalyDzien()">
+    <div class="modal-content" style="max-width:420px; width:100%; text-align:left; padding:22px; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:17px; color:#fafafa; display:flex; align-items:center; gap:8px;">
+          <span>⚙ Zmiana stałego dnia służby</span>
+        </h3>
+        <button onclick="zamknijModalZmienStalyDzien()" style="background:transparent; border:none; color:#a1a1aa; font-size:20px; cursor:pointer; padding:0 4px; line-height:1;">&times;</button>
+      </div>
+      
+      <div id="modal-zmien-dzien-obecny" style="font-size:13px; color:#e4e4e7; margin-bottom:12px; padding:10px 14px; background:#18181b; border:1px solid #27272a; border-radius:8px;">
+        Ładowanie aktualnego dnia...
+      </div>
+
+      <div id="modal-zmien-dzien-komunikat" style="margin-bottom:14px; font-size:12px; line-height:1.4;">
+      </div>
+
+      <div id="modal-zmien-dzien-wybor-sekcja" style="margin-bottom:16px;">
+        <label class="section-label" style="display:block; margin-bottom:8px; font-size:12px; font-weight:600; color:#a1a1aa; text-transform:uppercase;">Wybierz nowy stały dzień w tygodniu (godz. 18:00):</label>
+        <select id="sel-nowy-staly-dzien" style="width:100%; padding:10px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; outline:none; box-sizing:border-box;">
+          <option value="1">Poniedziałek (18:00)</option>
+          <option value="2">Wtorek (18:00)</option>
+          <option value="3">Środa (18:00)</option>
+          <option value="4">Czwartek (18:00)</option>
+          <option value="5">Piątek (18:00)</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px;">
+        <button type="button" onclick="zamknijModalZmienStalyDzien()" class="btn-secondary" style="width:auto; padding:9px 16px; margin:0; font-size:13px;">Anuluj</button>
+        <button type="button" id="btn-zatwierdz-zmiane-dnia" onclick="zatwierdzZmianeStalegoDnia()" class="btn-primary" style="width:auto; padding:9px 18px; margin:0; font-size:13px; font-weight:600; background:#38bdf8; color:#09090b; border:none; border-radius:6px; cursor:pointer;">Zapisz zmianę</button>
+      </div>
     </div>
   </div>
 
@@ -3497,6 +3570,23 @@
             }
           }
         }).catch(function(e) { console.warn('Firestore uzytkownicy:', e); });
+
+        // Stałe dni służby i daty ostatnich zmian
+        dbFirestore.collection('konfiguracja').doc('stale_dni').get().then(function(doc) {
+          if (doc.exists && doc.data()) {
+            var sDni = doc.data();
+            for (var uName in sDni) {
+              if (sDni[uName] && sDni[uName].ostatniaZmiana) {
+                try {
+                  localStorage.setItem('min_ostatnia_zmiana_dnia_' + encodeURIComponent(uName), sDni[uName].ostatniaZmiana);
+                  if (sDni[uName].stalyDzien) {
+                    localStorage.setItem('min_staly_dzien_' + encodeURIComponent(uName), String(sDni[uName].stalyDzien));
+                  }
+                } catch(e) {}
+              }
+            }
+          }
+        }).catch(function(e) { console.warn('Firestore stale_dni:', e); });
 
         // Metadane aktywnego miesiąca z konfiguracji Firestore
         dbFirestore.collection('konfiguracja').doc('ogolna').get().then(function(gDoc) {
@@ -7508,6 +7598,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
         }
 
+        var maRozaniec = (currentMonthIdx === 9); // Październik to miesiąc nabożeństw różańcowych (+2 pkt)
+
         zakrystiaStan = {
           sukces: true,
           docKey: targetDocKey || pobierzAktywnyKluczMiesiaca(),
@@ -7522,6 +7614,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
           nazwaLiturgii: domyslnaNazwa,
           juzZapisane: juzZapisane,
           czyLiturgiaDodatkowa: !!matchedExtraLit,
+          maRozaniec: maRozaniec,
           ministranci: ministranci,
           wszyscyMinistranciParafii: allNames
         };
@@ -7550,6 +7643,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 if (dOb.rodzajLiturgii) zakrystiaStan.rodzajLiturgii = dOb.rodzajLiturgii;
                 if (dOb.punktyLiturgii) zakrystiaStan.punktyLiturgii = dOb.punktyLiturgii;
                 if (dOb.nazwaLiturgii) zakrystiaStan.nazwaLiturgii = dOb.nazwaLiturgii;
+                if (dOb.maRozaniec !== undefined) zakrystiaStan.maRozaniec = dOb.maRozaniec;
               } else {
                 zakrystiaStan.juzZapisane = false;
                 (dOb.ministranci || []).forEach(function(savedM) {
@@ -8015,7 +8109,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (podtytul) {
         var typMszy = zakrystiaStan.nazwaLiturgii || ((zakrystiaStan.dzienTygodnia === 'niedziela') ? 'Msza w niedzielę' : 'Msza w tygodniu');
         var czystyTyp = typMszy.replace(/\s*\([^)]*\)/g, '').trim();
-        podtytul.innerText = czystyTyp + ' • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów';
+        var rozaniecInfo = zakrystiaStan.maRozaniec ? ' • <span style="color:#d8b4fe; font-weight:700;">📿 Różaniec (+2 pkt)</span>' : '';
+        podtytul.innerHTML = czystyTyp + ' • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów' + rozaniecInfo;
+      }
+
+      var btnWszyscyRozaniec = document.getElementById('btn-zakrystia-wszyscy-rozaniec');
+      if (btnWszyscyRozaniec) {
+        btnWszyscyRozaniec.style.display = zakrystiaStan.maRozaniec ? 'inline-flex' : 'none';
       }
 
       if (stanInfo) {
@@ -8037,7 +8137,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       for (var i = 0; i < zakrystiaStan.ministranci.length; i++) {
         var m = zakrystiaStan.ministranci[i];
         var cardClass = 'zakrystia-card';
-        if (m.status === 'OBECNY') cardClass += ' is-present';
+        if (m.tylkoRozaniec) cardClass += ' is-rozaniec';
+        else if (m.status === 'OBECNY') cardClass += ' is-present';
         else if (m.status === 'NIEOBECNY') cardClass += ' is-absent';
         else if (m.status === 'USPRAWIEDLIWIONY') cardClass += ' is-excused';
 
@@ -8058,7 +8159,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (m.typ === 'ZASTEPCA') {
           badgeHtml = '<span style="background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:2px;">Zastępuje: ' + (m.zastepuje || 'Wolny dyżur') + ' (+4 pkt)</span>';
         } else if (m.typ === 'DODATKOWY') {
-          badgeHtml = '<span style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:2px;">Dodatkowa służba (+' + ptsDlaObecnego + ' pkt)</span>';
+          badgeHtml = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:2px;">Dodatkowa służba (+' + ptsDlaObecnego + ' pkt)</span>';
         } else if (m.domyslnyStatus === 'ODDANY') {
           badgeHtml = '<span style="background:rgba(168,85,247,0.15); color:#c084fc; border:1px solid rgba(168,85,247,0.3); font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; display:inline-block; margin-top:2px;">' + (m.opisGieldy || 'Oddał dyżur na giełdę') + '</span>';
         } else if (m.domyslnyStatus === 'USPRAWIEDLIWIONY') {
@@ -8073,7 +8174,18 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         var badgeColor = '#10b981';
         var badgeText = pktLabel;
-        if (m.status === 'NIEOBECNY') {
+        if (m.tylkoRozaniec) {
+          badgeColor = '#d8b4fe';
+          badgeText = '+2 pkt (Różaniec)';
+        } else if (m.status === 'OBECNY') {
+          if (m.bylNaRozancu) {
+            badgeColor = '#c084fc';
+            badgeText = '+' + (ptsDlaObecnego + 2) + ' pkt (msza+różaniec)';
+          } else {
+            badgeColor = '#10b981';
+            badgeText = '+' + ptsDlaObecnego + ' pkt';
+          }
+        } else if (m.status === 'NIEOBECNY') {
           badgeColor = '#ef4444';
           badgeText = '-5 pkt';
         } else if (m.status === 'USPRAWIEDLIWIONY') {
@@ -8185,6 +8297,25 @@ function czyMaDostepDoZakrystii(nazwisko) {
                         '</div>';
         }
 
+        var rozaniecBtnHtml = '';
+        if (zakrystiaStan.maRozaniec) {
+          if (m.status === 'OBECNY') {
+            var rozActive = !!m.bylNaRozancu;
+            rozaniecBtnHtml = '<div style="margin-top:6px; display:flex; gap:6px;">' +
+                                '<button type="button" class="btn-rozaniec-toggle' + (rozActive ? ' active' : '') + '" style="flex:1; justify-content:center; padding:7px 10px; font-size:12px;" onclick="zakrystiaPrzelaczRozaniec(' + i + ')">' +
+                                  (rozActive ? '📿 Był na różańcu (+2 pkt) ✓' : '📿 Dodaj różaniec (+2 pkt)') +
+                                '</button>' +
+                              '</div>';
+          } else {
+            var tylkoRozActive = !!m.tylkoRozaniec;
+            rozaniecBtnHtml = '<div style="margin-top:6px; display:flex; gap:6px;">' +
+                                '<button type="button" class="btn-rozaniec-toggle' + (tylkoRozActive ? ' active' : '') + '" style="flex:1; justify-content:center; padding:7px 10px; font-size:12px;" onclick="zakrystiaTylkoRozaniec(' + i + ')">' +
+                                  (tylkoRozActive ? '📿 Tylko różaniec (+2 pkt, brak mszy) ✓' : '📿 Przyszedł tylko na różaniec (+2 pkt)') +
+                                '</button>' +
+                              '</div>';
+          }
+        }
+
         html += '<div class="' + cardClass + '" id="z-card-' + i + '">' +
                   '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
                     '<div>' +
@@ -8199,6 +8330,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   '<div class="zakrystia-btn-group">' +
                     buttonsHtml +
                   '</div>' +
+                  rozaniecBtnHtml +
                   funkcjaHtml +
                 '</div>';
       }
@@ -8308,8 +8440,67 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
     function zakrystiaUstawStatus(index, nowyStatus) {
       if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci[index]) return;
-      zakrystiaStan.ministranci[index].status = nowyStatus;
+      var m = zakrystiaStan.ministranci[index];
+      m.status = nowyStatus;
+      if (nowyStatus !== 'OBECNY') {
+        m.bylNaRozancu = false;
+        m.tylkoRozaniec = false;
+      }
       renderujTrybZakrystia();
+    }
+
+    function zakrystiaPrzelaczRozaniec(index) {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci[index]) return;
+      var m = zakrystiaStan.ministranci[index];
+      m.bylNaRozancu = !m.bylNaRozancu;
+      if (m.bylNaRozancu) {
+        m.tylkoRozaniec = false;
+      }
+      renderujTrybZakrystia();
+    }
+
+    function zakrystiaTylkoRozaniec(index) {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci[index]) return;
+      var m = zakrystiaStan.ministranci[index];
+      m.tylkoRozaniec = !m.tylkoRozaniec;
+      if (m.tylkoRozaniec) {
+        m.bylNaRozancu = true;
+        m.status = 'USPRAWIEDLIWIONY'; // neutralizuje karę -5 za brak mszy
+      } else {
+        m.bylNaRozancu = false;
+        m.status = m.domyslnyStatus || 'NIEOBECNY';
+      }
+      renderujTrybZakrystia();
+    }
+
+    function zakrystiaZaznaczWszystkichRozaniec() {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci) return;
+      var obecni = zakrystiaStan.ministranci.filter(function(m) { return m.status === 'OBECNY'; });
+      if (obecni.length === 0) {
+        for (var i = 0; i < zakrystiaStan.ministranci.length; i++) {
+          var m = zakrystiaStan.ministranci[i];
+          if (m.domyslnyStatus !== 'USPRAWIEDLIWIONY' && m.domyslnyStatus !== 'ODDANY') {
+            m.status = 'OBECNY';
+            m.bylNaRozancu = true;
+            m.tylkoRozaniec = false;
+          }
+        }
+        renderujTrybZakrystia();
+        pokazToast('📿 Zaznaczono obecność na mszy i różańcu (+2 pkt)');
+        return;
+      }
+
+      var wszyscyObecniMaja = obecni.every(function(m) { return m.bylNaRozancu; });
+      var nowyStan = !wszyscyObecniMaja;
+      for (var i = 0; i < zakrystiaStan.ministranci.length; i++) {
+        var m = zakrystiaStan.ministranci[i];
+        if (m.status === 'OBECNY') {
+          m.bylNaRozancu = nowyStan;
+          m.tylkoRozaniec = false;
+        }
+      }
+      renderujTrybZakrystia();
+      pokazToast(nowyStan ? '📿 Zaznaczono obecność na różańcu (+2 pkt)' : 'Cofnięto obecność na różańcu');
     }
 
     function zakrystiaUsunDodatkowego(index) {
@@ -8936,18 +9127,24 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
         return;
       }
-      var ob = 0, nieob = 0, usp = 0;
+      var ob = 0, nieob = 0, usp = 0, roz = 0;
       zakrystiaStan.ministranci.forEach(function(m) {
-        if (m.status === 'OBECNY') ob++;
+        if (m.tylkoRozaniec) { roz++; }
+        else if (m.status === 'OBECNY') {
+          ob++;
+          if (m.bylNaRozancu) roz++;
+        }
         else if (m.status === 'NIEOBECNY') nieob++;
         else if (m.status === 'USPRAWIEDLIWIONY') usp++;
       });
-      if (el) el.innerText = ob + ' obecnych, ' + nieob + ' nieobecnych' + (usp > 0 ? ', ' + usp + ' uspraw.' : '');
+      var rozTekst = (zakrystiaStan.maRozaniec && roz > 0) ? (' • ' + roz + ' na różańcu') : '';
+      if (el) el.innerText = ob + ' obecnych, ' + nieob + ' nieobecnych' + (usp > 0 ? ', ' + usp + ' uspraw.' : '') + rozTekst;
       if (btnZapisz) {
         btnZapisz.disabled = false;
         btnZapisz.style.opacity = '1';
         btnZapisz.style.cursor = 'pointer';
-        btnZapisz.innerText = 'ZAPISZ OBECNOŚĆ (' + (ob + nieob + usp) + ' ministrantów' + (usunieciCount > 0 ? ' • ' + usunieciCount + ' usunięto' : '') + ')';
+        var sumaOsob = ob + nieob + usp + (zakrystiaStan.ministranci.filter(function(m){ return m.tylkoRozaniec; }).length);
+        btnZapisz.innerText = 'ZAPISZ OBECNOŚĆ (' + sumaOsob + ' ministrantów' + (usunieciCount > 0 ? ' • ' + usunieciCount + ' usunięto' : '') + ')';
       }
     }
 
@@ -9178,11 +9375,24 @@ function czyMaDostepDoZakrystii(nazwisko) {
             return normW === normM || normW.indexOf(normM) !== -1 || normM.indexOf(normW) !== -1;
           });
           if (wiersz && wiersz.komorki && wiersz.komorki[colIdx]) {
-            if (m.status === 'OBECNY') {
+            if (m.tylkoRozaniec) {
+              // Ministrant przyszedł tylko na różaniec: +2 pkt, brak kary -5 za mszę
+              var stary = parseFloat(wiersz.komorki[colIdx].wartosc) || 0;
+              if (stary < 0) {
+                wiersz.komorki[colIdx].wartosc = 2;
+              } else if (stary > 0 && czyDodatkowa) {
+                wiersz.komorki[colIdx].wartosc = stary + 2;
+              } else {
+                wiersz.komorki[colIdx].wartosc = 2;
+              }
+            } else if (m.status === 'OBECNY') {
               var dodajPkt = zakrystiaStan.punktyLiturgii || 3;
               if (m.typ === 'ZASTEPCA') dodajPkt = 4;
               else if (m.typ === 'DODATKOWY') {
                 dodajPkt = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
+              }
+              if (m.bylNaRozancu) {
+                dodajPkt += 2;
               }
 
               var stary = parseFloat(wiersz.komorki[colIdx].wartosc) || 0;
@@ -9313,23 +9523,28 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         zakrystiaStan.ministranci.forEach(function(m) {
           var pts = 0;
-          if (m.status === 'OBECNY') {
+          if (m.tylkoRozaniec) {
+            pts = 2;
+          } else if (m.status === 'OBECNY') {
             if (m.typ === 'ZASTEPCA') pts = 4;
             else if (m.typ === 'DODATKOWY') {
               pts = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
             } else pts = zakrystiaStan.punktyLiturgii;
+            if (m.bylNaRozancu) pts += 2;
           } else if (m.status === 'NIEOBECNY') {
             pts = czyDodatkowa ? 0 : -5;
           } else if (m.status === 'USPRAWIEDLIWIONY' || m.status === 'ODDANY') {
             pts = 0;
           }
+          var statusNazwa = m.tylkoRozaniec ? 'TYLKO RÓŻANIEC (+2)' : (m.bylNaRozancu ? (m.status + ' (+RÓŻANIEC)') : m.status);
+          var mNazwa = (polishMonthsGenitive && polishMonthsGenitive[zakrystiaStan.miesiacIdx !== undefined ? zakrystiaStan.miesiacIdx : 9]) || 'października';
           tabelaMiesiacaDane.historiaWpisow.unshift({
             czas: timeStr,
-            dzien: zakrystiaStan.dataTekst || (zakrystiaStan.dzien + ' września'),
+            dzien: zakrystiaStan.dataTekst || (zakrystiaStan.dzien + ' ' + mNazwa),
             godzina: zakrystiaStan.godzina,
             liturgia: zakrystiaStan.nazwaLiturgii || 'Msza św.',
             nazwisko: m.nazwisko,
-            status: m.status,
+            status: statusNazwa,
             typ: m.typ,
             punkty: pts,
             zastepuje: m.zastepuje || '-',
@@ -9416,11 +9631,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
       var listaDoZapisu = zakrystiaStan.ministranci.map(function(m) {
         var pts = 0;
-        if (m.status === 'OBECNY') {
+        if (m.tylkoRozaniec) {
+          pts = 2;
+        } else if (m.status === 'OBECNY') {
           if (m.typ === 'ZASTEPCA') pts = 4;
           else if (m.typ === 'DODATKOWY') {
             pts = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
           } else pts = zakrystiaStan.punktyLiturgii;
+          if (m.bylNaRozancu) pts += 2;
         } else if (m.status === 'NIEOBECNY') {
           pts = czyDodatkowa ? 0 : -5;
         } else if (m.status === 'USPRAWIEDLIWIONY' || m.status === 'ODDANY') {
@@ -9428,9 +9646,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
         return {
           nazwisko: m.nazwisko,
-          status: m.status,
+          status: m.tylkoRozaniec ? 'ROZANIEC' : m.status,
           typ: m.typ,
           zastepuje: m.zastepuje,
+          bylNaRozancu: !!m.bylNaRozancu,
+          tylkoRozaniec: !!m.tylkoRozaniec,
           punkty: pts
         };
       });
@@ -10441,6 +10661,309 @@ function czyMaDostepDoZakrystii(nazwisko) {
       } catch(err) {
         alert(err.message || 'Błąd podczas akceptacji zamiany.');
         odswiezDane();
+      }
+    }
+
+    // =============================================================
+    // MODUŁ ZMIANY STAŁEGO DNIA SŁUŻBY W TYGODNIU (COOLDOWN 30 DNI)
+    // =============================================================
+    function otworzModalZmienStalyDzien() {
+      if (!globalUser || !globalUser.nazwisko) {
+        pokazToast('Musisz być zalogowany, aby zmienić stały dzień.');
+        return;
+      }
+      var myName = globalUser.nazwisko;
+      var myRow = null;
+      if (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) {
+        myRow = tabelaMiesiacaDane.wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
+      }
+
+      var curDow = -1;
+      if (myRow && myRow.stalyDzienTygodnia !== undefined && myRow.stalyDzienTygodnia > 0) {
+        curDow = myRow.stalyDzienTygodnia;
+      } else {
+        var storedDow = localStorage.getItem('min_staly_dzien_' + encodeURIComponent(myName));
+        if (storedDow) curDow = parseInt(storedDow, 10);
+      }
+
+      if (curDow < 1 && myRow && myRow.komorki) {
+        var rok = tabelaMiesiacaDane.rok || 2026;
+        var mIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+        for (var dayIdx = 0; dayIdx < myRow.komorki.length; dayIdx++) {
+          var dt = new Date(rok, mIdx, dayIdx + 1);
+          var dow = dt.getDay();
+          if (dow >= 1 && dow <= 5 && myRow.komorki[dayIdx] && myRow.komorki[dayIdx].maDyzur) {
+            curDow = dow;
+            break;
+          }
+        }
+      }
+
+      var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
+      var obecnyEl = document.getElementById('modal-zmien-dzien-obecny');
+      if (obecnyEl) {
+        var nazwaObecnego = (curDow >= 1 && curDow <= 5) ? (nazwyDni[curDow] + ' (godz. 18:00)') : 'Nieustalony';
+        obecnyEl.innerHTML = '<div style="font-size:11px; color:#a1a1aa; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Aktualny stały dzień służby:</div>' +
+                             '<div style="font-size:15px; font-weight:700; color:#38bdf8; display:flex; align-items:center; gap:6px;">' +
+                               '<span>📅 ' + nazwaObecnego + '</span>' +
+                             '</div>';
+      }
+
+      // Sprawdzenie 30-dniowego cooldownu
+      var lastChangeIso = (myRow && myRow.ostatniaZmianaDnia) || localStorage.getItem('min_ostatnia_zmiana_dnia_' + encodeURIComponent(myName));
+      var isLocked = false;
+      var dniDoOdblokowania = 0;
+      var dataOdblokowaniaStr = '';
+
+      if (lastChangeIso) {
+        var lastDate = new Date(lastChangeIso);
+        var diffMs = Date.now() - lastDate.getTime();
+        var limitMs = 30 * 24 * 60 * 60 * 1000; // 30 dni
+        if (diffMs < limitMs) {
+          isLocked = true;
+          var msLeft = limitMs - diffMs;
+          dniDoOdblokowania = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+          var unlockDate = new Date(lastDate.getTime() + limitMs);
+          dataOdblokowaniaStr = unlockDate.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+      }
+
+      var komunikatEl = document.getElementById('modal-zmien-dzien-komunikat');
+      var btnZatwierdz = document.getElementById('btn-zatwierdz-zmiane-dnia');
+      var selDzien = document.getElementById('sel-nowy-staly-dzien');
+
+      // Wypełnij opcje w select
+      if (selDzien) {
+        var optHtml = '';
+        for (var d = 1; d <= 5; d++) {
+          var isCur = (d === curDow);
+          var suffix = isCur ? ' (Twój obecny dzień)' : '';
+          optHtml += '<option value="' + d + '"' + (isCur ? ' selected' : '') + '>' + nazwyDni[d] + ' (18:00)' + suffix + '</option>';
+        }
+        selDzien.innerHTML = optHtml;
+      }
+
+      if (isLocked) {
+        if (komunikatEl) {
+          komunikatEl.innerHTML = '<div style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:12px; color:#fca5a5;">' +
+                                    '<div style="font-weight:700; font-size:13px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">' +
+                                      '<span>🔒 Zmiana zablokowana (limit: raz na 30 dni)</span>' +
+                                    '</div>' +
+                                    '<div style="font-size:12px; line-height:1.4;">' +
+                                      'Stały dzień można zmieniać <b>raz na 30 dni</b>. Twoja poprzednia zmiana miała miejsce mniej niż 30 dni temu.<br>' +
+                                      'Kolejna zmiana będzie dostępna za: <b style="color:#fafafa;">' + dniDoOdblokowania + ' dni</b> (' + dataOdblokowaniaStr + ').' +
+                                    '</div>' +
+                                  '</div>';
+        }
+        if (selDzien) selDzien.disabled = true;
+        if (btnZatwierdz) {
+          btnZatwierdz.disabled = true;
+          btnZatwierdz.style.opacity = '0.4';
+          btnZatwierdz.style.cursor = 'not-allowed';
+          btnZatwierdz.innerText = 'Zablokowane (' + dniDoOdblokowania + ' dni)';
+        }
+      } else {
+        if (komunikatEl) {
+          komunikatEl.innerHTML = '<div style="background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:8px; padding:12px; color:#6ee7b7;">' +
+                                    '<div style="font-weight:700; font-size:13px; margin-bottom:4px; display:flex; align-items:center; gap:6px;">' +
+                                      '<span>✓ Możesz zmienić stały dzień</span>' +
+                                    '</div>' +
+                                    '<div style="font-size:12px; line-height:1.4;">' +
+                                      'Nowy dzień zacznie obowiązywać <b>od razu w bieżącym tygodniu</b> i przez resztę miesiąca bez limitu miejsc. Po zatwierdzeniu kolejna zmiana będzie możliwa po 30 dniach.' +
+                                    '</div>' +
+                                  '</div>';
+        }
+        if (selDzien) selDzien.disabled = false;
+        if (btnZatwierdz) {
+          btnZatwierdz.disabled = false;
+          btnZatwierdz.style.opacity = '1';
+          btnZatwierdz.style.cursor = 'pointer';
+          btnZatwierdz.innerText = 'Zapisz zmianę';
+        }
+      }
+
+      document.getElementById('modal-zmien-staly-dzien').style.display = 'flex';
+    }
+
+    function zamknijModalZmienStalyDzien() {
+      var m = document.getElementById('modal-zmien-staly-dzien');
+      if (m) m.style.display = 'none';
+    }
+
+    async function zatwierdzZmianeStalegoDnia() {
+      if (!globalUser || !globalUser.nazwisko) {
+        alert('Brak zalogowanego użytkownika.');
+        return;
+      }
+      var myName = globalUser.nazwisko;
+      var selEl = document.getElementById('sel-nowy-staly-dzien');
+      if (!selEl) return;
+      var nowyDzien = parseInt(selEl.value, 10);
+      if (isNaN(nowyDzien) || nowyDzien < 1 || nowyDzien > 5) {
+        alert('Wybierz poprawny dzień w tygodniu (Poniedziałek - Piątek).');
+        return;
+      }
+
+      var myRow = null;
+      if (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) {
+        myRow = tabelaMiesiacaDane.wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
+      }
+      if (!myRow) {
+        alert('Nie znaleziono Twojego profilu w grafiku.');
+        return;
+      }
+
+      var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
+      var staryDzien = myRow.stalyDzienTygodnia;
+      var rok = tabelaMiesiacaDane.rok || 2026;
+      var mIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+      if (staryDzien === undefined || staryDzien < 1) {
+        for (var dayIdx = 0; dayIdx < myRow.komorki.length; dayIdx++) {
+          var dt = new Date(rok, mIdx, dayIdx + 1);
+          var dow = dt.getDay();
+          if (dow >= 1 && dow <= 5 && myRow.komorki[dayIdx] && myRow.komorki[dayIdx].maDyzur) {
+            staryDzien = dow;
+            break;
+          }
+        }
+      }
+
+      if (staryDzien === nowyDzien) {
+        pokazToast('Wybrany dzień (' + nazwyDni[nowyDzien] + ') jest już Twoim stałym dniem służby.');
+        zamknijModalZmienStalyDzien();
+        return;
+      }
+
+      // Sprawdź cooldown 30 dni
+      var lastChangeIso = myRow.ostatniaZmianaDnia || localStorage.getItem('min_ostatnia_zmiana_dnia_' + encodeURIComponent(myName));
+      if (lastChangeIso) {
+        var diffMs = Date.now() - new Date(lastChangeIso).getTime();
+        if (diffMs < 30 * 24 * 60 * 60 * 1000) {
+          alert('Nie minęło jeszcze 30 dni od Twojej ostatniej zmiany stałego dnia.');
+          return;
+        }
+      }
+
+      var btn = document.getElementById('btn-zatwierdz-zmiane-dnia');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Zapisywanie...';
+      }
+
+      var now = new Date();
+      var todayD = now.getDate();
+      var todayM = now.getMonth();
+      var todayY = now.getFullYear();
+      var isSameMonth = (rok === todayY && mIdx === todayM);
+
+      // Aktualizacja komórek w bieżącym miesiącu od dzisiaj / od bieżącego tygodnia
+      if (myRow.komorki && myRow.komorki.length) {
+        for (var d = 1; d <= myRow.komorki.length; d++) {
+          var dtCell = new Date(rok, mIdx, d);
+          var dowCell = dtCell.getDay();
+
+          var czyMozeZmienic = !isSameMonth || (d >= todayD);
+
+          if (czyMozeZmienic) {
+            var cell = myRow.komorki[d - 1];
+            if (cell && (cell.wartosc === null || cell.wartosc === undefined)) {
+              if (dowCell === staryDzien) {
+                cell.maDyzur = false;
+              } else if (dowCell === nowyDzien) {
+                cell.maDyzur = true;
+              }
+            }
+          }
+        }
+      }
+
+      // Wyczyść ewentualne zgłoszenia na giełdzie dla starego dnia, które oczekują
+      if (tabelaMiesiacaDane.gieldaTydzien && Array.isArray(tabelaMiesiacaDane.gieldaTydzien)) {
+        tabelaMiesiacaDane.gieldaTydzien = tabelaMiesiacaDane.gieldaTydzien.filter(function(g) {
+          var dOdd = (g.dzienOddawany !== undefined ? g.dzienOddawany : g.dzien);
+          if (czyToSamoNazwisko(g.oddajacy || g.wystawiajacy || g.nazwisko, myName) && dOdd >= todayD && g.status === 'OCZEKUJE') {
+            var dtG = new Date(rok, mIdx, dOdd);
+            if (dtG.getDay() === staryDzien) return false;
+          }
+          return true;
+        });
+      }
+
+      var nowIso = new Date().toISOString();
+      myRow.stalyDzienTygodnia = nowyDzien;
+      myRow.ostatniaZmianaDnia = nowIso;
+      localStorage.setItem('min_ostatnia_zmiana_dnia_' + encodeURIComponent(myName), nowIso);
+      localStorage.setItem('min_staly_dzien_' + encodeURIComponent(myName), String(nowyDzien));
+
+      // Jeśli załadowany jest kolejny miesiąc, zaktualizuj także w kolejnym miesiącu
+      if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wiersze) {
+        var nextRow = daneKolejnegoMiesiaca.wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
+        if (nextRow) {
+          nextRow.stalyDzienTygodnia = nowyDzien;
+          nextRow.ostatniaZmianaDnia = nowIso;
+          var nextR = daneKolejnegoMiesiaca.rok || 2026;
+          var nextM = (daneKolejnegoMiesiaca.miesiacIdx !== undefined) ? daneKolejnegoMiesiaca.miesiacIdx : ((mIdx + 1) % 12);
+          if (nextRow.komorki) {
+            for (var nd = 1; nd <= nextRow.komorki.length; nd++) {
+              var dtN = new Date(nextR, nextM, nd);
+              var dowN = dtN.getDay();
+              var nCell = nextRow.komorki[nd - 1];
+              if (nCell && (nCell.wartosc === null || nCell.wartosc === undefined)) {
+                if (dowN === staryDzien) nCell.maDyzur = false;
+                else if (dowN === nowyDzien) nCell.maDyzur = true;
+              }
+            }
+          }
+        }
+      }
+
+      // Zapisz do localStorage
+      try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+
+      // Zapisz do Firestore
+      if (dbFirestore) {
+        try {
+          var promises = [];
+          var curDocKey = pobierzAktywnyKluczMiesiaca();
+          promises.push(dbFirestore.collection('stan_grafiku').doc(curDocKey).set(tabelaMiesiacaDane, { merge: true }));
+
+          promises.push(dbFirestore.collection('konfiguracja').doc('stale_dni').set({
+            [myName]: {
+              stalyDzien: nowyDzien,
+              nazwaDnia: nazwyDni[nowyDzien],
+              ostatniaZmiana: nowIso,
+              zmienionoPrzez: myName
+            }
+          }, { merge: true }));
+
+          if (daneKolejnegoMiesiaca) {
+            var nextDocKey = wyznaczKluczMiesiaca(new Date(daneKolejnegoMiesiaca.rok || 2026, (daneKolejnegoMiesiaca.miesiacIdx !== undefined ? daneKolejnegoMiesiaca.miesiacIdx : 9), 1));
+            if (nextDocKey !== curDocKey) {
+              promises.push(dbFirestore.collection('stan_grafiku').doc(nextDocKey).set(daneKolejnegoMiesiaca, { merge: true }));
+            }
+          }
+          await Promise.all(promises);
+        } catch(errFs) {
+          console.warn('Błąd zapisu zmiany stałego dnia do Firestore:', errFs);
+        }
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = 'Zapisz zmianę';
+      }
+
+      zamknijModalZmienStalyDzien();
+      pokazToast('✓ Twój stały dzień został zmieniony na ' + nazwyDni[nowyDzien] + ' (18:00)');
+
+      // Odśwież pulpit ministranta
+      var nowyStan = generujStanZFirestore(myName, tabelaMiesiacaDane);
+      if (nowyStan) {
+        if (globalUser) globalUser.stan = nowyStan;
+        renderujDane(nowyStan);
+      }
+      if (typeof renderujTabeleMiesiaca === 'function' && document.getElementById('widok-pelna-tabela') && document.getElementById('widok-pelna-tabela').style.display !== 'none') {
+        renderujTabeleMiesiaca(tabelaMiesiacaDane);
       }
     }
 
