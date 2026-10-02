@@ -1910,7 +1910,7 @@
                 <option value="Grudzień_2026">Grudzień 2026</option>
                 <option value="Listopad_2026">Listopad 2026</option>
                 <option value="Październik_2026">Październik 2026</option>
-                <option value="Wrzesień_2026" selected>Wrzesień 2026 (bieżący)</option>
+                <option value="Wrzesień_2026">Wrzesień 2026</option>
                 <option value="Sierpień_2026">Sierpień 2026</option>
                 <option value="Lipiec_2026">Lipiec 2026</option>
                 <option value="Czerwiec_2026">Czerwiec 2026</option>
@@ -2632,16 +2632,27 @@
       return miesiacePL[d.getMonth()] + "_" + d.getFullYear();
     }
 
-    var wybranyMiesiacTabeli = (function() {
-      var realMonth = wyznaczKluczMiesiaca(new Date());
-      var cachedMonth = null;
-      try { cachedMonth = localStorage.getItem('min_active_month'); } catch(e) {}
-      return cachedMonth || realMonth;
+    var aktywnyKluczMiesiacaGlobal = (function() {
+      var realCalMonth = wyznaczKluczMiesiaca(new Date());
+      try {
+        var cached = localStorage.getItem('min_active_month');
+        if (cached && cached !== realCalMonth) {
+          localStorage.removeItem('min_cached_data');
+          localStorage.removeItem('min_cached_tabela');
+          localStorage.setItem('min_active_month', realCalMonth);
+          return realCalMonth;
+        }
+        return cached || realCalMonth;
+      } catch(e) {
+        return realCalMonth;
+      }
     })();
 
     function pobierzAktywnyKluczMiesiaca() {
-      return wybranyMiesiacTabeli || wyznaczKluczMiesiaca(new Date());
+      return aktywnyKluczMiesiacaGlobal || wyznaczKluczMiesiaca(new Date());
     }
+
+    var wybranyMiesiacTabeli = pobierzAktywnyKluczMiesiaca();
 
     var daneKolejnegoMiesiaca = (function() {
       try {
@@ -3377,6 +3388,7 @@
           localStorage.removeItem('min_cached_data');
           localStorage.removeItem('min_cached_tabela');
           localStorage.setItem('min_active_month', realCalMonth);
+          aktywnyKluczMiesiacaGlobal = realCalMonth;
           wybranyMiesiacTabeli = realCalMonth;
         }
       } catch(eMonth) {}
@@ -3490,15 +3502,30 @@
         dbFirestore.collection('konfiguracja').doc('ogolna').get().then(function(gDoc) {
           if (gDoc.exists && gDoc.data() && gDoc.data().aktywnyMiesiac) {
             var cfgMiesiac = gDoc.data().aktywnyMiesiac;
-            if (cfgMiesiac !== 'auto' && cfgMiesiac !== wybranyMiesiacTabeli) {
-              console.log('Synchronizacja aktywnego miesiąca z konfiguracji:', cfgMiesiac);
-              wybranyMiesiacTabeli = cfgMiesiac;
-              try {
-                localStorage.setItem('min_active_month', cfgMiesiac);
-                localStorage.removeItem('min_cached_data');
-                localStorage.removeItem('min_cached_tabela');
-              } catch(e) {}
-              odswiezDane();
+            if (cfgMiesiac && cfgMiesiac !== 'auto') {
+              if (cfgMiesiac !== aktywnyKluczMiesiacaGlobal) {
+                console.log('Synchronizacja aktywnego miesiąca z konfiguracji:', cfgMiesiac);
+                aktywnyKluczMiesiacaGlobal = cfgMiesiac;
+                wybranyMiesiacTabeli = cfgMiesiac;
+                try {
+                  localStorage.setItem('min_active_month', cfgMiesiac);
+                  localStorage.removeItem('min_cached_data');
+                  localStorage.removeItem('min_cached_tabela');
+                } catch(e) {}
+                odswiezDane();
+              }
+            } else if (cfgMiesiac === 'auto') {
+              var realCalMonth = wyznaczKluczMiesiaca(new Date());
+              if (aktywnyKluczMiesiacaGlobal !== realCalMonth) {
+                aktywnyKluczMiesiacaGlobal = realCalMonth;
+                wybranyMiesiacTabeli = realCalMonth;
+                try {
+                  localStorage.setItem('min_active_month', realCalMonth);
+                  localStorage.removeItem('min_cached_data');
+                  localStorage.removeItem('min_cached_tabela');
+                } catch(e) {}
+                odswiezDane();
+              }
             }
           }
         }).catch(function() {});
@@ -4817,7 +4844,9 @@
       // Aktualizacja opcji w select
       var selEl = document.getElementById('select-ranking-miesiac');
       if (selEl) {
-        if (selEl.options.length === 0) {
+        var needsRebuild = (selEl.options.length === 0 || selEl.dataset.curM !== String(currentMIdx));
+        if (needsRebuild) {
+          selEl.dataset.curM = String(currentMIdx);
           var optHtml = '';
           for (var mi = currentMIdx; mi >= 0; mi--) {
             var mName = polishMonthsAll[mi];
@@ -4969,19 +4998,18 @@
     function czyMszaJuzSieRozpoczela(dzien, godzinaStr, rok, miesiacIdx) {
       if (!dzien) return false;
       var now = new Date();
-      var curY = rok || now.getFullYear();
+      var curY = (rok !== undefined && rok !== null) ? rok : now.getFullYear();
       var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : now.getMonth();
-      var curD = now.getDate();
 
-      if (dzien < curD) return true;
-      if (dzien > curD) return false;
-
-      if (!godzinaStr) return false;
-      var parts = godzinaStr.split(':');
-      if (parts.length < 2) return false;
-      var h = parseInt(parts[0], 10);
-      var m = parseInt(parts[1], 10);
-      if (isNaN(h) || isNaN(m)) return false;
+      var h = 12, m = 0;
+      if (godzinaStr) {
+        var parts = godzinaStr.split(':');
+        if (parts.length >= 2) {
+          var ph = parseInt(parts[0], 10);
+          var pm = parseInt(parts[1], 10);
+          if (!isNaN(ph) && !isNaN(pm)) { h = ph; m = pm; }
+        }
+      }
 
       var mszaTime = new Date(curY, curM, dzien, h, m, 0, 0).getTime();
       return now.getTime() >= mszaTime;
@@ -5072,7 +5100,7 @@
       });
 
       if (dirty) {
-        var docKey = pobierzAktywnyKluczMiesiaca();
+        var docKey = data.nazwaMiesiaca ? (data.nazwaMiesiaca + '_' + curY) : pobierzAktywnyKluczMiesiaca();
         dbFirestore.collection('stan_grafiku').doc(docKey).update({
           wiersze: wiersze,
           gieldaNiedziele: gn,
@@ -5266,81 +5294,90 @@
       var listaMoichDyzurowDiv = document.getElementById('lista-moich-dyzurow-pulpit');
       if (listaMoichDyzurowDiv) {
         var mojeDyzuryDoWyswietlenia = [];
+        var nowCheck = new Date();
+        var isHistoricalMonth = (res.rok < nowCheck.getFullYear() || (res.rok === nowCheck.getFullYear() && res.miesiacIdx < nowCheck.getMonth()));
 
-        // Przejęte zastępstwa (+4 pkt)
-        if (res.mojePrzejeteZastepstwa) {
-          for (var dayKey in res.mojePrzejeteZastepstwa) {
-            var dNum = parseInt(dayKey, 10);
-            if (dNum >= res.dzisDzien) {
-              mojeDyzuryDoWyswietlenia.push({
-                dzien: dNum,
-                typ: 'przejete',
-                dane: res.mojePrzejeteZastepstwa[dayKey]
-              });
+        if (!isHistoricalMonth) {
+          // Przejęte zastępstwa (+4 pkt)
+          if (res.mojePrzejeteZastepstwa) {
+            for (var dayKey in res.mojePrzejeteZastepstwa) {
+              var dNum = parseInt(dayKey, 10);
+              var dtEnd = new Date(res.rok, res.miesiacIdx, dNum, 23, 59, 59).getTime();
+              if (dtEnd >= nowCheck.getTime()) {
+                mojeDyzuryDoWyswietlenia.push({
+                  dzien: dNum,
+                  typ: 'przejete',
+                  dane: res.mojePrzejeteZastepstwa[dayKey]
+                });
+              }
+            }
+          }
+
+          var myNamePulpit = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : (localStorage.getItem('min_name') || '');
+
+          // Moje stałe dyżury w tygodniu roboczym
+          if (res.mojeDyzuryTydzien) {
+            res.mojeDyzuryTydzien.forEach(function(d) {
+              var dtEnd = new Date(res.rok, res.miesiacIdx, d, 23, 59, 59).getTime();
+              if (dtEnd >= nowCheck.getTime()) {
+                var oddaneInfo = (res.mojeOddaneZastepstwa && res.mojeOddaneZastepstwa[d]) ? res.mojeOddaneZastepstwa[d] : null;
+                var ofeTydz = (res.gieldaTydzien || []).find(function(o) {
+                  var dOdd = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
+                  return dOdd === d && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
+                });
+                mojeDyzuryDoWyswietlenia.push({
+                  dzien: d,
+                  typ: 'tydzien',
+                  oddane: oddaneInfo,
+                  ofertaGielda: ofeTydz || null
+                });
+              }
+            });
+          }
+
+          // Moje dyżury weekendowe (tylko w niedziele, w których ministrant rzeczywiście ma służbę!)
+          if (res.godzinyWeekendy && Object.keys(res.godzinyWeekendy).length > 0) {
+            for (var dayKey in res.godzinyWeekendy) {
+              var dayNum = parseInt(dayKey, 10);
+              var dtEnd = new Date(res.rok, res.miesiacIdx, dayNum, 23, 59, 59).getTime();
+              if (dtEnd >= nowCheck.getTime()) {
+                var infoW = res.godzinyWeekendy[dayKey];
+                var oddaneInfoW = (res.mojeOddaneZastepstwa && res.mojeOddaneZastepstwa[dayNum]) ? res.mojeOddaneZastepstwa[dayNum] : null;
+                var ofeWknd = (res.gieldaNiedziele || []).find(function(o) {
+                  return o.dzien === dayNum && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
+                });
+                mojeDyzuryDoWyswietlenia.push({
+                  dzien: dayNum,
+                  typ: 'weekend',
+                  godzina: infoW.godzina || res.mojaGodzinaNiedziela || '10:00',
+                  czyZamienione: !!infoW.czyZamienione,
+                  czyUsprawiedliwiony: !!infoW.czyUsprawiedliwiony || !!oddaneInfoW,
+                  oddane: oddaneInfoW,
+                  ofertaGielda: ofeWknd || null
+                });
+              }
+            }
+          } else if (res.mojaGodzinaNiedziela) {
+            for (var day = 1; day <= res.daysInMonth; day++) {
+              var dt = new Date(res.rok, res.miesiacIdx, day);
+              var dtEnd = new Date(res.rok, res.miesiacIdx, day, 23, 59, 59).getTime();
+              if (dt.getDay() === 0 && dtEnd >= nowCheck.getTime()) {
+                var ofeWkndFallback = (res.gieldaNiedziele || []).find(function(o) {
+                  return o.dzien === day && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
+                });
+                mojeDyzuryDoWyswietlenia.push({
+                  dzien: day,
+                  typ: 'weekend',
+                  godzina: res.mojaGodzinaNiedziela,
+                  czyZamienione: false,
+                  czyUsprawiedliwiony: false,
+                  ofertaGielda: ofeWkndFallback || null
+                });
+              }
             }
           }
         }
 
-        var myNamePulpit = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : (localStorage.getItem('min_name') || '');
-
-        // Moje stałe dyżury w tygodniu roboczym
-        if (res.mojeDyzuryTydzien) {
-          res.mojeDyzuryTydzien.forEach(function(d) {
-            if (d >= res.dzisDzien) {
-              var oddaneInfo = (res.mojeOddaneZastepstwa && res.mojeOddaneZastepstwa[d]) ? res.mojeOddaneZastepstwa[d] : null;
-              var ofeTydz = (res.gieldaTydzien || []).find(function(o) {
-                var dOdd = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
-                return dOdd === d && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
-              });
-              mojeDyzuryDoWyswietlenia.push({
-                dzien: d,
-                typ: 'tydzien',
-                oddane: oddaneInfo,
-                ofertaGielda: ofeTydz || null
-              });
-            }
-          });
-        }
-
-        // Moje dyżury weekendowe (tylko w niedziele, w których ministrant rzeczywiście ma służbę!)
-        if (res.godzinyWeekendy && Object.keys(res.godzinyWeekendy).length > 0) {
-          for (var dayKey in res.godzinyWeekendy) {
-            var dayNum = parseInt(dayKey, 10);
-            if (dayNum >= res.dzisDzien) {
-              var infoW = res.godzinyWeekendy[dayKey];
-              var oddaneInfoW = (res.mojeOddaneZastepstwa && res.mojeOddaneZastepstwa[dayNum]) ? res.mojeOddaneZastepstwa[dayNum] : null;
-              var ofeWknd = (res.gieldaNiedziele || []).find(function(o) {
-                return o.dzien === dayNum && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
-              });
-              mojeDyzuryDoWyswietlenia.push({
-                dzien: dayNum,
-                typ: 'weekend',
-                godzina: infoW.godzina || res.mojaGodzinaNiedziela || '10:00',
-                czyZamienione: !!infoW.czyZamienione,
-                czyUsprawiedliwiony: !!infoW.czyUsprawiedliwiony || !!oddaneInfoW,
-                oddane: oddaneInfoW,
-                ofertaGielda: ofeWknd || null
-              });
-            }
-          }
-        } else if (res.mojaGodzinaNiedziela) {
-          for (var day = 1; day <= res.daysInMonth; day++) {
-            var dt = new Date(res.rok, res.miesiacIdx, day);
-            if (dt.getDay() === 0 && day >= res.dzisDzien) {
-              var ofeWkndFallback = (res.gieldaNiedziele || []).find(function(o) {
-                return o.dzien === day && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
-              });
-              mojeDyzuryDoWyswietlenia.push({
-                dzien: day,
-                typ: 'weekend',
-                godzina: res.mojaGodzinaNiedziela,
-                czyZamienione: false,
-                czyUsprawiedliwiony: false,
-                ofertaGielda: ofeWkndFallback || null
-              });
-            }
-          }
-        }
 
         mojeDyzuryDoWyswietlenia.sort(function(a, b) { return a.dzien - b.dzien; });
 
@@ -5475,12 +5512,13 @@
                                 '</div>';
                 }
               } else {
+                var isPastTydz = czyTydzienMszaPrzeterminowana(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
                 htmlDyzury += '<div class="dyzur-pulpit-item">' +
                                 '<div class="dyzur-pulpit-info">' +
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
                                   '<div class="dyzur-pulpit-opis">Godz. ' + godzWTyg + ' • 5 pkt</div>' +
                                 '</div>' +
-                                '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'Tydzień\', \'' + godzWTyg + '\')">Nie mogę przyjść</button>' +
+                                (!isPastTydz ? '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'Tydzień\', \'' + godzWTyg + '\', ' + res.rok + ', ' + res.miesiacIdx + ')">Nie mogę przyjść</button>' : '') +
                               '</div>';
               }
             } else if (item.typ === 'weekend') {
@@ -5545,12 +5583,13 @@
                                 '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + item.dzien + ')">Wycofaj zgłoszenie</button>' +
                               '</div>';
               } else {
+                var isPastWknd = czyWeekendMszaPrzeterminowana(item.dzien, item.godzina || '', res.rok, res.miesiacIdx);
                 htmlDyzury += '<div class="dyzur-pulpit-item">' +
                                 '<div class="dyzur-pulpit-info">' +
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
                                   '<div class="dyzur-pulpit-opis">' + godzinaTekst + subTekst + ' • 3 pkt</div>' +
                                 '</div>' +
-                                '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'Weekend\', \'' + (item.godzina || '') + '\')">Nie mogę przyjść</button>' +
+                                (!isPastWknd ? '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'Weekend\', \'' + (item.godzina || '') + '\', ' + res.rok + ', ' + res.miesiacIdx + ')">Nie mogę przyjść</button>' : '') +
                               '</div>';
               }
             }
@@ -6169,7 +6208,7 @@
         "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
         "lipca", "sierpnia", "września", "października", "listopada", "grudnia"
       ];
-      var currentMonthName = docData.nazwaMiesiaca || polishMonthsAll[currentMonthIdx] || "Wrzesień";
+      var currentMonthName = docData.nazwaMiesiaca || polishMonthsAll[currentMonthIdx] || wyznaczKluczMiesiaca(new Date()).split('_')[0];
       var currentMonthNameGenitive = polishMonthsGenitive[currentMonthIdx];
 
       var nClean = (nazwisko || "").trim();
@@ -6681,7 +6720,7 @@
             var dtM = new Date(currentYear, currentMonthIdx, k.dzien);
             szczegolyMinusow.push({
               dzien: k.dzien,
-              miesiac: docData.nazwaMiesiaca || "Wrzesień",
+              miesiac: docData.nazwaMiesiaca || currentMonthName,
               miesiacGen: mGenMinus,
               rok: currentYear,
               dzienTygodnia: dniNazwyMinus[dtM.getDay()],
@@ -6764,8 +6803,11 @@
 
             var widokTabeli = document.getElementById('widok-tabela-miesiaca');
             if (widokTabeli && widokTabeli.style.display !== 'none') {
-              renderujFiltryTabeli();
-              renderujTabeleMiesiaca();
+              if (wybranyMiesiacTabeli === mDocId) {
+                tabelaPrzegladanyMiesiacDane = tabelaMiesiacaDane;
+                renderujFiltryTabeli();
+                renderujTabeleMiesiaca();
+              }
             }
             var widokZakrystii = document.getElementById('widok-tryb-zakrystia');
             if (widokZakrystii && widokZakrystii.style.display !== 'none') {
@@ -9230,11 +9272,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
               return nw === rNorm || nw.indexOf(rNorm) !== -1 || rNorm.indexOf(nw) !== -1;
             });
             var mPts = matchW ? (matchW.suma || 0) : 0;
+            var curMName = tabelaMiesiacaDane.nazwaMiesiaca || "Październik";
+            var curMIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+            var curRok = tabelaMiesiacaDane.rok || (new Date()).getFullYear();
             var sumPrev = 0;
             var foundM = false;
             if (r.punktyPoMiesiacach && Array.isArray(r.punktyPoMiesiacach)) {
               r.punktyPoMiesiacach.forEach(function(pm) {
-                if (pm.miesiac === 'Wrzesień' || pm.miesiacIdx === 8) {
+                if (pm.miesiac === curMName || pm.miesiacIdx === curMIdx) {
                   pm.punkty = mPts;
                   foundM = true;
                 } else {
@@ -9243,7 +9288,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
               });
             }
             if (!foundM && r.punktyPoMiesiacach) {
-              r.punktyPoMiesiacach.push({ miesiac: 'Wrzesień', miesiacIdx: 8, rok: 2026, punkty: mPts });
+              r.punktyPoMiesiacach.push({ miesiac: curMName, miesiacIdx: curMIdx, rok: curRok, punkty: mPts });
             }
             r.punkty = Math.round((sumPrev + mPts) * 10) / 10;
             r.suma = r.punkty;
@@ -9414,6 +9459,25 @@ function czyMaDostepDoZakrystii(nazwisko) {
     var tabelaPrzegladanyMiesiacDane = null;
     var aktywnyFiltrGrupy = 'Wszyscy';
 
+    function zaktualizujSelectMiesiacaTabeli(wybrany) {
+      var selectEl = document.getElementById('select-miesiac-tabeli');
+      if (!selectEl) return;
+      var curKlucz = pobierzAktywnyKluczMiesiaca();
+      var targetVal = wybrany || wybranyMiesiacTabeli || curKlucz;
+      for (var i = 0; i < selectEl.options.length; i++) {
+        var opt = selectEl.options[i];
+        var isCurrent = (opt.value === curKlucz);
+        var baseName = opt.value.replace('_', ' ');
+        if (opt.value === 'Kwiecien_2026') baseName = 'Kwiecień 2026';
+        if (opt.value === 'Styczen_2026') baseName = 'Styczeń 2026';
+        opt.text = baseName + (isCurrent ? ' (bieżący)' : '');
+        if (opt.value === targetVal) {
+          opt.selected = true;
+        }
+      }
+      selectEl.value = targetVal;
+    }
+
     function otworzTabeleMiesiaca() {
       document.getElementById('auth-panel').style.display = 'none';
       document.getElementById('app-panel').style.display = 'block';
@@ -9421,13 +9485,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       if (!wybranyMiesiacTabeli) wybranyMiesiacTabeli = pobierzAktywnyKluczMiesiaca();
-      var selectEl = document.getElementById('select-miesiac-tabeli');
-      if (selectEl) selectEl.value = wybranyMiesiacTabeli;
+      zaktualizujSelectMiesiacaTabeli(wybranyMiesiacTabeli);
 
       wczytajTabeleMiesiaca();
     }
 
     function zamknijTabeleMiesiaca() {
+      wybranyMiesiacTabeli = pobierzAktywnyKluczMiesiaca();
       if (globalUser && globalUser.nazwisko) {
         document.getElementById('app-panel').style.display = 'block';
         pokazWidok('pulpit');
@@ -9445,21 +9509,20 @@ function czyMaDostepDoZakrystii(nazwisko) {
     function zmienMiesiacTabeli(nowyMiesiac) {
       wybranyMiesiacTabeli = nowyMiesiac || pobierzAktywnyKluczMiesiaca();
       tabelaPrzegladanyMiesiacDane = null;
+      zaktualizujSelectMiesiacaTabeli(wybranyMiesiacTabeli);
       wczytajTabeleMiesiaca(true);
     }
 
     function wczytajTabeleMiesiaca(wymus) {
       var kontener = document.getElementById('tabela-miesiaca-scroll');
       var docId = wybranyMiesiacTabeli || pobierzAktywnyKluczMiesiaca();
-      var selectEl = document.getElementById('select-miesiac-tabeli');
-      if (selectEl && selectEl.value !== docId) {
-        selectEl.value = docId;
-      }
+      zaktualizujSelectMiesiacaTabeli(docId);
       var cacheKey = 'min_cached_tabela_' + docId;
+      var isCurrent = (docId === pobierzAktywnyKluczMiesiaca());
 
       // 1. Natychmiastowy render z pamięci lub localStorage (0 ms!)
       var hasRenderedFromCache = false;
-      if (docId === pobierzAktywnyKluczMiesiaca() && tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze && tabelaMiesiacaDane.wiersze.length) {
+      if (isCurrent && tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze && tabelaMiesiacaDane.wiersze.length) {
         tabelaPrzegladanyMiesiacDane = tabelaMiesiacaDane;
         renderujFiltryTabeli();
         renderujTabeleMiesiaca();
@@ -9467,12 +9530,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
       } else {
         try {
           var cTbl = localStorage.getItem(cacheKey);
-          if (!cTbl && docId === pobierzAktywnyKluczMiesiaca()) cTbl = localStorage.getItem('min_cached_tabela');
+          if (!cTbl && isCurrent) cTbl = localStorage.getItem('min_cached_tabela');
           if (cTbl) {
             var parsed = JSON.parse(cTbl);
             if (parsed && parsed.wiersze && parsed.wiersze.length) {
               tabelaPrzegladanyMiesiacDane = parsed;
-              if (docId === pobierzAktywnyKluczMiesiaca()) tabelaMiesiacaDane = parsed;
+              if (isCurrent) tabelaMiesiacaDane = parsed;
               renderujFiltryTabeli();
               renderujTabeleMiesiaca();
               hasRenderedFromCache = true;
@@ -9492,7 +9555,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var fData = doc.data();
             autoRozliczWygasleOfertyFirestore(fData);
             tabelaPrzegladanyMiesiacDane = Object.assign({}, tabelaPrzegladanyMiesiacDane || {}, fData);
-            if (docId === pobierzAktywnyKluczMiesiaca()) {
+            if (isCurrent) {
               tabelaMiesiacaDane = Object.assign({}, tabelaMiesiacaDane || {}, fData);
               try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
             }
@@ -9546,12 +9609,19 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var dane = tabelaPrzegladanyMiesiacDane || tabelaMiesiacaDane;
       if (!filtryBox || !dane) return;
 
-      var grupy = ['Wszyscy'].concat(dane.grupy || []);
+      var rawGrupy = dane.grupy || [];
+      var normalizedGrupy = rawGrupy.map(function(item) {
+        if (!item) return '';
+        if (typeof item === 'object') return (item.nazwa || item.grupa || '');
+        return String(item);
+      }).filter(Boolean);
+
+      var grupy = ['Wszyscy'].concat(normalizedGrupy);
       var html = '';
       for (var i = 0; i < grupy.length; i++) {
         var g = grupy[i];
         var activeClass = (g === aktywnyFiltrGrupy) ? 'active' : '';
-        html += '<button type="button" class="filter-pill ' + activeClass + '" onclick="ustawFiltrGrupyTabeli(\'' + g.replace(/'/g, "\\'") + '\')">' + g + '</button>';
+        html += '<button type="button" class="filter-pill ' + activeClass + '" onclick="ustawFiltrGrupyTabeli(this.textContent)">' + g + '</button>';
       }
       filtryBox.innerHTML = html;
 
@@ -10383,10 +10453,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
     function otworzModalOddajDyzur(dzien, typ, godzina, optRok, optMiesiacIdx) {
       var myNameOdd = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : (localStorage.getItem('min_name') || '');
       var stanOdd = (globalUser && globalUser.stan) ? globalUser.stan : {};
-      var isNextMonth = (optRok !== undefined && optMiesiacIdx !== undefined && (optRok !== stanOdd.rok || optMiesiacIdx !== stanOdd.miesiacIdx));
-      var targetRok = isNextMonth ? optRok : stanOdd.rok;
-      var targetMiesiacIdx = isNextMonth ? optMiesiacIdx : stanOdd.miesiacIdx;
-      var targetDocKey = isNextMonth ? wyznaczKluczMiesiaca(new Date(targetRok, targetMiesiacIdx, 1)) : pobierzAktywnyKluczMiesiaca();
+      var targetRok = (optRok !== undefined && optRok !== null) ? optRok : (stanOdd.rok || (new Date()).getFullYear());
+      var targetMiesiacIdx = (optMiesiacIdx !== undefined && optMiesiacIdx !== null) ? optMiesiacIdx : ((stanOdd.miesiacIdx !== undefined) ? stanOdd.miesiacIdx : (new Date()).getMonth());
+      var targetDocKey = wyznaczKluczMiesiaca(new Date(targetRok, targetMiesiacIdx, 1));
       var targetData = isNextMonth ? (daneKolejnegoMiesiaca || {}) : stanOdd;
       var isWeekend = (typ === 'Weekend' || typ === 'Niedziela' || typ === 'Msza niedzielna');
 
@@ -10913,6 +10982,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var sel = document.getElementById('select-miesiac-nagrody');
       if (sel && sel.options.length === 0) {
         var dostepne = [
+          { id: "Październik_2026", label: "Październik 2026" },
           { id: "Wrzesień_2026", label: "Wrzesień 2026" },
           { id: "Sierpień_2026", label: "Sierpień 2026" },
           { id: "Lipiec_2026", label: "Lipiec 2026" },
