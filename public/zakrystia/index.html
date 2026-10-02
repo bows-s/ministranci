@@ -2556,13 +2556,13 @@
       </div>
 
       <div id="modal-zmien-dzien-wybor-sekcja" style="margin-bottom:16px;">
-        <label class="section-label" style="display:block; margin-bottom:8px; font-size:12px; font-weight:600; color:#a1a1aa; text-transform:uppercase;">Wybierz nowy stały dzień w tygodniu (godz. 18:00):</label>
+        <label class="section-label" style="display:block; margin-bottom:8px; font-size:12px; font-weight:600; color:#a1a1aa; text-transform:uppercase;">Wybierz nowy stały dzień w tygodniu:</label>
         <select id="sel-nowy-staly-dzien" style="width:100%; padding:10px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; outline:none; box-sizing:border-box;">
-          <option value="1">Poniedziałek (18:00)</option>
-          <option value="2">Wtorek (18:00)</option>
-          <option value="3">Środa (18:00)</option>
-          <option value="4">Czwartek (18:00)</option>
-          <option value="5">Piątek (18:00)</option>
+          <option value="1">Poniedziałek (godz. 18:00)</option>
+          <option value="2">Wtorek (godz. 18:00)</option>
+          <option value="3">Środa (godz. 08:00 - rano)</option>
+          <option value="4">Czwartek (godz. 17:00 - msza szkolna)</option>
+          <option value="5">Piątek (godz. 18:00)</option>
         </select>
       </div>
 
@@ -10700,9 +10700,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
+      var godzinyDni = ['', 'godz. 18:00', 'godz. 18:00', 'godz. 08:00 - rano', 'godz. 17:00 - msza szkolna', 'godz. 18:00'];
       var obecnyEl = document.getElementById('modal-zmien-dzien-obecny');
       if (obecnyEl) {
-        var nazwaObecnego = (curDow >= 1 && curDow <= 5) ? (nazwyDni[curDow] + ' (godz. 18:00)') : 'Nieustalony';
+        var godzTekst = (curDow >= 1 && curDow <= 5) ? (' (' + godzinyDni[curDow] + ')') : '';
+        var nazwaObecnego = (curDow >= 1 && curDow <= 5) ? (nazwyDni[curDow] + godzTekst) : 'Nieustalony';
         obecnyEl.innerHTML = '<div style="font-size:11px; color:#a1a1aa; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Aktualny stały dzień służby:</div>' +
                              '<div style="font-size:15px; font-weight:700; color:#38bdf8; display:flex; align-items:center; gap:6px;">' +
                                '<span>📅 ' + nazwaObecnego + '</span>' +
@@ -10737,8 +10739,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
         var optHtml = '';
         for (var d = 1; d <= 5; d++) {
           var isCur = (d === curDow);
-          var suffix = isCur ? ' (Twój obecny dzień)' : '';
-          optHtml += '<option value="' + d + '"' + (isCur ? ' selected' : '') + '>' + nazwyDni[d] + ' (18:00)' + suffix + '</option>';
+          var suffix = isCur ? ' — Twój obecny dzień' : '';
+          optHtml += '<option value="' + d + '"' + (isCur ? ' selected' : '') + '>' + nazwyDni[d] + ' (' + godzinyDni[d] + ')' + suffix + '</option>';
         }
         selDzien.innerHTML = optHtml;
       }
@@ -10814,6 +10816,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
+      var godzinyDni = ['', 'godz. 18:00', 'godz. 18:00', 'godz. 08:00 - rano', 'godz. 17:00 - msza szkolna', 'godz. 18:00'];
       var staryDzien = myRow.stalyDzienTygodnia;
       var rok = tabelaMiesiacaDane.rok || 2026;
       var mIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
@@ -10829,7 +10832,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       if (staryDzien === nowyDzien) {
-        pokazToast('Wybrany dzień (' + nazwyDni[nowyDzien] + ') jest już Twoim stałym dniem służby.');
+        pokazToast('Wybrany dzień (' + nazwyDni[nowyDzien] + ' - ' + godzinyDni[nowyDzien] + ') jest już Twoim stałym dniem służby.');
         zamknijModalZmienStalyDzien();
         return;
       }
@@ -10931,6 +10934,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             [myName]: {
               stalyDzien: nowyDzien,
               nazwaDnia: nazwyDni[nowyDzien],
+              godzinaDnia: godzinyDni[nowyDzien],
               ostatniaZmiana: nowIso,
               zmienionoPrzez: myName
             }
@@ -10954,7 +10958,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       zamknijModalZmienStalyDzien();
-      pokazToast('✓ Twój stały dzień został zmieniony na ' + nazwyDni[nowyDzien] + ' (18:00)');
+      pokazToast('✓ Twój stały dzień został zmieniony na ' + nazwyDni[nowyDzien] + ' (' + godzinyDni[nowyDzien] + ')');
 
       // Odśwież pulpit ministranta
       var nowyStan = generujStanZFirestore(myName, tabelaMiesiacaDane);
