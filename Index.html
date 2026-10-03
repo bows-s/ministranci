@@ -3630,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.5';
+    var APP_VERSION = '1.5.6';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -11577,7 +11577,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var targetRok = (optRok !== undefined && optRok !== null) ? optRok : (stanOdd.rok || (new Date()).getFullYear());
       var targetMiesiacIdx = (optMiesiacIdx !== undefined && optMiesiacIdx !== null) ? optMiesiacIdx : ((stanOdd.miesiacIdx !== undefined) ? stanOdd.miesiacIdx : (new Date()).getMonth());
       var targetDocKey = wyznaczKluczMiesiaca(new Date(targetRok, targetMiesiacIdx, 1));
-      var targetData = isNextMonth ? (daneKolejnegoMiesiaca || {}) : stanOdd;
+      var isNextMonth = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
+      var targetData = isNextMonth ? (daneKolejnegoMiesiaca || {}) : (tabelaMiesiacaDane || stanOdd || {});
       var isWeekend = (typ === 'Weekend' || typ === 'Niedziela' || typ === 'Msza niedzielna');
 
       // 1. Sprawdź czy dzień nie jest już wystawiony na giełdzie wymian 1:1
@@ -11741,6 +11742,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
         alert(err.message || 'Wystąpił błąd podczas oddawania dyżuru.');
       }
     }
+    window.otworzModalOddajDyzur = otworzModalOddajDyzur;
+    window.zamknijModalOddajDyzur = zamknijModalOddajDyzur;
+    window.wykonajOddajDyzur = wykonajOddajDyzur;
 
     async function anulujUsprawiedliwienieNiedziela(dzien, optDocKey) {
       if (!confirm('Czy na pewno chcesz wycofać zgłoszenie nieobecności i powrócić do normalnego dyżuru?')) return;
