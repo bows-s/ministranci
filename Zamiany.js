@@ -125,9 +125,24 @@ function obsluzZapytanieAPI(e) {
       wynik = testowePowiadomienieFCM(args[0]);
     } else if (funkcja === "aktywujWyzwalaczPoranny") {
       wynik = utworzWyzwalaczPoranny();
+    } else if (funkcja === "testujWieczornePrzypomnienia") {
+      var customDate = (args && args[0]) ? new Date(args[0]) : null;
+      wynik = wyslijWieczornePrzypomnieniaONajblizszejSluzbie(customDate);
+    } else if (funkcja === "utworzArkuszPazdziernik") {
+      var ssOct = pobierzAktywnyArkusz();
+      var wOct = ssOct.getSheetByName("Wrzesień_2026") || ssOct.getSheetByName("Wrzesien_2026");
+      var octExists = ssOct.getSheetByName("Październik_2026") || ssOct.getSheetByName("Pazdziernik_2026");
+      if (!octExists && wOct) {
+        var nSh = wOct.copyTo(ssOct).setName("Październik_2026");
+        wynik = { sukces: true, wiadomosc: "Utworzono arkusz Październik_2026 w skoroszycie!" };
+      } else {
+        wynik = { sukces: true, wiadomosc: octExists ? "Arkusz już istnieje" : "Brak arkusza wzorcowego Wrzesień_2026" };
+      }
     } else if (funkcja === "testujPorannePrzypomnienia") {
       var customDate = (args && args[0]) ? new Date(args[0]) : null;
       wynik = wyslijPorannePrzypomnieniaOSluzbie(customDate);
+    } else if (funkcja === "naprawCzystyPazdziernik") {
+      wynik = naprawCzystyPazdziernik();
     } else if (funkcja === "symulujPorannePrzypomnienie") {
       wynik = symulujPorannePrzypomnienieDlaMinistranta(args[0]);
     } else if (funkcja === "przypomnijOGieldzie") {
@@ -489,7 +504,100 @@ function powiadomOZamianie(doKogo, ktoZaakceptowal, szczegoly) {
 function przygotujDaneHarmonogramu(ss) {
   var ssObj = ss || pobierzAktywnyArkusz();
   var mSheet = pobierzBiezacyArkuszMiesiaca(ssObj);
-  if (!mSheet) return null;
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonthIdx = now.getMonth();
+  var currentDay = now.getDate();
+  var daysInMonth = new Date(currentYear, currentMonthIdx + 1, 0).getDate();
+
+  if (!mSheet) {
+    // FALLBACK: Pobierz bezpośrednio z Firestore!
+    var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+    var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+    var docName = polishM[currentMonthIdx] + "_" + currentYear;
+    var docAlt = polishAlt[currentMonthIdx] + "_" + currentYear;
+    var fsData = pobierzDokumentFirestore("stan_grafiku", docName) || pobierzDokumentFirestore("stan_grafiku", docAlt);
+
+    if (fsData && fsData.wiersze && fsData.wiersze.length > 0) {
+      var userRowMap = {};
+      var userGrupaMap = {};
+      var colBValues = [];
+      var allBackgrounds = [];
+      var allValues = [];
+
+      for (var fi = 0; fi < fsData.wiersze.length; fi++) {
+        var fw = fsData.wiersze[fi];
+        var nNorm = oczyscNazwiskoMinistranta(fw.nazwisko || "").toLowerCase();
+        var virtualRow = fi + 3;
+        userRowMap[nNorm] = virtualRow;
+        userGrupaMap[virtualRow] = fw.grupa || "";
+        colBValues.push([fw.nazwisko || ""]);
+
+        var rowVals = [];
+        var rowBgs = [];
+        for (var ci = 0; ci < daysInMonth; ci++) {
+          var cell = (fw.komorki && fw.komorki[ci]) ? fw.komorki[ci] : {};
+          rowVals.push(cell.wartosc !== undefined ? cell.wartosc : null);
+          rowBgs.push(cell.maDyzur ? "#c6efce" : "#ffffff");
+        }
+        allValues.push(rowVals);
+        allBackgrounds.push(rowBgs);
+      }
+
+      var grupyGodziny = {};
+      (fsData.grupy || []).forEach(function(g) {
+        if (g.nazwa && g.godzinaNiedziela) grupyGodziny[g.nazwa.trim()] = cleanTime(g.godzinaNiedziela);
+      });
+
+      var zastepstwaDni = {};
+      (fsData.zamianyZastepstwa || []).forEach(function(z) {
+        if (!z || z.status === "ANULOWANA") return;
+        var zDay = parseInt(z.dzien, 10);
+        if (isNaN(zDay)) return;
+        if (!zastepstwaDni[zDay]) zastepstwaDni[zDay] = [];
+        zastepstwaDni[zDay].push({
+          id: z.id,
+          dzien: zDay,
+          oddajacy: oczyscNazwiskoMinistranta(z.oddajacy || "").toLowerCase(),
+          przejmujacy: oczyscNazwiskoMinistranta(z.przejmujacy || "").toLowerCase(),
+          godzina: cleanTime(z.godzina),
+          status: z.status
+        });
+      });
+
+      var zamianyNiedzieleList = [];
+      (fsData.zamianyNiedziele || []).forEach(function(zn) {
+        if (zn && zn.status === "ZAAKCEPTOWANA") {
+          zamianyNiedzieleList.push({
+            dzien: parseInt(zn.dzien, 10),
+            wystawiajacy: oczyscNazwiskoMinistranta(zn.wystawiajacy || "").toLowerCase(),
+            godzOddana: cleanTime(zn.godzinaOddawana || zn.godzOddana),
+            przejmujacy: oczyscNazwiskoMinistranta(zn.przejmujacy || "").toLowerCase(),
+            godzWzieta: cleanTime(zn.godzinaPrzejmujacego || zn.godzWzieta)
+          });
+        }
+      });
+
+      return {
+        ss: ssObj,
+        mSheet: null,
+        currentYear: currentYear,
+        currentMonthIdx: currentMonthIdx,
+        currentDay: currentDay,
+        daysInMonth: daysInMonth,
+        colBValues: colBValues,
+        userRowMap: userRowMap,
+        userGrupaMap: userGrupaMap,
+        allBackgrounds: allBackgrounds,
+        allValues: allValues,
+        dniSwiateczne: [],
+        zastepstwaDni: zastepstwaDni,
+        grupyGodziny: grupyGodziny,
+        zamianyNiedzieleList: zamianyNiedzieleList
+      };
+    }
+    return null;
+  }
 
   var now = new Date();
   var currentYear = now.getFullYear();
@@ -497,16 +605,33 @@ function przygotujDaneHarmonogramu(ss) {
   var currentDay = now.getDate();
   var daysInMonth = new Date(currentYear, currentMonthIdx + 1, 0).getDate();
 
+  var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+  var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+  var docNameG = polishM[currentMonthIdx] + "_" + currentYear;
+  var docAltG = polishAlt[currentMonthIdx] + "_" + currentYear;
+  var fsDocG = pobierzDokumentFirestore("stan_grafiku", docNameG) || pobierzDokumentFirestore("stan_grafiku", docAltG);
+
   var maxRows = Math.min(mSheet.getLastRow(), 32);
   var colBValues = mSheet.getRange(1, 2, maxRows, 1).getValues();
 
   var userRowMap = {};
+  var userGrupaMap = {};
   for (var r = 2; r < maxRows; r++) {
     var rawN = colBValues[r][0].toString().trim();
     if (rawN) {
       var norm = oczyscNazwiskoMinistranta(rawN).toLowerCase();
       userRowMap[norm] = r + 1;
     }
+  }
+
+  if (fsDocG && fsDocG.wiersze) {
+    fsDocG.wiersze.forEach(function(fw) {
+      var nKey = oczyscNazwiskoMinistranta(fw.nazwisko || "").toLowerCase();
+      var rNum = userRowMap[nKey];
+      if (rNum && fw.grupa) {
+        userGrupaMap[rNum] = fw.grupa;
+      }
+    });
   }
 
   var allBackgrounds = mSheet.getRange(3, 4, maxRows - 2, daysInMonth).getBackgrounds();
@@ -552,11 +677,26 @@ function przygotujDaneHarmonogramu(ss) {
   }
 
   var sundaySheet = ssObj.getSheetByName("Grafik_Niedziele");
-  var grupyGodziny = {};
+  var grupyGodziny = wyznaczRotowaneGodzinyGrup(currentYear, currentMonthIdx);
+  if (fsDocG && fsDocG.grupy && fsDocG.grupy.length > 0) {
+    fsDocG.grupy.forEach(function(g) {
+      if (g.nazwa && g.godzinaNiedziela) grupyGodziny[g.nazwa.trim()] = cleanTime(g.godzinaNiedziela);
+    });
+  }
   if (sundaySheet) {
-    var gData = sundaySheet.getRange("A2:B5").getDisplayValues();
-    for (var gi = 0; gi < gData.length; gi++) {
-      grupyGodziny[gData[gi][0].toString().trim()] = cleanTime(gData[gi][1]);
+    try {
+      var gData = sundaySheet.getRange("A2:B5").getValues();
+      for (var gi = 0; gi < gData.length; gi++) {
+        var grpName = (gData[gi][0] || "").toString().trim();
+        for (var rk in grupyGodziny) {
+          if (dopasujGrupe(rk, grpName)) {
+            sundaySheet.getRange(gi + 2, 2).setValue(grupyGodziny[rk]);
+            break;
+          }
+        }
+      }
+    } catch (eG) {
+      console.warn("Nie udało się zaktualizować arkusza Grafik_Niedziele:", eG);
     }
   }
 
@@ -586,6 +726,7 @@ function przygotujDaneHarmonogramu(ss) {
     daysInMonth: daysInMonth,
     colBValues: colBValues,
     userRowMap: userRowMap,
+    userGrupaMap: userGrupaMap,
     allBackgrounds: allBackgrounds,
     allValues: allValues,
     dniSwiateczne: dniSwiateczne,
@@ -595,7 +736,13 @@ function przygotujDaneHarmonogramu(ss) {
   };
 }
 
-function wyznaczGodzineNiedzielnaMinistranta(userRow, colBValues, grupyGodziny) {
+function wyznaczGodzineNiedzielnaMinistranta(userRow, colBValues, grupyGodziny, userGrupaMap) {
+  if (userGrupaMap && userGrupaMap[userRow]) {
+    var uG = userGrupaMap[userRow];
+    for (var gKey in grupyGodziny) {
+      if (dopasujGrupe(gKey, uG)) return cleanTime(grupyGodziny[gKey]);
+    }
+  }
   if (!userRow || userRow < 3) return "";
   var groups = {
     "I GRUPA (CZERWONA)": [3, 4, 5, 6],
@@ -691,7 +838,7 @@ function sprawdzCzyMinistrantMaDyzurWDniu(normName, dayNum, cache) {
       if (uValNext === 0 || uValNext === "0") {
         return { maDyzur: false, powód: "usprawiedliwiony" };
       }
-      var sobGodzina = wyznaczGodzineNiedzielnaMinistranta(userRow, cache.colBValues, cache.grupyGodziny);
+      var sobGodzina = wyznaczGodzineNiedzielnaMinistranta(userRow, cache.colBValues, cache.grupyGodziny, cache.userGrupaMap);
       for (var szi = 0; szi < cache.zamianyNiedzieleList.length; szi++) {
         var zn = cache.zamianyNiedzieleList[szi];
         if (zn.dzien === nextSunday) {
@@ -720,7 +867,7 @@ function sprawdzCzyMinistrantMaDyzurWDniu(normName, dayNum, cache) {
     if (uValSun === 0 || uValSun === "0") {
       return { maDyzur: false, powód: "usprawiedliwiony" };
     }
-    var ndGodzina = wyznaczGodzineNiedzielnaMinistranta(userRow, cache.colBValues, cache.grupyGodziny);
+    var ndGodzina = wyznaczGodzineNiedzielnaMinistranta(userRow, cache.colBValues, cache.grupyGodziny, cache.userGrupaMap);
     for (var nzi = 0; nzi < cache.zamianyNiedzieleList.length; nzi++) {
       var znd = cache.zamianyNiedzieleList[nzi];
       if (znd.dzien === dayNum) {
@@ -880,6 +1027,95 @@ function wyslijPorannePrzypomnieniaOSluzbie(customDate) {
     liczbaWyslanych: wyslaneDo.length,
     odbiorcy: wyslaneDo,
     wszyscyNaDyzurze: wszyscyNaDyzurzeDzis,
+    zarejestrowani: zarejestrowaniMinistranci,
+    wiadomosc: wiadomoscWynik
+  };
+}
+
+function wyslijWieczornePrzypomnieniaONajblizszejSluzbie(customDate) {
+  var ss = pobierzAktywnyArkusz();
+  var now = customDate || new Date();
+  var cache = przygotujDaneHarmonogramu(ss);
+  if (!cache) {
+    console.warn("Brak arkusza bieżącego miesiąca dla wieczornych powiadomień.");
+    return { sukces: false, wiadomosc: "Brak arkusza bieżącego miesiąca." };
+  }
+
+  // Cel: przypominamy o służbie na JUTRO
+  var jutro = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  var jutroDay = jutro.getDate();
+  var jutroMonthIdx = jutro.getMonth();
+  var jutroYear = jutro.getFullYear();
+
+  var wszyscyNaDyzurzeJutro = [];
+  for (var normKey in cache.userRowMap) {
+    var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(normKey, jutroDay, cache);
+    if (checkAll.maDyzur) {
+      var rowIdx = cache.userRowMap[normKey];
+      var rawName = (cache.colBValues && cache.colBValues[rowIdx - 1]) ? cache.colBValues[rowIdx - 1][0] : normKey;
+      var cleanName = oczyscNazwiskoMinistranta(rawName);
+      wszyscyNaDyzurzeJutro.push(cleanName + " (" + checkAll.godzina + ")");
+    }
+  }
+
+  var sheetTok = ss.getSheetByName("Powiadomienia_Tokeny");
+  if (!sheetTok || sheetTok.getLastRow() < 2) {
+    var infoBrak = "Raport wieczorny (jutro " + jutroDay + "." + (jutroMonthIdx + 1 < 10 ? '0' : '') + (jutroMonthIdx + 1) + "):\n\n"
+      + "• Służbę na jutro mają w grafiku:\n  " + (wszyscyNaDyzurzeJutro.length > 0 ? wszyscyNaDyzurzeJutro.join("\n  ") : "Nikt nie ma jutro wyznaczonej służby") + "\n\n"
+      + "ℹ️ Brak zarejestrowanych urządzeń w arkuszu Powiadomienia_Tokeny.";
+    return { sukces: false, wiadomosc: infoBrak, wszyscyNaDyzurze: wszyscyNaDyzurzeJutro };
+  }
+
+  var tokenData = sheetTok.getRange(2, 1, sheetTok.getLastRow() - 1, 2).getValues();
+  var wyslaneDo = [];
+  var zarejestrowaniMinistranci = [];
+
+  for (var i = 0; i < tokenData.length; i++) {
+    var nazwisko = tokenData[i][0];
+    var token = tokenData[i][1];
+    if (!token || !nazwisko) continue;
+
+    if (zarejestrowaniMinistranci.indexOf(nazwisko) === -1) {
+      zarejestrowaniMinistranci.push(nazwisko);
+    }
+
+    var norm = oczyscNazwiskoMinistranta(nazwisko).toLowerCase();
+    var sluzba = sprawdzCzyMinistrantMaDyzurWDniu(norm, jutroDay, cache);
+
+    if (sluzba.maDyzur) {
+      var imie = nazwisko.trim().split(/\s+/)[0];
+      var tytul = "Przypomnienie o jutrzejszej służbie ⛪";
+      var tresc = "Cześć " + imie + "! Jutro masz dyżur na Mszy św. o godz. " + sluzba.godzina + ". Pamiętaj o przyjściu!";
+      if (sluzba.typ === "ZASTEPSTWO") {
+        tresc = "Cześć " + imie + "! Jutro masz dyżur na Mszy św. o godz. " + sluzba.godzina + " (" + sluzba.opis + "). Pamiętaj o przyjściu!";
+      }
+
+      var resPush = wyslijWiadomoscFCM(token, tytul, tresc, {
+        widok: "pulpit",
+        url: "https://ministranci.web.app/"
+      });
+
+      if (resPush && resPush.sukces) {
+        if (wyslaneDo.indexOf(nazwisko) === -1) wyslaneDo.push(nazwisko + " (" + sluzba.godzina + ")");
+      }
+    }
+  }
+
+  console.log("Wieczorne przypomnienia wysłane do:", wyslaneDo);
+  var wiadomoscWynik = "";
+  if (wyslaneDo.length > 0) {
+    wiadomoscWynik = "Wysłano wieczorne przypomnienia o jutrzejszej służbie do:\n" + wyslaneDo.join("\n");
+  } else {
+    wiadomoscWynik = "Raport wieczorny (jutro " + jutroDay + "." + (jutroMonthIdx + 1 < 10 ? '0' : '') + (jutroMonthIdx + 1) + "):\n\n"
+      + "• Służbę na jutro w grafiku mają:\n  " + (wszyscyNaDyzurzeJutro.length > 0 ? wszyscyNaDyzurzeJutro.join("\n  ") : "Brak osób na jutrzejszy dzień") + "\n\n"
+      + "• Zarejestrowane telefony w aplikacji:\n  " + (zarejestrowaniMinistranci.length > 0 ? zarejestrowaniMinistranci.join(", ") : "brak");
+  }
+
+  return {
+    sukces: true,
+    liczbaWyslanych: wyslaneDo.length,
+    odbiorcy: wyslaneDo,
+    wszyscyNaDyzurze: wszyscyNaDyzurzeJutro,
     zarejestrowani: zarejestrowaniMinistranci,
     wiadomosc: wiadomoscWynik
   };
@@ -1123,11 +1359,11 @@ function utworzWyzwalaczPoranny() {
   var triggers = ScriptApp.getProjectTriggers();
   for (var i = 0; i < triggers.length; i++) {
     var fn = triggers[i].getHandlerFunction();
-    if (fn === "wyslijPorannePrzypomnieniaOSluzbie" || fn === "automatycznyZegarGieldy" || fn === "przypomnieniaGieldaTrigger") {
+    if (fn === "wyslijPorannePrzypomnieniaOSluzbie" || fn === "wyslijWieczornePrzypomnieniaONajblizszejSluzbie" || fn === "automatycznyZegarGieldy" || fn === "przypomnieniaGieldaTrigger") {
       ScriptApp.deleteTrigger(triggers[i]);
     }
   }
-  // 1. Wyzwalacz codziennych przypomnień o 7:00 rano
+  // 1. Wyzwalacz codziennych przypomnień o 7:00 rano (o dzisiejszej służbie)
   ScriptApp.newTrigger("wyslijPorannePrzypomnieniaOSluzbie")
     .timeBased()
     .everyDays(1)
@@ -1136,13 +1372,22 @@ function utworzWyzwalaczPoranny() {
     .inTimezone("Europe/Warsaw")
     .create();
 
-  // 2. Automatyczny zegar giełdy sprawdzający wygasające wymiany co 30 minut
+  // 2. Wyzwalacz wieczornych przypomnień o 20:00 (o jutrzejszej służbie)
+  ScriptApp.newTrigger("wyslijWieczornePrzypomnieniaONajblizszejSluzbie")
+    .timeBased()
+    .everyDays(1)
+    .atHour(20)
+    .nearMinute(0)
+    .inTimezone("Europe/Warsaw")
+    .create();
+
+  // 3. Automatyczny zegar giełdy sprawdzający wygasające wymiany co 30 minut
   ScriptApp.newTrigger("automatycznyZegarGieldy")
     .timeBased()
     .everyMinutes(30)
     .create();
 
-  // 3. Popołudniowe przypomnienie o wolnych służbach na giełdzie o godz. 16:00
+  // 4. Popołudniowe przypomnienie o wolnych służbach na giełdzie o godz. 16:00
   ScriptApp.newTrigger("przypomnieniaGieldaTrigger")
     .timeBased()
     .everyDays(1)
@@ -1151,7 +1396,7 @@ function utworzWyzwalaczPoranny() {
     .inTimezone("Europe/Warsaw")
     .create();
 
-  return { sukces: true, wiadomosc: "Automatyczne wyzwalacze (przypomnienie o 7:00 oraz zegar giełdy co 30 minut) zostały pomyślnie utworzone!" };
+  return { sukces: true, wiadomosc: "Automatyczne wyzwalacze (przypomnienie o 7:00, wieczorne o 20:00 oraz zegar giełdy co 30 minut) zostały pomyślnie utworzone!" };
 }
 
 function menuAktywujWyzwalaczPoranny() {
@@ -1657,6 +1902,73 @@ function odpiszDyzurowMateuszaPokojskiego() {
   }
 }
 
+function naprawCzystyPazdziernik() {
+  var ss = pobierzAktywnyArkusz();
+  var sheet = ss.getSheetByName("Październik_2026") || ss.getSheetByName("Pazdziernik_2026");
+  if (!sheet) return { sukces: false, wiadomosc: "Brak arkusza Październik_2026" };
+
+  var maxRows = Math.min(sheet.getLastRow(), 45);
+  var colB = sheet.getRange(1, 2, maxRows, 1).getValues();
+
+  // 1. Wyczyść komórki w arkuszu dla dni 1..31 (kolumny 4..34)
+  for (var r = 3; r <= maxRows; r++) {
+    var rawN = (colB[r - 1][0] || "").toString().trim();
+    if (!rawN || rawN.toUpperCase().indexOf("GRUPA") !== -1) continue;
+    var norm = oczyscNazwiskoMinistranta(rawN).toLowerCase();
+
+    for (var d = 1; d <= 31; d++) {
+      var colIdx = d + 3;
+      var cellVal = "";
+      if (d === 2) {
+        if (norm.indexOf("maciej erich") !== -1) cellVal = 7;
+        else if (norm.indexOf("emil czech") !== -1) cellVal = 7;
+        else if (norm.indexOf("pierścieński") !== -1) cellVal = 5;
+      } else if (d === 3) {
+        if (norm.indexOf("maciej erich") !== -1) cellVal = 4;
+      }
+      sheet.getRange(r, colIdx).setValue(cellVal);
+    }
+
+    var sVal = 0;
+    if (norm.indexOf("maciej erich") !== -1) sVal = 11;
+    else if (norm.indexOf("emil czech") !== -1) sVal = 7;
+    else if (norm.indexOf("pierścieński") !== -1) sVal = 5;
+    sheet.getRange(r, 35).setValue(sVal);
+  }
+  SpreadsheetApp.flush();
+
+  // 2. Bezpośrednio zaktualizuj Firestore stan_grafiku/Październik_2026
+  var fsDoc = pobierzDokumentFirestore("stan_grafiku", "Październik_2026") || pobierzDokumentFirestore("stan_grafiku", "Pazdziernik_2026");
+  if (fsDoc && fsDoc.wiersze) {
+    fsDoc.wiersze.forEach(function(w) {
+      var wNorm = oczyscNazwiskoMinistranta(w.nazwisko || "").toLowerCase();
+      var suma = 0;
+      for (var day = 1; day <= 31; day++) {
+        var cIdx = day - 1;
+        var c = (w.komorki && w.komorki[cIdx]) ? w.komorki[cIdx] : { dzien: day };
+        c.dzien = day;
+        if (day === 2) {
+          if (wNorm.indexOf("maciej erich") !== -1) c.wartosc = 7;
+          else if (wNorm.indexOf("emil czech") !== -1) c.wartosc = 7;
+          else if (wNorm.indexOf("pierścieński") !== -1) c.wartosc = 5;
+          else c.wartosc = null;
+        } else if (day === 3) {
+          if (wNorm.indexOf("maciej erich") !== -1) c.wartosc = 4;
+          else c.wartosc = null;
+        } else {
+          c.wartosc = null;
+        }
+        if (c.wartosc !== null && c.wartosc !== undefined) suma += c.wartosc;
+        w.komorki[cIdx] = c;
+      }
+      w.suma = suma;
+    });
+    zapiszDokumentFirestore("stan_grafiku", "Październik_2026", fsDoc);
+  }
+
+  return { sukces: true, wiadomosc: "Pomyślnie wyczyszczono i zsynchronizowano Październik 2026!" };
+}
+
 function pobierzAktywnyArkusz() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   if (!ss) {
@@ -1672,11 +1984,21 @@ function pobierzBiezacyArkuszMiesiaca(ss) {
     "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
     "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
   ];
+  var alt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
   var mName = polishMonths[now.getMonth()] + "_" + now.getFullYear();
   var sheet = ss.getSheetByName(mName);
   if (!sheet) {
-    var alt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
     sheet = ss.getSheetByName(alt[now.getMonth()] + "_" + now.getFullYear());
+  }
+  if (!sheet) {
+    var all = ss.getSheets();
+    var curMNameLow = polishMonths[now.getMonth()].toLowerCase();
+    for (var i = 0; i < all.length; i++) {
+      var sName = all[i].getName().toLowerCase();
+      if (sName.indexOf(curMNameLow) === 0 && sName.indexOf(String(now.getFullYear())) !== -1) {
+        return all[i];
+      }
+    }
   }
   return sheet;
 }
@@ -1735,8 +2057,8 @@ function wyznaczRotowaneGodzinyGrup(rok, miesiacIdx) {
   // I GRUPA (CZERWONA) -> 10:00 (idx 1)
   // II GRUPA (POMARAŃCZOWA) -> 11:30 (idx 2)
   // III GRUPA (ZIELONA) -> 17:00 (idx 3)
-  var r = (rok !== undefined && rok !== null) ? parseInt(rok, 10) : 2026;
-  var m = (miesiacIdx !== undefined && miesiacIdx !== null) ? parseInt(miesiacIdx, 10) : 8;
+  var r = (rok !== undefined && rok !== null) ? parseInt(rok, 10) : (new Date()).getFullYear();
+  var m = (miesiacIdx !== undefined && miesiacIdx !== null) ? parseInt(miesiacIdx, 10) : (new Date()).getMonth();
   var diffMiesiace = (r - 2026) * 12 + (m - 8);
   var shift = ((diffMiesiace % 4) + 4) % 4;
 
@@ -4224,7 +4546,9 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         }
         if (logSheet) {
           try {
-            logSheet.appendRow([timeStamp, dNum + " września", godzina, litNazwa, uItem.nazwisko, "USUNIĘTO", "DODATKOWY", -(domPunkty || 3), "-", autorStr]);
+            var polishMonthsGen = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
+            var mNameLog = polishMonthsGen[(miesiacIdx !== undefined) ? miesiacIdx : (new Date()).getMonth()] || polishMonthsGen[(new Date()).getMonth()];
+            logSheet.appendRow([timeStamp, dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()), godzina, litNazwa, uItem.nazwisko, "USUNIĘTO", "DODATKOWY", -(domPunkty || 3), "-", autorStr]);
           } catch(e) {}
         }
         break;
@@ -4262,7 +4586,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
       if (logSheet) {
         try {
           var ptsLog = (typeof item.punkty === "number") ? item.punkty : (status === "NIEOBECNY" ? -5 : status === "OBECNY" ? ptsObecny : 0);
-          logSheet.appendRow([timeStamp, dNum + " września " + (rok || 2026), godzina, litNazwa, item.nazwisko, status, typ, ptsLog, zastepuje || "-", autorStr]);
+          logSheet.appendRow([timeStamp, dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()), godzina, litNazwa, item.nazwisko, status, typ, ptsLog, zastepuje || "-", autorStr]);
         } catch(eL) {}
       }
       continue;
@@ -4273,7 +4597,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
 
     if (status === "OBECNY") {
       if (typ === "ZASTEPCA") {
-        var dtSub = new Date(rok || 2026, (miesiacIdx !== undefined) ? miesiacIdx : 8, dNum);
+        var dtSub = new Date(rok || (new Date()).getFullYear(), (miesiacIdx !== undefined) ? miesiacIdx : (new Date()).getMonth(), dNum);
         var isSunSub = (dtSub.getDay() === 0);
         var subPts = isSunSub ? 3 : 4;
         cell.setValue(subPts);
@@ -4323,14 +4647,17 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         var curVal = cell.getValue();
         var curNum = parseFloat(curVal);
         var finalPts = ptsObecny;
-        if (!isNaN(curNum) && curNum < 0) {
+        if (!isNaN(curNum) && curNum < 0 && !item.karaPunkty) {
           finalPts = curNum + ptsObecny;
           noteText += " (+" + ptsObecny + " pkt po karze " + curNum + ", łącznie: " + finalPts + " pkt)";
         } else if (!isNaN(curNum) && curNum > 0 && (typ === "DODATKOWY" || czyDodatkowa)) {
           finalPts = curNum + ptsObecny;
           noteText += " (+" + ptsObecny + " pkt, łącznie: " + finalPts + " pkt)";
         } else {
-          noteText += " (+" + ptsObecny + " pkt)";
+          noteText += " (" + (ptsObecny >= 0 ? "+" : "") + ptsObecny + " pkt)";
+        }
+        if (item.karaPunkty && item.karaPunkty > 0) {
+          noteText += "\n⚠️ Punkty karne: -" + item.karaPunkty + " pkt";
         }
         cell.setValue(finalPts);
       }
@@ -4338,13 +4665,19 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
       zapisano++;
       if (logSheet) {
         try {
+          var polishMonthsGen = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
+          var mNameLog = polishMonthsGen[(miesiacIdx !== undefined) ? miesiacIdx : (new Date()).getMonth()] || polishMonthsGen[(new Date()).getMonth()];
+          var logStat = status;
+          if (item.karaPunkty && item.karaPunkty > 0) {
+            logStat += " (Kara: -" + item.karaPunkty + " pkt)";
+          }
           logSheet.appendRow([
             timeStamp,
-            dNum + " września " + (rok || 2026),
+            dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()),
             godzina,
             litNazwa,
             item.nazwisko,
-            status,
+            logStat,
             typ,
             (typ === "ZASTEPCA" ? subPts : ptsObecny),
             zastepuje || "-",
@@ -4405,7 +4738,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         try {
           logSheet.appendRow([
             timeStamp,
-            dNum + " września " + (rok || 2026),
+            dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()),
             godzina,
             litNazwa,
             item.nazwisko,
@@ -4426,7 +4759,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         try {
           logSheet.appendRow([
             timeStamp,
-            dNum + " września " + (rok || 2026),
+            dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()),
             godzina,
             litNazwa,
             item.nazwisko,
@@ -4447,7 +4780,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         try {
           logSheet.appendRow([
             timeStamp,
-            dNum + " września " + (rok || 2026),
+            dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()),
             godzina,
             litNazwa,
             item.nazwisko,
@@ -5147,12 +5480,12 @@ function synchronizujZFirestoreDoArkusza(nazwaMiesiaca, optionalSs) {
         var dzien = k.dzien || (d + 1);
         var colIdx = dzien + 3;
         var val = k.wartosc;
-
-        if (val !== null && val !== undefined && val !== "") {
-          sheet.getRange(targetRow, colIdx).setValue(val);
-          zaktualizowano++;
-        }
+        var cellVal = (val !== null && val !== undefined) ? val : "";
+        sheet.getRange(targetRow, colIdx).setValue(cellVal);
+        zaktualizowano++;
       }
+      var sumaVal = (fsW.suma !== undefined && fsW.suma !== null) ? fsW.suma : 0;
+      sheet.getRange(targetRow, 35).setValue(sumaVal);
     }
 
     SpreadsheetApp.flush();
@@ -5346,7 +5679,8 @@ function oglosDodatkowaLiturgie(liturgia) {
     }
     var rodzaj = liturgia.rodzaj || "Pogrzeb";
     var punkty = parseInt(liturgia.punkty, 10) || 3;
-    var dataTekst = liturgia.dataTekst || (dzien + " września");
+    var polishMonthsGen = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
+    var dataTekst = liturgia.dataTekst || (dzien + " " + (polishMonthsGen[miesiac] || polishMonthsGen[(new Date()).getMonth()]));
     var opis = liturgia.opis || rodzaj;
     var utworzyl = liturgia.utworzyl || "Kościelny";
     var zgloszeni = Array.isArray(liturgia.zgloszeni) ? liturgia.zgloszeni.join(", ") : (liturgia.zgloszeni || "");
@@ -5603,15 +5937,17 @@ function pobierzWszystkieLiturgieDodatkowe(ss) {
           sheet.getRange(i + 2, 5).setNumberFormat("@").setValue("'" + gVal);
         } catch(eSet) {}
       }
+      var polishMonthsGenL = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
+      var mIdxRow = (row[2] !== "" && row[2] !== null) ? Number(row[2]) : (new Date()).getMonth();
       lits.push({
         id: String(row[0]),
-        rok: Number(row[1]) || 2026,
-        miesiacIdx: (row[2] !== "" && row[2] !== null) ? Number(row[2]) : 8,
+        rok: Number(row[1]) || (new Date()).getFullYear(),
+        miesiacIdx: mIdxRow,
         dzien: dNum,
         godzina: gVal,
         rodzaj: String(row[5] || "Pogrzeb"),
         punkty: Number(row[6]) || 3,
-        dataTekst: String(row[7] || (row[3] + " września")),
+        dataTekst: String(row[7] || (row[3] + " " + polishMonthsGenL[mIdxRow])),
         opis: String(row[8] || ""),
         utworzyl: String(row[9] || "Kościelny"),
         zgloszeni: zg,

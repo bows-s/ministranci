@@ -1536,7 +1536,7 @@
               <div id="dashboard-rank-icon" style="font-size:11px; font-weight:600; width:34px; height:34px; border-radius:6px; background:#27272a; display:flex; align-items:center; justify-content:center; border:1px solid #3f3f46; flex-shrink:0; color:#fafafa;">L1</div>
               <div>
                 <div style="display:flex; align-items:center; gap:6px;">
-                  <span id="dashboard-rank-name" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Debiutant</span>
+                  <span id="dashboard-rank-name" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Młodzik</span>
                   <span id="dashboard-rank-lvl" style="font-size:10px; font-weight:700; background:#27272a; color:#fafafa; border:1px solid #3f3f46; padding:1px 6px; border-radius:9999px;">Lvl 1</span>
                 </div>
                 <div id="dashboard-rank-sub" style="font-size:11px; color:#a1a1aa; margin-top:2px;">Ładowanie poziomu...</div>
@@ -1944,18 +1944,7 @@
             <div style="display:inline-flex; align-items:center; gap:6px; background:#18181b; padding:3px 8px; border:1px solid #27272a; border-radius:6px;">
               
               <select id="select-miesiac-tabeli" onchange="zmienMiesiacTabeli(this.value)" style="border:none; outline:none; font-size:13px; font-weight:500; color:#fafafa; background:transparent; cursor:pointer; padding:4px 2px;">
-                <option value="Grudzień_2026">Grudzień 2026</option>
-                <option value="Listopad_2026">Listopad 2026</option>
-                <option value="Październik_2026">Październik 2026</option>
-                <option value="Wrzesień_2026">Wrzesień 2026</option>
-                <option value="Sierpień_2026">Sierpień 2026</option>
-                <option value="Lipiec_2026">Lipiec 2026</option>
-                <option value="Czerwiec_2026">Czerwiec 2026</option>
-                <option value="Maj_2026">Maj 2026</option>
-                <option value="Kwiecien_2026">Kwiecień 2026</option>
-                <option value="Marzec_2026">Marzec 2026</option>
-                <option value="Luty_2026">Luty 2026</option>
-                <option value="Styczen_2026">Styczeń 2026</option>
+                <option value="">Wczytywanie miesięcy...</option>
               </select>
             </div>
           </div>
@@ -2122,7 +2111,7 @@
             <div style="display:flex; align-items:center; gap:8px;">
               <span id="profil-ranga-ikona" style="font-size:12px; font-weight:600; color:#fafafa;">L1</span>
               <div>
-                <span id="profil-ranga-nazwa" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Debiutant</span>
+                <span id="profil-ranga-nazwa" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Młodzik</span>
                 <span id="profil-poziom-numer" style="font-size:10px; font-weight:600; background:#27272a; color:#a1a1aa; border:1px solid #3f3f46; padding:1px 6px; border-radius:4px; margin-left:4px;">Lvl 1</span>
               </div>
             </div>
@@ -2268,7 +2257,7 @@
             <div id="profil-stat-rok" style="font-size:16px; font-weight:700; color:#fafafa; letter-spacing:-0.02em; margin-top:2px;">0 XP</div>
           </div>
           <div style="background:#18181b; border:1px solid #27272a; border-radius:6px; padding:10px 12px; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
-            <div style="font-size:11px; font-weight:500; color:#71717a; text-transform:uppercase; letter-spacing:0.02em;">Bonus z odznak</div>
+            <div style="font-size:11px; font-weight:500; color:#71717a; text-transform:uppercase; letter-spacing:0.02em;">Bonusy XP</div>
             <div id="profil-stat-bonus-xp" style="font-size:16px; font-weight:700; color:#fafafa; letter-spacing:-0.02em; margin-top:2px;">+0 XP</div>
           </div>
           <div style="background:#09090b; border:1px solid #27272a; border-radius:12px; padding:10px 12px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
@@ -2333,8 +2322,13 @@
       <!-- Wybór miesiąca -->
       <div style="margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; background:#18181b; padding:10px 14px; border-radius:8px; border:1px solid #27272a;">
         <span style="font-size:13px; font-weight:600; color:#fafafa;">Wybierz miesiąc:</span>
-        <select id="select-miesiac-nagrody" onchange="zaladujNagrodyDlaMiesiaca(this.value)" style="width:auto; padding:6px 12px; font-size:13px; border-radius:6px; background:#27272a; color:#fafafa; border:1px solid #3f3f46; cursor:pointer;">
-        </select>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <select id="select-miesiac-nagrody" onchange="zaladujNagrodyDlaMiesiaca(this.value)" style="width:auto; padding:6px 12px; font-size:13px; border-radius:6px; background:#27272a; color:#fafafa; border:1px solid #3f3f46; cursor:pointer;">
+          </select>
+          <button type="button" onclick="zaladujNagrodyDlaMiesiaca(aktualnyMiesiacNagrody, true)" class="btn-secondary" style="width:auto; padding:6px 10px; font-size:12px; background:#27272a; color:#facc15; border:1px solid rgba(250,204,21,0.35); border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Przelicz ranking z aktualnych punktów w grafiku">
+            🔄 Odśwież
+          </button>
+        </div>
       </div>
 
       <div style="font-size:12px; color:#a1a1aa; margin-bottom:12px; line-height:1.4;">
@@ -2348,6 +2342,52 @@
 
       <div style="margin-top:16px; display:flex; justify-content:flex-end;">
         <button type="button" onclick="zamknijModalNagrodyZakrystia()" class="btn-secondary" style="width:auto; padding:8px 18px; font-size:13px;">Zamknij</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Wpisywania Punktów Karnych za Zachowanie w Zakrystii -->
+  <div id="modal-kara-zakrystia" class="modal-overlay" onclick="if(event.target === this) zamknijModalKaryZakrystia()">
+    <div class="modal-content" style="max-width:390px; width:100%; text-align:left; max-height:85vh; display:flex; flex-direction:column; padding:20px; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #27272a; padding-bottom:10px;">
+        <h3 style="margin:0; font-size:17px; display:flex; align-items:center; gap:8px; color:#f87171;">
+          <span>⚠️ Punkty karne</span>
+        </h3>
+        <span class="close-btn" onclick="zamknijModalKaryZakrystia()" style="font-size:24px; cursor:pointer; line-height:1;">&times;</span>
+      </div>
+
+      <div style="font-size:13px; color:#a1a1aa; margin-bottom:16px;">
+        Ministrant: <b id="kara-ministrant-nazwisko" style="color:#ffffff; font-size:15px;">-</b>
+      </div>
+
+      <!-- Wybór punktów karnych: -2, -3, -5 oraz własne -->
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:12px; font-weight:700; color:#fafafa; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">
+          Punkty karne do odjęcia:
+        </label>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:12px;">
+          <button type="button" class="btn-kara-pkt" data-pkt="2" onclick="wybierzKarePkt(2)" style="padding:12px 6px; font-size:16px; font-weight:800; border-radius:8px; background:#27272a; color:#fafafa; border:1px solid #3f3f46; cursor:pointer; transition:all 0.15s ease;">-2 pkt</button>
+          <button type="button" class="btn-kara-pkt" data-pkt="3" onclick="wybierzKarePkt(3)" style="padding:12px 6px; font-size:16px; font-weight:800; border-radius:8px; background:#27272a; color:#fafafa; border:1px solid #3f3f46; cursor:pointer; transition:all 0.15s ease;">-3 pkt</button>
+          <button type="button" class="btn-kara-pkt" data-pkt="5" onclick="wybierzKarePkt(5)" style="padding:12px 6px; font-size:16px; font-weight:800; border-radius:8px; background:#27272a; color:#fafafa; border:1px solid #3f3f46; cursor:pointer; transition:all 0.15s ease;">-5 pkt</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; background:#18181b; padding:10px 12px; border-radius:8px; border:1px solid #27272a;">
+          <span style="font-size:13px; color:#fafafa; font-weight:500;">Własna liczba:</span>
+          <span style="font-size:15px; font-weight:800; color:#f87171;">-</span>
+          <input type="number" id="input-kara-punkty" min="1" max="50" placeholder="np. 4" style="width:75px; padding:6px 10px; font-size:14px; font-weight:700; border-radius:6px; background:#27272a; color:#f87171; border:1px solid #3f3f46; text-align:center;" oninput="odznaczKarePktButtony()">
+          <span style="font-size:13px; color:#a1a1aa;">pkt</span>
+        </div>
+      </div>
+
+      <div style="background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.25); border-radius:8px; padding:10px 12px; font-size:12px; color:#fca5a5; margin-bottom:18px; line-height:1.4;">
+        💡 Punkty zostaną natychmiast odjęte od dorobku ministranta za tę mszę.
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <button type="button" id="btn-kara-usun" onclick="zatwierdzUsuniecieKaryZModalu()" class="btn-secondary" style="display:none; width:auto; padding:10px 14px; font-size:13px; color:#ef4444; border-color:rgba(239,68,68,0.3);">✕ Usuń karę</button>
+        <div style="display:flex; gap:8px; margin-left:auto;">
+          <button type="button" onclick="zamknijModalKaryZakrystia()" class="btn-secondary" style="width:auto; padding:10px 16px; font-size:13px;">Anuluj</button>
+          <button type="button" onclick="zatwierdzKareZakrystia()" style="width:auto; padding:10px 20px; font-size:13px; font-weight:700; background:#dc2626; color:#ffffff; border:none; border-radius:6px; cursor:pointer;">Zatwierdź</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2705,6 +2745,198 @@
       return miesiacePL[d.getMonth()] + "_" + d.getFullYear();
     }
 
+    function parsujKluczMiesiaca(klucz) {
+      var polishMonthsAll = [
+        "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+        "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+      ];
+      var now = new Date();
+      if (!klucz || typeof klucz !== 'string') {
+        return { rok: now.getFullYear(), miesiacIdx: now.getMonth(), nazwaMiesiaca: polishMonthsAll[now.getMonth()] };
+      }
+      var parts = klucz.split('_');
+      var mName = parts[0] || '';
+      var r = parseInt(parts[1], 10) || now.getFullYear();
+      var mIdx = polishMonthsAll.findIndex(function(m) { return m.toLowerCase() === mName.toLowerCase(); });
+      if (mIdx === -1) mIdx = now.getMonth();
+      return {
+        rok: r,
+        miesiacIdx: mIdx,
+        nazwaMiesiaca: polishMonthsAll[mIdx]
+      };
+    }
+
+    function wyznaczPoprzedniKluczMiesiaca(klucz) {
+      var p = parsujKluczMiesiaca(klucz);
+      var prevDt = new Date(p.rok, p.miesiacIdx - 1, 1);
+      return wyznaczKluczMiesiaca(prevDt);
+    }
+
+    function wyznaczNastepnyKluczMiesiaca(klucz) {
+      var p = parsujKluczMiesiaca(klucz);
+      var nextDt = new Date(p.rok, p.miesiacIdx + 1, 1);
+      return wyznaczKluczMiesiaca(nextDt);
+    }
+
+    async function zapewnijStanGrafikuDlaMiesiaca(docelowyKlucz, optBazaDane) {
+      if (!dbFirestore) return null;
+      var targetP = parsujKluczMiesiaca(docelowyKlucz);
+      var targetRok = targetP.rok;
+      var targetMIdx = targetP.miesiacIdx;
+      var docelowaNazwa = wyznaczKluczMiesiaca(new Date(targetRok, targetMIdx, 1));
+
+      try {
+        var checkSnap = await dbFirestore.collection('stan_grafiku').doc(docelowaNazwa).get().catch(function() { return null; });
+        if (checkSnap && checkSnap.exists && checkSnap.data() && checkSnap.data().wiersze && checkSnap.data().wiersze.length) {
+          return checkSnap.data();
+        }
+
+        var baza = optBazaDane;
+        if (!baza || !baza.wiersze) {
+          var prevKlucz = wyznaczPoprzedniKluczMiesiaca(docelowaNazwa);
+          var prevSnap = await dbFirestore.collection('stan_grafiku').doc(prevKlucz).get().catch(function() { return null; });
+          if (prevSnap && prevSnap.exists && prevSnap.data() && prevSnap.data().wiersze) {
+            baza = prevSnap.data();
+          } else {
+            var fallSnap = await dbFirestore.collection('stan_grafiku').doc('Wrzesień_2026').get().catch(function() { return null; });
+            if (fallSnap && fallSnap.exists && fallSnap.data() && fallSnap.data().wiersze) {
+              baza = fallSnap.data();
+            }
+          }
+        }
+
+        if (!baza || !baza.wiersze || !baza.wiersze.length) {
+          return null;
+        }
+
+        var skrotyDni = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "Sb"];
+        var dniWNowym = new Date(targetRok, targetMIdx + 1, 0).getDate();
+        var dniNaglowek = [];
+        for (var d = 1; d <= dniWNowym; d++) {
+          var dt = new Date(targetRok, targetMIdx, d);
+          var dow = dt.getDay();
+          dniNaglowek.push({
+            dzien: d,
+            skrotDnia: skrotyDni[dow],
+            czySobota: dow === 6,
+            czyNiedziela: dow === 0
+          });
+        }
+
+        var rotowaneGodziny = wyznaczRotowaneGodzinyGrup(targetRok, targetMIdx);
+        var noweWiersze = [];
+        var lp = 1;
+
+        for (var i = 0; i < baza.wiersze.length; i++) {
+          var w = baza.wiersze[i];
+          if (!w || !w.nazwisko) continue;
+          if (w.nazwisko.toLowerCase().indexOf('mateusz pokojski') !== -1) continue;
+
+          var stalyDzien = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia > 0) ? w.stalyDzienTygodnia : -1;
+          if (stalyDzien === -1 && w.komorki && w.komorki.length) {
+            for (var dayIdx = 0; dayIdx < w.komorki.length; dayIdx++) {
+              var dtPrev = new Date(baza.rok || (new Date()).getFullYear(), baza.miesiacIdx !== undefined ? baza.miesiacIdx : (targetMIdx === 0 ? 11 : targetMIdx - 1), dayIdx + 1);
+              var dowPrev = dtPrev.getDay();
+              if (dowPrev >= 1 && dowPrev <= 5 && w.komorki[dayIdx] && w.komorki[dayIdx].maDyzur) {
+                stalyDzien = dowPrev;
+                break;
+              }
+            }
+          }
+
+          var noweKomorki = [];
+          for (var cD = 1; cD <= dniWNowym; cD++) {
+            var dtN = new Date(targetRok, targetMIdx, cD);
+            var dowN = dtN.getDay();
+            var maDyzur = (dowN === 0 || (dowN >= 1 && dowN <= 5 && dowN === stalyDzien));
+            noweKomorki.push({ maDyzur: maDyzur, wartosc: null });
+          }
+
+          noweWiersze.push({
+            lp: lp++,
+            nazwisko: w.nazwisko,
+            grupa: w.grupa || "Ogólna",
+            stopien: w.stopien || "Ministrant",
+            stopienRanga: w.stopienRanga || 1,
+            stalyDzienTygodnia: stalyDzien,
+            ostatniaZmianaDnia: w.ostatniaZmianaDnia || null,
+            komorki: noweKomorki,
+            suma: 0
+          });
+        }
+
+        var rankingRokPrzeniesiony = [];
+        var prevRok = baza.rankingRok || baza.rankingMiesiac || [];
+        for (var k = 0; k < noweWiersze.length; k++) {
+          var nw = noweWiersze[k];
+          var prevItem = prevRok.find(function(p) { return p.nazwisko && czyToTenSamMinistrant(p.nazwisko, nw.nazwisko); });
+          var pmListPrzeniesione = (prevItem && prevItem.punktyPoMiesiacach && Array.isArray(prevItem.punktyPoMiesiacach))
+            ? JSON.parse(JSON.stringify(prevItem.punktyPoMiesiacach))
+            : [];
+          rankingRokPrzeniesiony.push({
+            nazwisko: nw.nazwisko,
+            normName: nw.nazwisko.toLowerCase().trim(),
+            punkty: prevItem ? (prevItem.punkty || prevItem.suma || 0) : 0,
+            suma: prevItem ? (prevItem.punkty || prevItem.suma || 0) : 0,
+            grupa: nw.grupa,
+            punktyPoMiesiacach: pmListPrzeniesione
+          });
+        }
+        rankingRokPrzeniesiony.sort(function(a, b) { return b.punkty - a.punkty; });
+        var poz = 1;
+        rankingRokPrzeniesiony.forEach(function(r, idx) {
+          if (idx > 0 && r.punkty < rankingRokPrzeniesiony[idx - 1].punkty) poz = idx + 1;
+          r.pozycja = poz;
+          r.miejsce = poz;
+        });
+
+        // Przenosimy pełną historię punktów minusowych z poprzednich miesięcy!
+        var prevMinusyRok = (baza.rankingMinusyRok && baza.rankingMinusyRok.length)
+          ? baza.rankingMinusyRok
+          : ((baza.rankingMinusy && baza.rankingMinusy.length) ? baza.rankingMinusy : []);
+        var rankingMinusyRokPrzeniesiony = JSON.parse(JSON.stringify(prevMinusyRok || []));
+
+        var polishMonthsAll = [
+          "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+          "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+        ];
+        var nowyStanGrafiku = {
+          nazwaMiesiaca: polishMonthsAll[targetMIdx],
+          rok: targetRok,
+          miesiacIdx: targetMIdx,
+          dniNaglowek: dniNaglowek,
+          grupy: [
+            { nazwa: "I GRUPA (CZERWONA)", godzinaNiedziela: rotowaneGodziny["I GRUPA (CZERWONA)"] },
+            { nazwa: "II GRUPA (POMARAŃCZOWA)", godzinaNiedziela: rotowaneGodziny["II GRUPA (POMARAŃCZOWA)"] },
+            { nazwa: "III GRUPA (ZIELONA)", godzinaNiedziela: rotowaneGodziny["III GRUPA (ZIELONA)"] },
+            { nazwa: "IV GRUPA (ŻÓŁTA)", godzinaNiedziela: rotowaneGodziny["IV GRUPA (ŻÓŁTA)"] }
+          ],
+          wiersze: noweWiersze,
+          ranking: noweWiersze.map(function(w) { return { nazwisko: w.nazwisko, suma: 0, miejsce: 1, grupa: w.grupa }; }),
+          rankingMiesiac: noweWiersze.map(function(w) { return { nazwisko: w.nazwisko, punkty: 0, pozycja: 1, grupa: w.grupa }; }),
+          rankingRok: rankingRokPrzeniesiony,
+          rankingMinusy: rankingMinusyRokPrzeniesiony,
+          rankingMinusyRok: rankingMinusyRokPrzeniesiony,
+          rankingMinusyMiesiac: [],
+          rankingiMiesiecy: baza.rankingiMiesiecy || {},
+          gieldaTydzien: [],
+          gieldaNiedziele: [],
+          zamianyZastepstwa: [],
+          wolneZastepstwa: [],
+          liturgieDodatkowe: [],
+          historiaWpisow: [],
+          zaktualizowano: new Date().toISOString()
+        };
+
+        await dbFirestore.collection('stan_grafiku').doc(docelowaNazwa).set(nowyStanGrafiku);
+        console.log('Automatycznie wygenerowano i zapisano miesiąc w Firestore:', docelowaNazwa);
+        return nowyStanGrafiku;
+      } catch(eGen) {
+        console.warn('Błąd w zapewnijStanGrafikuDlaMiesiaca:', eGen);
+        return null;
+      }
+    }
+
     var aktywnyKluczMiesiacaGlobal = (function() {
       var realCalMonth = wyznaczKluczMiesiaca(new Date());
       try {
@@ -2749,13 +2981,21 @@
           try { unsubKolejnyMiesiac(); } catch(e) {}
         }
         try {
-          unsubKolejnyMiesiac = dbFirestore.collection('stan_grafiku').doc(nDocId).onSnapshot(function(docN) {
+          unsubKolejnyMiesiac = dbFirestore.collection('stan_grafiku').doc(nDocId).onSnapshot(async function(docN) {
             if (docN.exists && docN.data()) {
               daneKolejnegoMiesiaca = docN.data();
               try { localStorage.setItem('min_cached_tabela_' + nDocId, JSON.stringify(daneKolejnegoMiesiaca)); } catch(e) {}
               if (globalUser && globalUser.nazwisko && tabelaMiesiacaDane) {
                 var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
                 if (stan) renderujDane(stan);
+              }
+            } else {
+              // Pod koniec miesiąca automatycznie przygotuj grafik kolejnego miesiąca w tle!
+              console.log('Koniec miesiąca - automatyczne przygotowanie kolejnego grafiku:', nDocId);
+              var nowyGrafik = await zapewnijStanGrafikuDlaMiesiaca(nDocId, tabelaMiesiacaDane);
+              if (nowyGrafik) {
+                daneKolejnegoMiesiaca = nowyGrafik;
+                try { localStorage.setItem('min_cached_tabela_' + nDocId, JSON.stringify(daneKolejnegoMiesiaca)); } catch(e) {}
               }
             }
           }, function(err) {
@@ -2923,8 +3163,8 @@
 
     function formatujDateDnia(d, stan, optRok, optMiesiacIdx, optNazwaMiesiaca) {
       if (!d && d !== 0) return '';
-      var r = optRok || (stan && stan.rok) || 2026;
-      var m = (optMiesiacIdx !== undefined && optMiesiacIdx !== null) ? optMiesiacIdx : ((stan && stan.miesiacIdx !== undefined) ? stan.miesiacIdx : 8);
+      var r = optRok || (stan && stan.rok) || (new Date()).getFullYear();
+      var m = (optMiesiacIdx !== undefined && optMiesiacIdx !== null) ? optMiesiacIdx : ((stan && stan.miesiacIdx !== undefined) ? stan.miesiacIdx : (new Date()).getMonth());
       var mNazwa = optNazwaMiesiaca || polishMonthsGenitive[m] || (stan && stan.nazwaMiesiaca) || '';
       var dzienTyg = pobierzDzienTygodnia(r, m, d);
       return d + ' ' + mNazwa + (dzienTyg ? ' (' + dzienTyg + ')' : '');
@@ -3387,7 +3627,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.4.1';
+    var APP_VERSION = '1.5.3';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -3395,9 +3635,12 @@
         if (savedVer && savedVer !== APP_VERSION) {
           console.log('Nowa wersja aplikacji:', APP_VERSION);
           localStorage.setItem('min_app_ver', APP_VERSION);
-          localStorage.removeItem('min_cached_tabela');
-          localStorage.removeItem('min_cached_data');
-          // tabelaMiesiacaDane zachowane w pamięci dla błyskawicznego logowania
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i);
+            if (k && (k.indexOf('min_cached_') === 0 || k.indexOf('min_staly_') === 0)) {
+              localStorage.removeItem(k);
+            }
+          }
           if ('caches' in window) {
             caches.keys().then(function(names) {
               names.forEach(function(n) { caches.delete(n); });
@@ -3465,6 +3708,8 @@
           wybranyMiesiacTabeli = realCalMonth;
         }
       } catch(eMonth) {}
+
+      zaktualizujSelectMiesiacaTabeli(pobierzAktywnyKluczMiesiaca());
 
       var pathname = (window.location.pathname || '').toLowerCase();
       var search   = (window.location.search || '').toLowerCase();
@@ -3622,14 +3867,19 @@
 
         // Stan grafiku (Błyskawiczny odczyt z Firestore Warszawa 15 ms!)
         var mDocId = pobierzAktywnyKluczMiesiaca();
-        dbFirestore.collection('stan_grafiku').doc(mDocId).get().then(function(doc) {
+        dbFirestore.collection('stan_grafiku').doc(mDocId).get().then(async function(doc) {
           ukryjSpinner();
           pokazMiniRefresh(false);
-          if (doc.exists && doc.data()) {
-            tabelaMiesiacaDane = doc.data();
+          var docData = (doc.exists && doc.data()) ? doc.data() : null;
+          if (!docData) {
+            console.log('Miesiąc ' + mDocId + ' nie istnieje w Firestore - uruchamiam auto-generowanie...');
+            docData = await zapewnijStanGrafikuDlaMiesiaca(mDocId);
+          }
+          if (docData) {
+            tabelaMiesiacaDane = docData;
             try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
             if (sName) {
-              var stanZFirestore = generujStanZFirestore(sName, doc.data());
+              var stanZFirestore = generujStanZFirestore(sName, docData);
               if (stanZFirestore) renderujDane(stanZFirestore);
             }
           }
@@ -3885,10 +4135,14 @@
       pokazMiniRefresh(true);
       var mDocId = pobierzAktywnyKluczMiesiaca();
       if (dbFirestore) {
-        dbFirestore.collection('stan_grafiku').doc(mDocId).get().then(function(doc) {
+        dbFirestore.collection('stan_grafiku').doc(mDocId).get().then(async function(doc) {
           pokazMiniRefresh(false);
-          if (doc.exists && doc.data()) {
-            tabelaMiesiacaDane = doc.data();
+          var docData = (doc.exists && doc.data()) ? doc.data() : null;
+          if (!docData) {
+            docData = await zapewnijStanGrafikuDlaMiesiaca(mDocId);
+          }
+          if (docData) {
+            tabelaMiesiacaDane = docData;
             try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
             if (globalUser && globalUser.nazwisko) {
               var stan = generujStanZFirestore(globalUser.nazwisko, doc.data());
@@ -3919,14 +4173,14 @@
     // SYSTEM GRYWALIZACJI (POZIOMY XP, ODZNAKI, PASSA) I PROFILE
     // =============================================================
     var RANGI_GAMIFIKACJI = [
-      { lvl: 1, nazwa: "Debiutant", icon: "D", minXp: 0, maxXp: 75, kolor: "#94a3b8", bg: "#f1f5f9" },
-      { lvl: 2, nazwa: "Dyżurny", icon: "2", minXp: 76, maxXp: 200, kolor: "#10b981", bg: "#ecfdf5" },
-      { lvl: 3, nazwa: "Stały Bywalec", icon: "3", minXp: 201, maxXp: 400, kolor: "#0284c7", bg: "#e0f2fe" },
-      { lvl: 4, nazwa: "Doświadczony", icon: "4", minXp: 401, maxXp: 700, kolor: "#8b5cf6", bg: "#f3e8ff" },
-      { lvl: 5, nazwa: "Mistrz Służby", icon: "5", minXp: 701, maxXp: 1100, kolor: "#f97316", bg: "#fff7ed" },
-      { lvl: 6, nazwa: "Elita Zakrystii", icon: "6", minXp: 1101, maxXp: 1600, kolor: "#ef4444", bg: "#fef2f2" },
-      { lvl: 7, nazwa: "Weteran", icon: "7", minXp: 1601, maxXp: 2300, kolor: "#d97706", bg: "#fef3c7" },
-      { lvl: 8, nazwa: "Legenda", icon: "★", minXp: 2301, maxXp: 99999, kolor: "#eab308", bg: "#fefce8" }
+      { lvl: 1, nazwa: "Młodzik", icon: "1", minXp: 0, maxXp: 75, kolor: "#94a3b8", bg: "#f1f5f9" },
+      { lvl: 2, nazwa: "Padawan", icon: "2", minXp: 76, maxXp: 200, kolor: "#10b981", bg: "#ecfdf5" },
+      { lvl: 3, nazwa: "Strażnik Jedi", icon: "3", minXp: 201, maxXp: 400, kolor: "#0284c7", bg: "#e0f2fe" },
+      { lvl: 4, nazwa: "Rycerz Jedi", icon: "4", minXp: 401, maxXp: 700, kolor: "#8b5cf6", bg: "#f3e8ff" },
+      { lvl: 5, nazwa: "Konsul Jedi", icon: "5", minXp: 701, maxXp: 1100, kolor: "#f97316", bg: "#fff7ed" },
+      { lvl: 6, nazwa: "Mistrz Jedi", icon: "6", minXp: 1101, maxXp: 1600, kolor: "#ef4444", bg: "#fef2f2" },
+      { lvl: 7, nazwa: "Mistrz Zakonu", icon: "7", minXp: 1601, maxXp: 2300, kolor: "#d97706", bg: "#fef3c7" },
+      { lvl: 8, nazwa: "Legenda Mocy", icon: "★", minXp: 2301, maxXp: 99999, kolor: "#eab308", bg: "#fefce8" }
     ];
 
     function wyznaczRangeGamifikacji(xp) {
@@ -3959,14 +4213,14 @@
       return {
         ranga: RANGI_GAMIFIKACJI[0],
         lvl: 1,
-        nazwa: "Debiutant",
-        icon: "L1",
+        nazwa: "Młodzik",
+        icon: "1",
         kolor: "#94a3b8",
         bg: "#f1f5f9",
         xp: xpVal,
         procent: 0,
         brakujeDoNast: 76 - xpVal,
-        nastepnaNazwa: "Dyżurny",
+        nastepnaNazwa: "Padawan",
         zakresKonca: 75
       };
     }
@@ -4144,7 +4398,9 @@
       if (userMinusRecord && userMinusRecord.szczegolyMinusow) {
         userMinusRecord.szczegolyMinusow.forEach(function(sm) {
           if (sm && sm.miesiac) {
-            minusyByMonth[sm.miesiac] = (minusyByMonth[sm.miesiac] || 0) + (sm.punkty || 0);
+            var pts = parseInt(sm.punkty, 10);
+            if (isNaN(pts)) pts = 0;
+            minusyByMonth[sm.miesiac] = (minusyByMonth[sm.miesiac] || 0) + pts;
           }
         });
       }
@@ -4156,7 +4412,7 @@
       var podiumCount = 0;
 
       var punktyPoMiesiacach = (itemRok && itemRok.punktyPoMiesiacach) ? itemRok.punktyPoMiesiacach : [];
-      var biezacyMiesiacNazwa = stan.nazwaMiesiaca || "Wrzesień";
+      var biezacyMiesiacNazwa = stan.nazwaMiesiaca || (typeof pobierzAktywnaNazweMiesiaca === 'function' ? pobierzAktywnaNazweMiesiaca() : "Październik");
 
       punktyPoMiesiacach.forEach(function(pm) {
         if (!pm || pm.punkty === undefined || pm.punkty === null) return;
@@ -4315,6 +4571,7 @@
         calkowiteXp: calkowiteXp,
         bazaXp: bazaXp,
         bonusXp: bonusXp,
+        bonusOdznakiXp: bonusXp,
         punktyMiesiac: punktyMiesiac,
         minusyRok: minusyRok,
         passa: passaLicznik,
@@ -4925,7 +5182,7 @@
         "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
         "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
       ];
-      var currentMIdx = (stan.miesiacIdx !== undefined) ? stan.miesiacIdx : 8;
+      var currentMIdx = (stan.miesiacIdx !== undefined) ? stan.miesiacIdx : (new Date()).getMonth();
       var currentMonthName = stan.nazwaMiesiaca || polishMonthsAll[currentMIdx];
       if (!wybranyMiesiacRankingu) {
         wybranyMiesiacRankingu = currentMonthName;
@@ -4941,7 +5198,7 @@
           for (var mi = currentMIdx; mi >= 0; mi--) {
             var mName = polishMonthsAll[mi];
             var isCurrent = (mi === currentMIdx);
-            optHtml += '<option value="' + mName + '"' + (mName === wybranyMiesiacRankingu ? ' selected' : '') + '>' + mName + ' ' + (stan.rok || 2026) + (isCurrent ? ' (bieżący)' : '') + '</option>';
+            optHtml += '<option value="' + mName + '"' + (mName === wybranyMiesiacRankingu ? ' selected' : '') + '>' + mName + ' ' + (stan.rok || (new Date()).getFullYear()) + (isCurrent ? ' (bieżący)' : '') + '</option>';
           }
           selEl.innerHTML = optHtml;
         } else {
@@ -4961,23 +5218,23 @@
       if (tab === 'miesiac') {
         var isCurrentSelected = (wybranyMiesiacRankingu === currentMonthName);
         if (isCurrentSelected) {
-          if (desc) desc.innerText = 'Aktualna klasyfikacja punktowa w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || 2026) + ').';
+          if (desc) desc.innerText = 'Aktualna klasyfikacja punktowa w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || (new Date()).getFullYear()) + ').';
           list = (stan.rankingMiesiac && stan.rankingMiesiac.length) ? stan.rankingMiesiac : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac) || []);
         } else {
-          if (desc) desc.innerText = 'Klasyfikacja punktowa w miesiącu: ' + wybranyMiesiacRankingu + ' ' + (stan.rok || 2026) + '.';
+          if (desc) desc.innerText = 'Klasyfikacja punktowa w miesiącu: ' + wybranyMiesiacRankingu + ' ' + (stan.rok || (new Date()).getFullYear()) + '.';
           var rankM = (stan.rankingiMiesiecy && stan.rankingiMiesiecy[wybranyMiesiacRankingu]) || 
                       (tabelaMiesiacaDane && tabelaMiesiacaDane.rankingiMiesiecy && tabelaMiesiacaDane.rankingiMiesiecy[wybranyMiesiacRankingu]) || [];
           list = rankM;
         }
       } else if (tab === 'rok') {
-        if (desc) desc.innerText = 'Klasyfikacja generalna od początku roku ' + (stan.rok || 2026) + '.';
+        if (desc) desc.innerText = 'Klasyfikacja generalna od początku roku ' + (stan.rok || (new Date()).getFullYear()) + '.';
         list = (stan.rankingRok && stan.rankingRok.length) ? stan.rankingRok : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingRok) || []);
       } else if (tab === 'minus') {
         if (okresMinusow === 'rok') {
-          if (desc) desc.innerText = 'Ranking punktów ujemnych od początku roku ' + (stan.rok || 2026) + ' (kto ma czyste konto, a kto zebrał najwięcej minusów).';
+          if (desc) desc.innerText = 'Ranking punktów ujemnych od początku roku ' + (stan.rok || (new Date()).getFullYear()) + ' (kto ma czyste konto, a kto zebrał najwięcej minusów).';
           list = (stan.rankingMinusyRok && stan.rankingMinusyRok.length) ? stan.rankingMinusyRok : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyRok) || stan.rankingMinusy || []);
         } else {
-          if (desc) desc.innerText = 'Ranking punktów ujemnych w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || 2026) + ').';
+          if (desc) desc.innerText = 'Ranking punktów ujemnych w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || (new Date()).getFullYear()) + ').';
           list = (stan.rankingMinusyMiesiac && stan.rankingMinusyMiesiac.length) ? stan.rankingMinusyMiesiac : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyMiesiac) || []);
         }
       }
@@ -5074,9 +5331,13 @@
     }
 
     function czyWeekendMszaPrzeterminowana(niedzielaDzien, godzinaStr, rok, miesiacIdx) {
+      if (!niedzielaDzien) return false;
+      var curY = (rok !== undefined && rok !== null) ? rok : (new Date()).getFullYear();
+      var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : (new Date()).getMonth();
       var godzClean = cleanTime(godzinaStr);
-      var realDay = (godzClean === '17:00') ? (niedzielaDzien - 1) : niedzielaDzien;
-      return czyZbytPoznoNaZamiane(realDay, godzClean, rok, miesiacIdx);
+      var dow = new Date(curY, curM, niedzielaDzien).getDay();
+      var realDay = (dow === 0 && godzClean === '17:00') ? (niedzielaDzien - 1) : niedzielaDzien;
+      return czyZbytPoznoNaZamiane(realDay, godzClean, curY, curM);
     }
 
     function czyTydzienMszaPrzeterminowana(dzien, godzinaStr, rok, miesiacIdx) {
@@ -5106,9 +5367,13 @@
     }
 
     function czyWeekendZgloszeniePrzeterminowane(niedzielaDzien, godzinaStr, rok, miesiacIdx) {
+      if (!niedzielaDzien) return false;
+      var curY = (rok !== undefined && rok !== null) ? rok : (new Date()).getFullYear();
+      var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : (new Date()).getMonth();
       var godzClean = cleanTime(godzinaStr);
-      var realDay = (godzClean === '17:00') ? (niedzielaDzien - 1) : niedzielaDzien;
-      return czyMszaJuzSieRozpoczela(realDay, godzClean, rok, miesiacIdx);
+      var dow = new Date(curY, curM, niedzielaDzien).getDay();
+      var realDay = (dow === 0 && godzClean === '17:00') ? (niedzielaDzien - 1) : niedzielaDzien;
+      return czyMszaJuzSieRozpoczela(realDay, godzClean, curY, curM);
     }
 
     function czyTydzienZgloszeniePrzeterminowane(dzien, godzinaStr, rok, miesiacIdx) {
@@ -5328,8 +5593,10 @@
         var aktywneLiturgie = baseLits.filter(function(l) {
           return !czyLiturgiaJuzMinela(l.dzien, l.godzina, null, l.rok, l.miesiacIdx);
         }).sort(function(a, b) {
-          var ta = new Date(a.rok || 2026, (a.miesiacIdx !== undefined) ? a.miesiacIdx : 8, a.dzien).getTime();
-          var tb = new Date(b.rok || 2026, (b.miesiacIdx !== undefined) ? b.miesiacIdx : 8, b.dzien).getTime();
+          var curYDef = (new Date()).getFullYear();
+          var curMDef = (new Date()).getMonth();
+          var ta = new Date(a.rok || curYDef, (a.miesiacIdx !== undefined) ? a.miesiacIdx : curMDef, a.dzien).getTime();
+          var tb = new Date(b.rok || curYDef, (b.miesiacIdx !== undefined) ? b.miesiacIdx : curMDef, b.dzien).getTime();
           if (ta !== tb) return ta - tb;
           return (a.godzina || '').localeCompare(b.godzina || '');
         });
@@ -5429,17 +5696,21 @@
           if (res.godzinyWeekendy && Object.keys(res.godzinyWeekendy).length > 0) {
             for (var dayKey in res.godzinyWeekendy) {
               var dayNum = parseInt(dayKey, 10);
-              var dtEnd = new Date(res.rok, res.miesiacIdx, dayNum, 23, 59, 59).getTime();
+              var infoW = res.godzinyWeekendy[dayKey];
+              var gStr = cleanTime(infoW.godzina || res.mojaGodzinaNiedziela || '10:00');
+              var isSatVigil = (gStr === '17:00');
+              var displayDay = isSatVigil ? (dayNum - 1) : dayNum;
+              var dtEnd = new Date(res.rok, res.miesiacIdx, displayDay, 23, 59, 59).getTime();
               if (dtEnd >= nowCheck.getTime()) {
-                var infoW = res.godzinyWeekendy[dayKey];
-                var oddaneInfoW = (res.mojeOddaneZastepstwa && res.mojeOddaneZastepstwa[dayNum]) ? res.mojeOddaneZastepstwa[dayNum] : null;
+                var oddaneInfoW = (res.mojeOddaneZastepstwa && (res.mojeOddaneZastepstwa[displayDay] || res.mojeOddaneZastepstwa[dayNum])) ? (res.mojeOddaneZastepstwa[displayDay] || res.mojeOddaneZastepstwa[dayNum]) : null;
                 var ofeWknd = (res.gieldaNiedziele || []).find(function(o) {
-                  return o.dzien === dayNum && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
+                  return (o.dzien === dayNum || o.dzien === displayDay) && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
                 });
                 mojeDyzuryDoWyswietlenia.push({
-                  dzien: dayNum,
+                  dzien: displayDay,
+                  dzienNiedzieli: dayNum,
                   typ: 'weekend',
-                  godzina: infoW.godzina || res.mojaGodzinaNiedziela || '10:00',
+                  godzina: gStr,
                   czyZamienione: !!infoW.czyZamienione,
                   czyUsprawiedliwiony: !!infoW.czyUsprawiedliwiony || !!oddaneInfoW,
                   oddane: oddaneInfoW,
@@ -5448,21 +5719,27 @@
               }
             }
           } else if (res.mojaGodzinaNiedziela) {
+            var gFallback = cleanTime(res.mojaGodzinaNiedziela);
+            var isSatFallback = (gFallback === '17:00');
             for (var day = 1; day <= res.daysInMonth; day++) {
               var dt = new Date(res.rok, res.miesiacIdx, day);
-              var dtEnd = new Date(res.rok, res.miesiacIdx, day, 23, 59, 59).getTime();
-              if (dt.getDay() === 0 && dtEnd >= nowCheck.getTime()) {
-                var ofeWkndFallback = (res.gieldaNiedziele || []).find(function(o) {
-                  return o.dzien === day && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
-                });
-                mojeDyzuryDoWyswietlenia.push({
-                  dzien: day,
-                  typ: 'weekend',
-                  godzina: res.mojaGodzinaNiedziela,
-                  czyZamienione: false,
-                  czyUsprawiedliwiony: false,
-                  ofertaGielda: ofeWkndFallback || null
-                });
+              if (dt.getDay() === 0) {
+                var displayDayFb = isSatFallback ? (day - 1) : day;
+                var dtEndFb = new Date(res.rok, res.miesiacIdx, displayDayFb, 23, 59, 59).getTime();
+                if (dtEndFb >= nowCheck.getTime()) {
+                  var ofeWkndFallback = (res.gieldaNiedziele || []).find(function(o) {
+                    return (o.dzien === day || o.dzien === displayDayFb) && czyToSamoNazwisko(o.wystawiajacy, myNamePulpit) && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA';
+                  });
+                  mojeDyzuryDoWyswietlenia.push({
+                    dzien: displayDayFb,
+                    dzienNiedzieli: day,
+                    typ: 'weekend',
+                    godzina: gFallback,
+                    czyZamienione: false,
+                    czyUsprawiedliwiony: false,
+                    ofertaGielda: ofeWkndFallback || null
+                  });
+                }
               }
             }
           }
@@ -5670,7 +5947,7 @@
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
                                   '<div class="dyzur-pulpit-opis" style="color:#fbbf24; font-weight:500;">Zgłoszono nieobecność • Usprawiedliwiony (0 pkt, brak minusa)</div>' +
                                 '</div>' +
-                                '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + item.dzien + ')">Wycofaj zgłoszenie</button>' +
+                                '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + (item.dzienNiedzieli || item.dzien) + ')">Wycofaj zgłoszenie</button>' +
                               '</div>';
               } else {
                 var isPastWknd = czyWeekendMszaPrzeterminowana(item.dzien, item.godzina || '', res.rok, res.miesiacIdx);
@@ -5679,7 +5956,7 @@
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
                                   '<div class="dyzur-pulpit-opis">' + godzinaTekst + subTekst + ' • 3 pkt</div>' +
                                 '</div>' +
-                                (!isPastWknd ? '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'Weekend\', \'' + (item.godzina || '') + '\', ' + res.rok + ', ' + res.miesiacIdx + ')">Nie mogę przyjść</button>' : '') +
+                                (!isPastWknd ? '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + (item.dzienNiedzieli || item.dzien) + ', \'Weekend\', \'' + (item.godzina || '') + '\', ' + res.rok + ', ' + res.miesiacIdx + ')">Nie mogę przyjść</button>' : '') +
                               '</div>';
               }
             }
@@ -6499,43 +6776,74 @@
         var skrot = nagl ? nagl.skrotDnia : '';
         var k = (userRow && userRow.komorki) ? userRow.komorki[d - 1] : null;
         var dtCheck = new Date(currentYear, currentMonthIdx, d);
-        var isSunday = (dtCheck.getDay() === 0);
+        var dowCheck = dtCheck.getDay();
+        var isSunday = (dowCheck === 0);
+        var isSaturday = (dowCheck === 6);
 
-        // Czy ma przejęte zastępstwo w tym dniu
+        var kandydaciDnia = [];
+
+        // 1. Sprawdź czy to sobota i ministrant ma mszę niedzielną w wigilię (sobota 17:00)
+        if (isSaturday) {
+          var nextSunD = d + 1;
+          var kNextSun = (nextSunD <= daysInMonth && userRow && userRow.komorki) ? userRow.komorki[nextSunD - 1] : null;
+          var godzinaWknd = (godzinyWeekendy[nextSunD] && godzinyWeekendy[nextSunD].godzina) || mojaGodzinaNiedziela;
+          if (cleanTime(godzinaWknd) === '17:00' && kNextSun && kNextSun.maDyzur) {
+            var oddaneSat = mojeOddaneZastepstwa[d] || mojeOddaneZastepstwa[nextSunD];
+            if (!oddaneSat || (oddaneSat.status !== "OCZEKUJE" && oddaneSat.status !== "PRZEJETE" && oddaneSat.status !== "ZREALIZOWANE")) {
+              var czySat17JuzByla = (d === currentDay && czyMszaJuzMinaDzisLocal('17:00'));
+              var czyNiedzielnaJuzWpisana = (kNextSun && kNextSun.wartosc !== null && kNextSun.wartosc !== undefined && kNextSun.wartosc !== "");
+              if (!czySat17JuzByla && !czyNiedzielnaJuzWpisana) {
+                kandydaciDnia.push({
+                  jest: true,
+                  dzien: d,
+                  tekst: (d === currentDay ? 'DZIŚ • ' : (d === currentDay + 1 ? 'JUTRO • ' : '')) + d + ' ' + currentMonthNameGenitive + ' (Sb)',
+                  typ: 'Msza niedzielna (sobota 17:00)',
+                  godzina: '17:00'
+                });
+              }
+            }
+          }
+        }
+
+        // 2. Czy ma przejęte zastępstwo w tym dniu
         if (mojePrzejeteZastepstwa[d] && mojePrzejeteZastepstwa[d].status === "PRZEJETE") {
           var prz = mojePrzejeteZastepstwa[d];
           var godzPrz = prz.godzina || '18:00';
-          if (d === currentDay && czyMszaJuzMinaDzisLocal(godzPrz)) {
-            // Dzisiejsza msza już minęła
-          } else {
-            najblizszaSluzba = {
+          if (!(d === currentDay && czyMszaJuzMinaDzisLocal(godzPrz))) {
+            kandydaciDnia.push({
               jest: true,
               dzien: d,
               tekst: (d === currentDay ? 'DZIŚ • ' : (d === currentDay + 1 ? 'JUTRO • ' : '')) + d + ' ' + currentMonthNameGenitive + (skrot ? ' (' + skrot + ')' : ''),
               typ: 'Zastępstwo (+4 pkt) za: ' + prz.oddajacy,
               godzina: godzPrz
-            };
-            break;
+            });
           }
         }
 
-        // Czy ma własny dyżur i czy nie jest oddany na giełdę
+        // 3. Czy ma własny dyżur i czy nie jest oddany na giełdę
         if (k && k.maDyzur) {
           var oddane = mojeOddaneZastepstwa[d];
-          if (oddane && (oddane.status === "OCZEKUJE" || oddane.status === "PRZEJETE" || oddane.status === "ZREALIZOWANE")) {
-            continue; // oddany dyżur pomijamy jako najbliższą służbę
+          if (!oddane || (oddane.status !== "OCZEKUJE" && oddane.status !== "PRZEJETE" && oddane.status !== "ZREALIZOWANE")) {
+            var godzinaSluzby = isSunday ? ((godzinyWeekendy[d] && godzinyWeekendy[d].godzina) || mojaGodzinaNiedziela) : '18:00';
+            if (!(isSunday && cleanTime(godzinaSluzby) === '17:00')) {
+              if (!(d === currentDay && (czyMszaJuzMinaDzisLocal(godzinaSluzby) || (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== "")))) {
+                kandydaciDnia.push({
+                  jest: true,
+                  dzien: d,
+                  tekst: (d === currentDay ? 'DZIŚ • ' : (d === currentDay + 1 ? 'JUTRO • ' : '')) + d + ' ' + currentMonthNameGenitive + (skrot ? ' (' + skrot + ')' : ''),
+                  typ: isSunday ? 'Msza niedzielna' : 'Służba w tygodniu',
+                  godzina: godzinaSluzby
+                });
+              }
+            }
           }
-          var godzinaSluzby = isSunday ? ((godzinyWeekendy[d] && godzinyWeekendy[d].godzina) || mojaGodzinaNiedziela) : '18:00';
-          if (d === currentDay && (czyMszaJuzMinaDzisLocal(godzinaSluzby) || (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== ""))) {
-            continue; // Dzisiejszy dyżur już się odbył / oceniony
-          }
-          najblizszaSluzba = {
-            jest: true,
-            dzien: d,
-            tekst: (d === currentDay ? 'DZIŚ • ' : (d === currentDay + 1 ? 'JUTRO • ' : '')) + d + ' ' + currentMonthNameGenitive + (skrot ? ' (' + skrot + ')' : ''),
-            typ: isSunday ? 'Msza niedzielna' : 'Służba w tygodniu',
-            godzina: godzinaSluzby
-          };
+        }
+
+        if (kandydaciDnia.length > 0) {
+          kandydaciDnia.sort(function(a, b) {
+            return (a.godzina || '').localeCompare(b.godzina || '');
+          });
+          najblizszaSluzba = kandydaciDnia[0];
           break;
         }
       }
@@ -6804,7 +7112,7 @@
           "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
           "lipca", "sierpnia", "września", "października", "listopada", "grudnia"
         ];
-        var mGenMinus = polishMonthsGenMinus[currentMonthIdx] || (docData.nazwaMiesiaca || "września");
+        var mGenMinus = polishMonthsGenMinus[currentMonthIdx] || docData.nazwaMiesiaca || polishMonthsGenMinus[(new Date()).getMonth()];
         userRow.komorki.forEach(function(k) {
           if (typeof k.wartosc === "number" && k.wartosc < 0) {
             var dtM = new Date(currentYear, currentMonthIdx, k.dzien);
@@ -6986,7 +7294,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var d = parseInt(dzien, 10);
       if (isNaN(d)) return false;
       var now = new Date();
-      var r = optRok || 2026;
+      var r = optRok || now.getFullYear();
       var m = (optMiesiacIdx !== undefined && optMiesiacIdx !== null) ? optMiesiacIdx : now.getMonth();
 
       var gClean = cleanTime(godzina) || '11:00';
@@ -7007,8 +7315,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       // I GRUPA (CZERWONA) -> 10:00 (idx 1)
       // II GRUPA (POMARAŃCZOWA) -> 11:30 (idx 2)
       // III GRUPA (ZIELONA) -> 17:00 (idx 3)
-      var r = (rok !== undefined && rok !== null) ? parseInt(rok, 10) : 2026;
-      var m = (miesiacIdx !== undefined && miesiacIdx !== null) ? parseInt(miesiacIdx, 10) : 8;
+      var r = (rok !== undefined && rok !== null) ? parseInt(rok, 10) : (new Date()).getFullYear();
+      var m = (miesiacIdx !== undefined && miesiacIdx !== null) ? parseInt(miesiacIdx, 10) : (new Date()).getMonth();
       var diffMiesiace = (r - 2026) * 12 + (m - 8);
       var shift = ((diffMiesiace % 4) + 4) % 4;
 
@@ -7175,8 +7483,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (isNaN(dNum) || dNum < 1 || dNum > 31) {
           dNum = now.getDate();
         }
-        var currentYear = daneTabeli.rok || (targetDocKey.indexOf('2026') !== -1 ? 2026 : now.getFullYear());
-        var currentMonthIdx = (daneTabeli.miesiacIdx !== undefined) ? daneTabeli.miesiacIdx : (targetDocKey.indexOf('Październik') !== -1 ? 9 : now.getMonth());
+        var parsedTKey = parsujKluczMiesiaca(targetDocKey);
+        var currentYear = daneTabeli.rok || parsedTKey.rok || now.getFullYear();
+        var currentMonthIdx = (daneTabeli.miesiacIdx !== undefined) ? daneTabeli.miesiacIdx : parsedTKey.miesiacIdx;
         var dt = new Date(currentYear, currentMonthIdx, dNum);
         var dow = dt.getDay(); // 0=Nd, 1=Pn, ..., 6=Sb
 
@@ -7199,8 +7508,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var allUpcomingLits = allCombinedLits.filter(function(l) {
             return !czyLiturgiaJuzMinela(l.dzien, l.godzina, null, l.rok, l.miesiacIdx);
           }).sort(function(a, b) {
-            var ta = new Date(a.rok || 2026, (a.miesiacIdx !== undefined) ? a.miesiacIdx : 8, a.dzien).getTime();
-            var tb = new Date(b.rok || 2026, (b.miesiacIdx !== undefined) ? b.miesiacIdx : 8, b.dzien).getTime();
+            var curYDef = (new Date()).getFullYear();
+          var curMDef = (new Date()).getMonth();
+          var ta = new Date(a.rok || curYDef, (a.miesiacIdx !== undefined) ? a.miesiacIdx : curMDef, a.dzien).getTime();
+          var tb = new Date(b.rok || curYDef, (b.miesiacIdx !== undefined) ? b.miesiacIdx : curMDef, b.dzien).getTime();
             if (ta !== tb) return ta - tb;
             return (a.godzina || '').localeCompare(b.godzina || '');
           });
@@ -7214,7 +7525,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 dispH = (Number(ul.dzien) === 14) ? '10:00' : '11:00';
               }
               var isUlNext = (ul.miesiacIdx !== undefined && ul.miesiacIdx !== currentMonthIdx);
-              var ulDocKey = isUlNext ? wyznaczKluczMiesiaca(new Date(ul.rok || 2026, ul.miesiacIdx, 1)) : '';
+              var ulDocKey = isUlNext ? wyznaczKluczMiesiaca(new Date(ul.rok || currentYear, ul.miesiacIdx, 1)) : '';
               hL += '<div style="font-size:13px; color:#fafafa; margin-top:5px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:6px 8px; border-radius:6px; flex-wrap:wrap; gap:6px;">' +
                 '<div><b>' + ul.rodzaj + '</b> — ' + ul.dataTekst + ' godz. ' + dispH + ' (+ ' + (ul.punkty || 3) + ' pkt) • Zgłoszeni: <span style="color:#60a5fa; font-weight:600;">' + zg + '</span></div>' +
                 '<div style="display:flex; gap:6px;">' +
@@ -7278,7 +7589,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
               }
               gStr = bestH;
             } else if (dow === 6) {
-              gStr = "17:00";
+              if (dNum <= 7 && now.getHours() < 12) {
+                gStr = "08:00";
+              } else {
+                gStr = "17:00";
+              }
             } else if (dow === 3) {
               gStr = "08:00";
             } else if (dow === 4) {
@@ -7289,13 +7604,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
         }
 
-        var isWeekendMass = (dow === 0) || (dow === 6 && gStr === "17:00");
+        var isFirstSatRose = (dow === 6 && dNum <= 7 && cleanTime(gStr) === "08:00");
+        var isWeekendMass = (dow === 0) || (dow === 6 && cleanTime(gStr) === "17:00");
         var dSun = (dow === 6) ? (dNum + 1) : dNum;
         var sunColIdx = dSun - 1;
 
-        var domyslnyRodzaj = isWeekendMass ? 'msza_niedziela' : 'msza_tydzien';
-        var domyslnePkt = isWeekendMass ? 3 : 5;
-        var domyslnaNazwa = isWeekendMass ? (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę') : 'Msza w tygodniu';
+        var domyslnyRodzaj = isFirstSatRose ? 'nabozenstwo' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien');
+        var domyslnePkt = isFirstSatRose ? 4 : (isWeekendMass ? 3 : 5);
+        var domyslnaNazwa = isFirstSatRose ? 'Msza Róży Różańcowej (Msza + Różaniec)' : (isWeekendMass ? (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę') : 'Msza w tygodniu');
 
         if (matchedExtraLit) {
           var rLow = (matchedExtraLit.rodzaj || '').toLowerCase();
@@ -7691,7 +8007,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (dbFirestore) {
         kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#818cf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie zaplanowanych ministrantów...</div>';
         var targetG = cleanTime(wybranaGodzina);
-        var logIdPrefix = isNextMonthZak ? 'M9_' : '';
+        var parsedTgt = parsujKluczMiesiaca(targetDocKey);
+        var logIdPrefix = (parsedTgt.miesiacIdx !== 8 || parsedTgt.rok !== 2026) ? ('M' + parsedTgt.miesiacIdx + '_') : '';
         var lId = targetG ? (logIdPrefix + ((parseInt(wybranyDzien, 10) < 10 ? '0' : '') + parseInt(wybranyDzien, 10)) + '_' + targetG.replace(':', '')) : null;
         var fsPromises = [
           dbFirestore.collection('stan_grafiku').doc(targetDocKey).get(),
@@ -7721,14 +8038,15 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   m.stopienRanga = sInfo.ranga;
                 }
               });
+              var parsedTgtZ = parsujKluczMiesiaca(targetDocKey);
               zakrystiaStan = {
                 sukces: true,
                 docKey: targetDocKey,
-                rok: dOb.rok || (targetDocKey.indexOf('2026') !== -1 ? 2026 : 2026),
-                miesiacIdx: (dOb.miesiacIdx !== undefined) ? dOb.miesiacIdx : (isNextMonthZak ? 9 : 8),
+                rok: dOb.rok || parsedTgtZ.rok,
+                miesiacIdx: (dOb.miesiacIdx !== undefined) ? dOb.miesiacIdx : parsedTgtZ.miesiacIdx,
                 dzien: dOb.dzien || parseInt(wybranyDzien, 10),
                 godzina: dOb.godzina || cleanTime(wybranaGodzina),
-                dataTekst: dOb.dataTekst || (wybranyDzien + (isNextMonthZak ? ' października' : ' września')),
+                dataTekst: dOb.dataTekst || (wybranyDzien + ' ' + (polishMonthsGenitive[parsedTgtZ.miesiacIdx] || '')),
                 dzienTygodnia: dOb.dzienTygodnia || '',
                 rodzajLiturgii: dOb.rodzajLiturgii || 'msza_tydzien',
                 punktyLiturgii: dOb.punktyLiturgii || 5,
@@ -8178,7 +8496,16 @@ function czyMaDostepDoZakrystii(nazwisko) {
           badgeColor = '#d8b4fe';
           badgeText = '+2 pkt (Różaniec)';
         } else if (m.status === 'OBECNY') {
-          if (m.bylNaRozancu) {
+          var kPkt = parseInt(m.karaPunkty, 10) || 0;
+          var sumaPkt = ptsDlaObecnego;
+          if (m.bylNaRozancu) sumaPkt += 2;
+          sumaPkt -= kPkt;
+
+          if (kPkt > 0) {
+            badgeColor = sumaPkt > 0 ? '#f59e0b' : '#ef4444';
+            var sign = sumaPkt > 0 ? '+' : '';
+            badgeText = sign + sumaPkt + ' pkt (kara -' + kPkt + ')';
+          } else if (m.bylNaRozancu) {
             badgeColor = '#c084fc';
             badgeText = '+' + (ptsDlaObecnego + 2) + ' pkt (msza+różaniec)';
           } else {
@@ -8316,6 +8643,28 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
         }
 
+        var karaBtnHtml = '';
+        if (m.status === 'OBECNY') {
+          var kPkt = parseInt(m.karaPunkty, 10) || 0;
+          if (kPkt > 0) {
+            karaBtnHtml = '<div style="margin-top:6px; display:flex; align-items:center; justify-content:space-between; background:rgba(239, 68, 68, 0.12); border:1px solid rgba(239, 68, 68, 0.35); border-radius:6px; padding:6px 10px; gap:8px;">' +
+                            '<div style="font-size:12px; color:#fca5a5; font-weight:700; display:flex; align-items:center; gap:5px;">' +
+                              '<span>⚠️ Punkty karne: <b style="color:#ef4444;">-' + kPkt + ' pkt</b></span>' +
+                            '</div>' +
+                            '<div style="display:flex; gap:6px; flex-shrink:0;">' +
+                              '<button type="button" onclick="zakrystiaOtworzKare(' + i + ')" style="background:#27272a; border:1px solid #3f3f46; color:#fafafa; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer;">Zmień</button>' +
+                              '<button type="button" onclick="zakrystiaUsunKare(' + i + ')" style="background:#dc2626; border:none; color:#ffffff; font-size:11px; padding:4px 8px; border-radius:4px; cursor:pointer;" title="Usuń karę">✕ Usuń</button>' +
+                            '</div>' +
+                          '</div>';
+          } else {
+            karaBtnHtml = '<div style="margin-top:6px;">' +
+                            '<button type="button" onclick="zakrystiaOtworzKare(' + i + ')" style="display:inline-flex; align-items:center; gap:5px; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.22); color:#fca5a5; font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer; transition:all 0.15s ease;">' +
+                              '⚠️ Punkty karne (-2, -3, -5 pkt)' +
+                            '</button>' +
+                          '</div>';
+          }
+        }
+
         html += '<div class="' + cardClass + '" id="z-card-' + i + '">' +
                   '<div style="display:flex; justify-content:space-between; align-items:flex-start;">' +
                     '<div>' +
@@ -8331,6 +8680,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                     buttonsHtml +
                   '</div>' +
                   rozaniecBtnHtml +
+                  karaBtnHtml +
                   funkcjaHtml +
                 '</div>';
       }
@@ -9022,7 +9372,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (!dbFirestore || !zakrystiaStan || !zakrystiaStan.godzina) return;
       var dNum = zakrystiaStan.dzien;
       var gStr = zakrystiaStan.godzina;
-      var lId = ((dNum < 10 ? '0' : '') + dNum) + '_' + gStr.replace(':', '');
+      var mPfx = (zakrystiaStan.miesiacIdx !== undefined && (zakrystiaStan.miesiacIdx !== 8 || (zakrystiaStan.rok && zakrystiaStan.rok !== 2026))) ? ('M' + zakrystiaStan.miesiacIdx + '_') : '';
+      var lId = mPfx + ((dNum < 10 ? '0' : '') + dNum) + '_' + gStr.replace(':', '');
       try {
         dbFirestore.collection('obecnosc').doc(lId).set({
           ministranci: zakrystiaStan.ministranci,
@@ -9043,7 +9394,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       try {
         var now = new Date();
         var dNum = now.getDate();
-        var dPrefix = (dNum < 10 ? '0' : '') + dNum + '_';
+        var mPfx = (now.getMonth() !== 8 || now.getFullYear() !== 2026) ? ('M' + now.getMonth() + '_') : '';
+        var dPrefix = mPfx + (dNum < 10 ? '0' : '') + dNum + '_';
         
         var snap = await dbFirestore.collection('obecnosc')
           .where(firebase.firestore.FieldPath.documentId(), '>=', dPrefix)
@@ -9151,8 +9503,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
     function aktualizujGodzinyZakrystiiDlaDnia(d, wybranaGodz, optM, optR) {
       var selG = document.getElementById('sel-zakrystia-godzina');
       if (!selG) return;
-      var m = (optM !== undefined && optM !== null) ? optM : 8;
-      var r = optR || 2026;
+      var m = (optM !== undefined && optM !== null) ? optM : ((zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth());
+      var r = optR || (zakrystiaStan && zakrystiaStan.rok) || (new Date()).getFullYear();
       var dt = new Date(r, m, d);
       var dow = dt.getDay();
       var optHtml = '';
@@ -9161,6 +9513,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
         optHtml += '<option value="10:00">10:00</option>';
         optHtml += '<option value="11:30">11:30</option>';
       } else if (dow === 6) {
+        if (d <= 7) {
+          optHtml += '<option value="08:00">08:00 (Msza Róży Różańcowej - 4 pkt)</option>';
+        }
         optHtml += '<option value="17:00">17:00</option>';
       } else if (dow === 3) {
         optHtml += '<option value="08:00">08:00</option>';
@@ -9180,7 +9535,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         allLits = allLits.concat(daneKolejnegoMiesiaca.liturgieDodatkowe);
       }
       var matchingLits = allLits.filter(function(l) {
-        var lm = (l.miesiacIdx !== undefined) ? l.miesiacIdx : 8;
+        var lm = (l.miesiacIdx !== undefined) ? l.miesiacIdx : m;
         return l.dzien === d && lm === m;
       });
       matchingLits.forEach(function(l) {
@@ -9202,9 +9557,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var selG = document.getElementById('sel-zakrystia-godzina');
       if (!selD || !selG) return;
       var curStan = zakrystiaStan || {};
-      var curR = curStan.rok || 2026;
-      var curM = (curStan.miesiacIdx !== undefined) ? curStan.miesiacIdx : 8;
-      var daysInMonth = (tabelaMiesiacaDane && tabelaMiesiacaDane.dniNaglowek) ? tabelaMiesiacaDane.dniNaglowek.length : 30;
+      var curR = curStan.rok || (new Date()).getFullYear();
+      var curM = (curStan.miesiacIdx !== undefined) ? curStan.miesiacIdx : (new Date()).getMonth();
+      var daysInMonth = (tabelaMiesiacaDane && tabelaMiesiacaDane.dniNaglowek) ? tabelaMiesiacaDane.dniNaglowek.length : new Date(curR, curM + 1, 0).getDate();
       selD.innerHTML = '';
 
       // 1. Dni bieżącego miesiąca
@@ -9212,8 +9567,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
         var opt = document.createElement('option');
         opt.value = d + '|' + curM + '|' + curR;
         var dayName = pobierzDzienTygodnia(curR, curM, d);
-        opt.innerText = d + ' ' + (polishMonthsGenitive[curM] || 'września') + ' (' + dayName + ')';
-        if (d === curStan.dzien && curM === (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : 8)) opt.selected = true;
+        opt.innerText = d + ' ' + (polishMonthsGenitive[curM] || '') + ' (' + dayName + ')';
+        if (d === curStan.dzien && curM === (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : (new Date()).getMonth())) opt.selected = true;
         selD.appendChild(opt);
       }
 
@@ -9224,7 +9579,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         var optN = document.createElement('option');
         optN.value = nd + '|' + nextM + '|' + nextR;
         var dayNameN = pobierzDzienTygodnia(nextR, nextM, nd);
-        optN.innerText = nd + ' ' + (polishMonthsGenitive[nextM] || 'października') + ' (' + dayNameN + ')';
+        optN.innerText = nd + ' ' + (polishMonthsGenitive[nextM] || '') + ' (' + dayNameN + ')';
         if (nd === curStan.dzien && curStan.miesiacIdx === nextM) optN.selected = true;
         selD.appendChild(optN);
       }
@@ -9253,8 +9608,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var selVal = document.getElementById('sel-zakrystia-dzien').value;
       var parts = selVal.split('|');
       var d = parseInt(parts[0], 10);
-      var m = parts.length > 1 ? parseInt(parts[1], 10) : 8;
-      var r = parts.length > 2 ? parseInt(parts[2], 10) : 2026;
+      var m = parts.length > 1 ? parseInt(parts[1], 10) : ((zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth());
+      var r = parts.length > 2 ? parseInt(parts[2], 10) : ((zakrystiaStan && zakrystiaStan.rok) || (new Date()).getFullYear());
       var g = document.getElementById('sel-zakrystia-godzina').value.split(' ')[0];
       var docKey = wyznaczKluczMiesiaca(new Date(r, m, 1));
       zamknijModalZmienMsze();
@@ -9309,6 +9664,106 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       renderujTrybZakrystia();
       pokazToast('Dodano: ' + name);
+    }
+
+    var aktywnyMinistrantKaryIdx = -1;
+
+    function zakrystiaOtworzKare(idx) {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci[idx]) return;
+      aktywnyMinistrantKaryIdx = idx;
+      var m = zakrystiaStan.ministranci[idx];
+
+      var elNazw = document.getElementById('kara-ministrant-nazwisko');
+      if (elNazw) elNazw.innerText = m.nazwisko;
+
+      var curPkt = m.karaPunkty || 0;
+
+      var inpPkt = document.getElementById('input-kara-punkty');
+      if (inpPkt) inpPkt.value = curPkt > 0 ? curPkt : 2;
+
+      wybierzKarePkt(curPkt > 0 ? curPkt : 2);
+
+      var btnUsun = document.getElementById('btn-kara-usun');
+      if (btnUsun) btnUsun.style.display = (curPkt > 0) ? 'inline-block' : 'none';
+
+      var modal = document.getElementById('modal-kara-zakrystia');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function zamknijModalKaryZakrystia() {
+      var modal = document.getElementById('modal-kara-zakrystia');
+      if (modal) modal.style.display = 'none';
+      aktywnyMinistrantKaryIdx = -1;
+    }
+
+    function wybierzKarePkt(pkt) {
+      var inp = document.getElementById('input-kara-punkty');
+      if (inp) inp.value = pkt;
+      var btns = document.querySelectorAll('.btn-kara-pkt');
+      btns.forEach(function(b) {
+        var p = parseInt(b.getAttribute('data-pkt'), 10);
+        if (p === pkt) {
+          b.style.background = '#dc2626';
+          b.style.borderColor = '#ef4444';
+          b.style.color = '#ffffff';
+        } else {
+          b.style.background = '#27272a';
+          b.style.borderColor = '#3f3f46';
+          b.style.color = '#fafafa';
+        }
+      });
+    }
+
+    function odznaczKarePktButtony() {
+      var inp = document.getElementById('input-kara-punkty');
+      var val = inp ? parseInt(inp.value, 10) : 0;
+      var btns = document.querySelectorAll('.btn-kara-pkt');
+      btns.forEach(function(b) {
+        var p = parseInt(b.getAttribute('data-pkt'), 10);
+        if (p === val) {
+          b.style.background = '#dc2626';
+          b.style.borderColor = '#ef4444';
+          b.style.color = '#ffffff';
+        } else {
+          b.style.background = '#27272a';
+          b.style.borderColor = '#3f3f46';
+          b.style.color = '#fafafa';
+        }
+      });
+    }
+
+    function zatwierdzKareZakrystia() {
+      if (aktywnyMinistrantKaryIdx === -1 || !zakrystiaStan || !zakrystiaStan.ministranci) return;
+      var m = zakrystiaStan.ministranci[aktywnyMinistrantKaryIdx];
+      if (!m) return;
+
+      var inpPkt = document.getElementById('input-kara-punkty');
+      var pkt = inpPkt ? parseInt(inpPkt.value, 10) : 0;
+      if (isNaN(pkt) || pkt <= 0) {
+        alert('Podaj prawidłową liczbę punktów karnych (np. 2, 3, 5...)');
+        return;
+      }
+
+      m.karaPunkty = pkt;
+
+      zamknijModalKaryZakrystia();
+      renderujTrybZakrystia();
+      pokazToast('⚠️ Wpisano karę: -' + pkt + ' pkt dla ' + m.nazwisko);
+    }
+
+    function zakrystiaUsunKare(idx) {
+      if (!zakrystiaStan || !zakrystiaStan.ministranci || !zakrystiaStan.ministranci[idx]) return;
+      var m = zakrystiaStan.ministranci[idx];
+      m.karaPunkty = 0;
+      renderujTrybZakrystia();
+      pokazToast('Cofnięto punkty karne dla ' + m.nazwisko);
+    }
+
+    function zatwierdzUsuniecieKaryZModalu() {
+      if (aktywnyMinistrantKaryIdx !== -1) {
+        zakrystiaUsunKare(aktywnyMinistrantKaryIdx);
+      }
+      zamknijModalKaryZakrystia();
     }
 
     async function zakrystiaZapiszObecnosc() {
@@ -9394,9 +9849,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
               if (m.bylNaRozancu) {
                 dodajPkt += 2;
               }
+              if (m.karaPunkty && m.karaPunkty > 0) {
+                dodajPkt -= m.karaPunkty;
+              }
 
               var stary = parseFloat(wiersz.komorki[colIdx].wartosc) || 0;
-              if (stary < 0) {
+              if (stary < 0 && !m.karaPunkty) {
                 wiersz.komorki[colIdx].wartosc = stary + dodajPkt;
               } else if (stary > 0 && czyDodatkowa) {
                 wiersz.komorki[colIdx].wartosc = stary + dodajPkt;
@@ -9512,6 +9970,94 @@ function czyMaDostepDoZakrystii(nazwisko) {
           });
         }
 
+        // Dynamiczne przeliczenie minusów (miesiąc i rok) w locie:
+        var curMNameZ = tabelaMiesiacaDane.nazwaMiesiaca || "Październik";
+        var curMIdxZ = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+        var curRokZ = tabelaMiesiacaDane.rok || (new Date()).getFullYear();
+        var dniNazwyMinusZ = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
+        var polishMonthsGenMinusZ = [
+          "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
+          "lipca", "sierpnia", "września", "października", "listopada", "grudnia"
+        ];
+        var mGenMinusZ = polishMonthsGenMinusZ[curMIdxZ] || polishMonthsGenMinusZ[(new Date()).getMonth()];
+
+        if (!tabelaMiesiacaDane.rankingMinusyRok) {
+          tabelaMiesiacaDane.rankingMinusyRok = tabelaMiesiacaDane.rankingMinusy || [];
+        }
+
+        var minusyMiesiacMapZ = {};
+        tabelaMiesiacaDane.wiersze.forEach(function(w) {
+          if (!w || !w.nazwisko) return;
+          var wNorm = w.nazwisko.toLowerCase().trim();
+          var mList = [];
+          (w.komorki || []).forEach(function(k, kIdx) {
+            if (typeof k.wartosc === "number" && k.wartosc < 0) {
+              var dtM = new Date(curRokZ, curMIdxZ, kIdx + 1);
+              mList.push({
+                dzien: kIdx + 1,
+                miesiac: curMNameZ,
+                miesiacGen: mGenMinusZ,
+                miesiacIdx: curMIdxZ,
+                rok: curRokZ,
+                dzienTygodnia: dniNazwyMinusZ[dtM.getDay()],
+                punkty: k.wartosc
+              });
+            }
+          });
+          if (mList.length > 0) {
+            minusyMiesiacMapZ[wNorm] = { nazwisko: w.nazwisko, grupa: w.grupa, mins: mList };
+          }
+        });
+
+        var nowyRMM = [];
+        for (var nKey in minusyMiesiacMapZ) {
+          var itemMM = minusyMiesiacMapZ[nKey];
+          var sumMM = 0;
+          itemMM.mins.forEach(function(x) { sumMM += x.punkty; });
+          nowyRMM.push({
+            nazwisko: itemMM.nazwisko,
+            normName: nKey,
+            minusy: sumMM,
+            szczegolyMinusow: itemMM.mins,
+            grupa: itemMM.grupa,
+            pozycja: 1
+          });
+        }
+        nowyRMM.sort(function(a, b) { return a.minusy - b.minusy; });
+        var pMM = 1;
+        nowyRMM.forEach(function(m, idx) {
+          if (idx > 0 && m.minusy > nowyRMM[idx - 1].minusy) pMM = idx + 1;
+          m.pozycja = pMM;
+        });
+        tabelaMiesiacaDane.rankingMinusyMiesiac = nowyRMM;
+
+        tabelaMiesiacaDane.wiersze.forEach(function(w) {
+          if (!w || !w.nazwisko) return;
+          var wNorm = w.nazwisko.toLowerCase().trim();
+          var rItem = tabelaMiesiacaDane.rankingMinusyRok.find(function(it) {
+            return (it.normName || it.nazwisko || '').toLowerCase().trim() === wNorm;
+          });
+          if (!rItem) {
+            rItem = { nazwisko: w.nazwisko, normName: wNorm, minusy: 0, szczegolyMinusow: [], grupa: w.grupa, pozycja: 1 };
+            tabelaMiesiacaDane.rankingMinusyRok.push(rItem);
+          }
+          var starszeMinusy = (rItem.szczegolyMinusow || []).filter(function(sm) {
+            return sm.miesiac !== curMNameZ && sm.miesiacIdx !== curMIdxZ;
+          });
+          var biezaceMinusy = (minusyMiesiacMapZ[wNorm] && minusyMiesiacMapZ[wNorm].mins) ? minusyMiesiacMapZ[wNorm].mins : [];
+          rItem.szczegolyMinusow = starszeMinusy.concat(biezaceMinusy);
+          var totalM = 0;
+          rItem.szczegolyMinusow.forEach(function(sm) { totalM += (sm.punkty || 0); });
+          rItem.minusy = totalM;
+        });
+        tabelaMiesiacaDane.rankingMinusyRok.sort(function(a, b) { return a.minusy - b.minusy; });
+        var pMR = 1;
+        tabelaMiesiacaDane.rankingMinusyRok.forEach(function(m, idx) {
+          if (idx > 0 && m.minusy > tabelaMiesiacaDane.rankingMinusyRok[idx - 1].minusy) pMR = idx + 1;
+          m.pozycja = pMR;
+        });
+        tabelaMiesiacaDane.rankingMinusy = tabelaMiesiacaDane.rankingMinusyRok;
+
         // Błyskawiczny zapis do lokalnej historii wpisów
         if (!tabelaMiesiacaDane.historiaWpisow) tabelaMiesiacaDane.historiaWpisow = [];
         var timeNow = new Date();
@@ -9531,13 +10077,18 @@ function czyMaDostepDoZakrystii(nazwisko) {
               pts = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
             } else pts = zakrystiaStan.punktyLiturgii;
             if (m.bylNaRozancu) pts += 2;
+            if (m.karaPunkty && m.karaPunkty > 0) pts -= m.karaPunkty;
           } else if (m.status === 'NIEOBECNY') {
             pts = czyDodatkowa ? 0 : -5;
           } else if (m.status === 'USPRAWIEDLIWIONY' || m.status === 'ODDANY') {
             pts = 0;
           }
           var statusNazwa = m.tylkoRozaniec ? 'TYLKO RÓŻANIEC (+2)' : (m.bylNaRozancu ? (m.status + ' (+RÓŻANIEC)') : m.status);
-          var mNazwa = (polishMonthsGenitive && polishMonthsGenitive[zakrystiaStan.miesiacIdx !== undefined ? zakrystiaStan.miesiacIdx : 9]) || 'października';
+          if (m.karaPunkty && m.karaPunkty > 0) {
+            statusNazwa += ' (⚠️ Kara: -' + m.karaPunkty + ' pkt)';
+          }
+          var curMVal = (zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth();
+          var mNazwa = (polishMonthsGenitive && polishMonthsGenitive[curMVal]) || polishMonthsGenitive[(new Date()).getMonth()];
           tabelaMiesiacaDane.historiaWpisow.unshift({
             czas: timeStr,
             dzien: zakrystiaStan.dataTekst || (zakrystiaStan.dzien + ' ' + mNazwa),
@@ -9566,7 +10117,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var targetDocKey = (zakrystiaStan && zakrystiaStan.docKey) || pobierzAktywnyKluczMiesiaca();
       var isNextMonthZapis = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
       var tabelaDoZapisu = isNextMonthZapis ? (daneKolejnegoMiesiaca || tabelaMiesiacaDane) : tabelaMiesiacaDane;
-      var logIdPrefix = (zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined && zakrystiaStan.miesiacIdx !== 8) ? ('M' + zakrystiaStan.miesiacIdx + '_') : '';
+      var curMValZ = (zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth();
+      var curRY = (zakrystiaStan && zakrystiaStan.rok) || (new Date()).getFullYear();
+      var logIdPrefix = (curMValZ !== 8 || curRY !== 2026) ? ('M' + curMValZ + '_') : '';
       var logId = logIdPrefix + (zakrystiaStan.dzien < 10 ? '0' : '') + zakrystiaStan.dzien + '_' + zakrystiaStan.godzina.replace(':', '');
       var firestoreSuccess = true;
 
@@ -9639,6 +10192,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             pts = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
           } else pts = zakrystiaStan.punktyLiturgii;
           if (m.bylNaRozancu) pts += 2;
+          if (m.karaPunkty && m.karaPunkty > 0) pts -= m.karaPunkty;
         } else if (m.status === 'NIEOBECNY') {
           pts = czyDodatkowa ? 0 : -5;
         } else if (m.status === 'USPRAWIEDLIWIONY' || m.status === 'ODDANY') {
@@ -9651,6 +10205,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
           zastepuje: m.zastepuje,
           bylNaRozancu: !!m.bylNaRozancu,
           tylkoRozaniec: !!m.tylkoRozaniec,
+          karaPunkty: m.karaPunkty || 0,
           punkty: pts
         };
       });
@@ -9684,17 +10239,34 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (!selectEl) return;
       var curKlucz = pobierzAktywnyKluczMiesiaca();
       var targetVal = wybrany || wybranyMiesiacTabeli || curKlucz;
-      for (var i = 0; i < selectEl.options.length; i++) {
-        var opt = selectEl.options[i];
-        var isCurrent = (opt.value === curKlucz);
-        var baseName = opt.value.replace('_', ' ');
-        if (opt.value === 'Kwiecien_2026') baseName = 'Kwiecień 2026';
-        if (opt.value === 'Styczen_2026') baseName = 'Styczeń 2026';
-        opt.text = baseName + (isCurrent ? ' (bieżący)' : '');
-        if (opt.value === targetVal) {
-          opt.selected = true;
-        }
+
+      // Dynamiczne budowanie opcji: kolejny miesiąc + bieżący + 11 poprzednich miesięcy
+      var teraz = new Date();
+      var polishMonthsAll = [
+        "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+        "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+      ];
+      selectEl.innerHTML = '';
+      
+      // 1. Kolejny miesiąc
+      var nextDt = new Date(teraz.getFullYear(), teraz.getMonth() + 1, 1);
+      var nextKlucz = polishMonthsAll[nextDt.getMonth()] + '_' + nextDt.getFullYear();
+      var optNext = document.createElement('option');
+      optNext.value = nextKlucz;
+      optNext.text = polishMonthsAll[nextDt.getMonth()] + ' ' + nextDt.getFullYear() + ' (kolejny)';
+      selectEl.appendChild(optNext);
+
+      // 2. Bieżący oraz przeszłe miesiące
+      for (var i = 0; i < 12; i++) {
+        var d = new Date(teraz.getFullYear(), teraz.getMonth() - i, 1);
+        var mKey = polishMonthsAll[d.getMonth()] + '_' + d.getFullYear();
+        var isCurrent = (mKey === curKlucz);
+        var opt = document.createElement('option');
+        opt.value = mKey;
+        opt.text = polishMonthsAll[d.getMonth()] + ' ' + d.getFullYear() + (isCurrent ? ' (bieżący)' : '');
+        selectEl.appendChild(opt);
       }
+
       selectEl.value = targetVal;
     }
 
@@ -9847,7 +10419,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       var printTytul = document.getElementById('print-tabela-tytul');
       var printMiesiac = document.getElementById('print-tabela-miesiac');
-      if (printTytul) printTytul.innerText = 'GRAFIK SŁUŻBY MINISTRANTÓW — ' + (dane.nazwaMiesiaca || '').toUpperCase() + ' ' + (dane.rok || 2026);
+      if (printTytul) printTytul.innerText = 'GRAFIK SŁUŻBY MINISTRANTÓW — ' + (dane.nazwaMiesiaca || '').toUpperCase() + ' ' + (dane.rok || (new Date()).getFullYear());
       if (printMiesiac) printMiesiac.innerText = 'Parafia pw. św. Józefa • Wygenerowano: ' + (new Date().toLocaleDateString('pl-PL'));
     }
 
@@ -10687,7 +11259,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       if (curDow < 1 && myRow && myRow.komorki) {
-        var rok = tabelaMiesiacaDane.rok || 2026;
+        var rok = tabelaMiesiacaDane.rok || (new Date()).getFullYear();
         var mIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
         for (var dayIdx = 0; dayIdx < myRow.komorki.length; dayIdx++) {
           var dt = new Date(rok, mIdx, dayIdx + 1);
@@ -10818,7 +11390,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
       var godzinyDni = ['', 'godz. 18:00', 'godz. 18:00', 'godz. 08:00 - rano', 'godz. 17:00 - msza szkolna', 'godz. 18:00'];
       var staryDzien = myRow.stalyDzienTygodnia;
-      var rok = tabelaMiesiacaDane.rok || 2026;
+      var rok = tabelaMiesiacaDane.rok || (new Date()).getFullYear();
       var mIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
       if (staryDzien === undefined || staryDzien < 1) {
         for (var dayIdx = 0; dayIdx < myRow.komorki.length; dayIdx++) {
@@ -10904,7 +11476,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (nextRow) {
           nextRow.stalyDzienTygodnia = nowyDzien;
           nextRow.ostatniaZmianaDnia = nowIso;
-          var nextR = daneKolejnegoMiesiaca.rok || 2026;
+          var nextR = daneKolejnegoMiesiaca.rok || (new Date()).getFullYear();
           var nextM = (daneKolejnegoMiesiaca.miesiacIdx !== undefined) ? daneKolejnegoMiesiaca.miesiacIdx : ((mIdx + 1) % 12);
           if (nextRow.komorki) {
             for (var nd = 1; nd <= nextRow.komorki.length; nd++) {
@@ -10941,7 +11513,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }, { merge: true }));
 
           if (daneKolejnegoMiesiaca) {
-            var nextDocKey = wyznaczKluczMiesiaca(new Date(daneKolejnegoMiesiaca.rok || 2026, (daneKolejnegoMiesiaca.miesiacIdx !== undefined ? daneKolejnegoMiesiaca.miesiacIdx : 9), 1));
+            var nextDocKey = wyznaczKluczMiesiaca(new Date(daneKolejnegoMiesiaca.rok || (new Date()).getFullYear(), (daneKolejnegoMiesiaca.miesiacIdx !== undefined ? daneKolejnegoMiesiaca.miesiacIdx : ((mIdx + 1) % 12)), 1));
             if (nextDocKey !== curDocKey) {
               promises.push(dbFirestore.collection('stan_grafiku').doc(nextDocKey).set(daneKolejnegoMiesiaca, { merge: true }));
             }
@@ -11025,7 +11597,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
         docKey: targetDocKey,
         isNextMonth: isNextMonth
       };
-      var dataStr = formatujDateDnia(dzien, stanOdd, targetRok, targetMiesiacIdx);
+      var realModalD = dzien;
+      if (isWeekend && cleanTime(godzina) === '17:00') {
+        var dowM = new Date(targetRok, targetMiesiacIdx, dzien).getDay();
+        realModalD = (dowM === 0) ? (dzien - 1) : dzien;
+      }
+      var dataStr = formatujDateDnia(realModalD, stanOdd, targetRok, targetMiesiacIdx);
 
       if (isWeekend) {
         document.getElementById('modal-oddaj-tytul').innerText = 'Zgłoś nieobecność (0 pkt)';
@@ -11090,11 +11667,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
           if (row && row.komorki) {
             var targetIdx = dOdd - 1;
             if (isWeekend && cleanTime(godz) === '17:00') {
-              // Rzeczywista msza jest w sobotę o 17:00 (dOdd to niedziela)! Wpisujemy 0 w sobotę:
-              targetIdx = dOdd - 2;
-              // Niedziela ma pozostać pusta / czysta
-              if (row.komorki[dOdd - 1] && (row.komorki[dOdd - 1].wartosc === 0 || row.komorki[dOdd - 1].wartosc === '0')) {
-                row.komorki[dOdd - 1].wartosc = null;
+              var dowOdd = new Date(data.rok, data.miesiacIdx, dOdd).getDay();
+              targetIdx = (dowOdd === 0) ? (dOdd - 2) : (dOdd - 1);
+              var sunIdx = (dowOdd === 0) ? (dOdd - 1) : dOdd;
+              if (row.komorki[sunIdx] && (row.komorki[sunIdx].wartosc === 0 || row.komorki[sunIdx].wartosc === '0')) {
+                row.komorki[sunIdx].wartosc = null;
               }
             }
             if (targetIdx >= 0 && row.komorki[targetIdx]) {
@@ -11252,8 +11829,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
           docKey: optDocKey
         };
         var curStan = (globalUser && globalUser.stan) ? globalUser.stan : {};
-        var r = optRok || curStan.rok || 2026;
-        var m = (optMiesiacIdx !== undefined) ? optMiesiacIdx : (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : 8);
+        var r = optRok || curStan.rok || (new Date()).getFullYear();
+        var m = (optMiesiacIdx !== undefined) ? optMiesiacIdx : (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : (new Date()).getMonth());
         var dataStr = formatujDateDnia(dzien, curStan, r, m);
         var dt = new Date(r, m, dzien);
         var isSunday = (dt.getDay() === 0);
@@ -11508,25 +12085,21 @@ function czyMaDostepDoZakrystii(nazwisko) {
       // Wypełnij select miesięcy jeśli pusty
       var sel = document.getElementById('select-miesiac-nagrody');
       if (sel && sel.options.length === 0) {
-        var dostepne = [
-          { id: "Październik_2026", label: "Październik 2026" },
-          { id: "Wrzesień_2026", label: "Wrzesień 2026" },
-          { id: "Sierpień_2026", label: "Sierpień 2026" },
-          { id: "Lipiec_2026", label: "Lipiec 2026" },
-          { id: "Czerwiec_2026", label: "Czerwiec 2026" },
-          { id: "Maj_2026", label: "Maj 2026" },
-          { id: "Kwiecień_2026", label: "Kwiecień 2026" },
-          { id: "Marzec_2026", label: "Marzec 2026" },
-          { id: "Luty_2026", label: "Luty 2026" },
-          { id: "Styczeń_2026", label: "Styczeń 2026" }
+        var teraz = new Date();
+        var polishMonthsAll = [
+          "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+          "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
         ];
         sel.innerHTML = '';
-        dostepne.forEach(function(m) {
+        for (var i = 0; i < 12; i++) {
+          var d = new Date(teraz.getFullYear(), teraz.getMonth() - i, 1);
+          var mKey = polishMonthsAll[d.getMonth()] + '_' + d.getFullYear();
+          var mLabel = polishMonthsAll[d.getMonth()] + ' ' + d.getFullYear() + (i === 0 ? ' (bieżący)' : '');
           var opt = document.createElement('option');
-          opt.value = m.id;
-          opt.innerText = m.label;
+          opt.value = mKey;
+          opt.innerText = mLabel;
           sel.appendChild(opt);
-        });
+        }
       }
 
       var domyslnyMiesiac = wyznaczPoprzedniMiesiacId();
@@ -11541,14 +12114,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (modal) modal.style.display = 'none';
     }
 
-    async function zaladujNagrodyDlaMiesiaca(miesiacId) {
+    async function zaladujNagrodyDlaMiesiaca(miesiacId, wymusPrzeliczenie) {
       aktualnyMiesiacNagrody = miesiacId || wyznaczPoprzedniMiesiacId();
       var box = document.getElementById('lista-laureatow-nagrody');
       if (!box) return;
       box.innerHTML = '<div style="text-align:center; padding:24px; color:#a1a1aa;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie rankingu TOP 3...</div>';
 
       try {
-        var dane = await pobierzLubObliczNagrodyMiesiaca(aktualnyMiesiacNagrody);
+        var dane = await pobierzLubObliczNagrodyMiesiaca(aktualnyMiesiacNagrody, wymusPrzeliczenie);
         renderujListeNagrodZakrystia(dane);
       } catch(e) {
         console.error('Błąd ładowania nagród:', e);
@@ -11556,20 +12129,27 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
     }
 
-    async function pobierzLubObliczNagrodyMiesiaca(miesiacId) {
+    async function pobierzLubObliczNagrodyMiesiaca(miesiacId, wymusPrzeliczenie) {
       if (!dbFirestore) throw new Error('Brak połączenia z bazą');
 
-      // 1. Sprawdź czy dokument już istnieje w nagrody_miesieczne
       var docRef = dbFirestore.collection('nagrody_miesieczne').doc(miesiacId);
       var snap = await docRef.get();
-      if (snap.exists) {
-        return snap.data();
+      var istniejaceDane = snap.exists ? snap.data() : null;
+
+      var teraz = new Date();
+      var nazwyMiesiecy = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+      var biezacyMiesiacId = nazwyMiesiecy[teraz.getMonth()] + '_' + teraz.getFullYear();
+      var czyBiezacy = (miesiacId === biezacyMiesiacId);
+
+      // Jeśli mamy już dane, a nie jest to bieżący miesiąc i nie zażądano wymuszonego przeliczenia:
+      if (istniejaceDane && !czyBiezacy && !wymusPrzeliczenie) {
+        return istniejaceDane;
       }
 
-      // 2. Jeśli nie, pobierz stan grafiku dla tego miesiąca i wyznacz TOP 3
+      // W przeciwnym razie pobierz stan grafiku dla tego miesiąca i wyznacz TOP 3
       var grafikDoc = await dbFirestore.collection('stan_grafiku').doc(miesiacId).get();
       if (!grafikDoc.exists) {
-        return { miesiacId: miesiacId, laureaci: [] };
+        return istniejaceDane || { miesiacId: miesiacId, laureaci: [] };
       }
 
       var gData = grafikDoc.data();
@@ -11597,22 +12177,29 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       var top3 = obliczeni.slice(0, 3);
       var laureaci = top3.map(function(item, idx) {
+        var stary = null;
+        if (istniejaceDane && istniejaceDane.laureaci) {
+          stary = istniejaceDane.laureaci.find(function(l) {
+            return czyToTenSamMinistrant(l.nazwisko, item.nazwisko);
+          });
+        }
         return {
           miejsce: idx + 1,
           nazwisko: item.nazwisko,
           punkty: item.punkty,
           obecnosci: item.obecnosci,
           kwota: "50 zł",
-          odebrane: false,
-          dataOdbioru: null
+          odebrane: stary ? !!stary.odebrane : false,
+          dataOdbioru: stary ? (stary.dataOdbioru || null) : null
         };
       });
 
       var payload = {
         miesiacId: miesiacId,
         nazwaMiesiaca: miesiacId.split('_')[0],
-        rok: parseInt(miesiacId.split('_')[1], 10) || 2026,
-        utworzono: new Date().toISOString(),
+        rok: parseInt(miesiacId.split('_')[1], 10) || (new Date()).getFullYear(),
+        utworzono: (istniejaceDane && istniejaceDane.utworzono) ? istniejaceDane.utworzono : new Date().toISOString(),
+        zaktualizowano: new Date().toISOString(),
         laureaci: laureaci
       };
 
