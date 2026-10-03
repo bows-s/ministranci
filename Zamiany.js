@@ -4600,8 +4600,10 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         var dtSub = new Date(rok || (new Date()).getFullYear(), (miesiacIdx !== undefined) ? miesiacIdx : (new Date()).getMonth(), dNum);
         var isSunSub = (dtSub.getDay() === 0);
         var subPts = isSunSub ? 3 : 4;
-        cell.setValue(subPts);
-        noteText += "\nZastępstwo za: " + (zastepuje || "brak") + " (+" + subPts + " pkt)";
+        var curValSub = parseFloat(cell.getValue()) || 0;
+        var finalSubPts = (curValSub > 0 ? curValSub : 0) + subPts;
+        cell.setValue(finalSubPts);
+        noteText += "\nZastępstwo za: " + (zastepuje || "brak") + " (+" + subPts + " pkt" + (curValSub > 0 ? ", łącznie: " + finalSubPts + " pkt" : "") + ")";
         // Przyznaj 1 pkt dla oddającego!
         if (zastepuje) {
           var oddLower = oczyscNazwiskoMinistranta(zastepuje).toLowerCase();
@@ -4616,8 +4618,11 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
 
             if (oName === oddLower || (oName.length >= 4 && oddLower.indexOf(oName) !== -1) || (oddLower.length >= 4 && oName.indexOf(oddLower) !== -1)) {
               var oddCell = mSheet.getRange(rOdd + 1, targetCol);
-              oddCell.setValue(1);
-              oddCell.setNote("Oddany dyżur zrealizowany przez: " + item.nazwisko + "\n" + litNazwa + " " + godzina + " (+1 pkt) (" + timeStamp + ")");
+              var curOddVal = parseFloat(oddCell.getValue()) || 0;
+              if (curOddVal <= 0) {
+                oddCell.setValue(1);
+                oddCell.setNote("Oddany dyżur zrealizowany przez: " + item.nazwisko + "\n" + litNazwa + " " + godzina + " (+1 pkt) (" + timeStamp + ")");
+              }
               break;
             }
           }
@@ -4650,7 +4655,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         if (!isNaN(curNum) && curNum < 0 && !item.karaPunkty) {
           finalPts = curNum + ptsObecny;
           noteText += " (+" + ptsObecny + " pkt po karze " + curNum + ", łącznie: " + finalPts + " pkt)";
-        } else if (!isNaN(curNum) && curNum > 0 && (typ === "DODATKOWY" || czyDodatkowa)) {
+        } else if (!isNaN(curNum) && curNum > 0) {
           finalPts = curNum + ptsObecny;
           noteText += " (+" + ptsObecny + " pkt, łącznie: " + finalPts + " pkt)";
         } else {

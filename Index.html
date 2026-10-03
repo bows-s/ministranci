@@ -3630,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.4';
+    var APP_VERSION = '1.5.5';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -7852,11 +7852,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   }
                 } else {
                   if (nVal > 0) {
-                    juzZapisane = true;
                     status = 'OBECNY';
                     if (nVal === 4) typ = 'ZASTEPCA';
                   } else if (nVal < 0) {
-                    juzZapisane = true;
                     status = 'NIEOBECNY';
                   } else if (nVal === 0) {
                     status = 'USPRAWIEDLIWIONY';
@@ -7881,7 +7879,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 domyslnyStatus: domyslnyStatus,
                 obecnyPkt: pkt,
                 opisGieldy: opisGieldy,
-                poprzedniaWartosc: cellVal
+                poprzedniaWartosc: cellVal,
+                poprzedniePunktyZTejMszy: 0
               });
             }
           }
@@ -7917,7 +7916,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 domyslnyStatus: 'OBECNY',
                 obecnyPkt: 4,
                 opisGieldy: 'Zastępca za: ' + ofe.oddajacy + ' (+4 pkt)',
-                poprzedniaWartosc: null
+                poprzedniaWartosc: null,
+                poprzedniePunktyZTejMszy: 0
               });
             }
           }
@@ -7965,6 +7965,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
               if (dOb.zapisano) {
                 zakrystiaStan.ministranci = dOb.ministranci;
                 zakrystiaStan.juzZapisane = true;
+                (zakrystiaStan.ministranci || []).forEach(function(m) {
+                  m.poprzedniePunktyZTejMszy = (typeof m.punkty === 'number') ? m.punkty : ((m.obecnyPkt || 0) + (m.bylNaRozancu ? 2 : 0) - (m.karaPunkty || 0));
+                });
                 if (dOb.rodzajLiturgii) zakrystiaStan.rodzajLiturgii = dOb.rodzajLiturgii;
                 if (dOb.punktyLiturgii) zakrystiaStan.punktyLiturgii = dOb.punktyLiturgii;
                 if (dOb.nazwaLiturgii) zakrystiaStan.nazwaLiturgii = dOb.nazwaLiturgii;
@@ -9839,16 +9842,16 @@ function czyMaDostepDoZakrystii(nazwisko) {
             return normW === normM || normW.indexOf(normM) !== -1 || normM.indexOf(normW) !== -1;
           });
           if (wiersz && wiersz.komorki && wiersz.komorki[colIdx]) {
+            var cellObj = wiersz.komorki[colIdx];
+            var curVal = (typeof cellObj.wartosc === 'number' && !isNaN(cellObj.wartosc)) ? cellObj.wartosc : 0;
+            var prevFromThis = (typeof m.poprzedniePunktyZTejMszy === 'number') ? m.poprzedniePunktyZTejMszy : 0;
+            var pointsFromOtherLiturgies = curVal - prevFromThis;
+
             if (m.tylkoRozaniec) {
-              // Ministrant przyszedł tylko na różaniec: +2 pkt, brak kary -5 za mszę
-              var stary = parseFloat(wiersz.komorki[colIdx].wartosc) || 0;
-              if (stary < 0) {
-                wiersz.komorki[colIdx].wartosc = 2;
-              } else if (stary > 0 && czyDodatkowa) {
-                wiersz.komorki[colIdx].wartosc = stary + 2;
-              } else {
-                wiersz.komorki[colIdx].wartosc = 2;
-              }
+              var pktThis = 2;
+              m.punkty = pktThis;
+              m.poprzedniePunktyZTejMszy = pktThis;
+              cellObj.wartosc = pointsFromOtherLiturgies + pktThis;
             } else if (m.status === 'OBECNY') {
               var dodajPkt = zakrystiaStan.punktyLiturgii || 3;
               if (m.typ === 'ZASTEPCA') dodajPkt = 4;
@@ -9862,14 +9865,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 dodajPkt -= m.karaPunkty;
               }
 
-              var stary = parseFloat(wiersz.komorki[colIdx].wartosc) || 0;
-              if (stary < 0 && !m.karaPunkty) {
-                wiersz.komorki[colIdx].wartosc = stary + dodajPkt;
-              } else if (stary > 0 && czyDodatkowa) {
-                wiersz.komorki[colIdx].wartosc = stary + dodajPkt;
-              } else {
-                wiersz.komorki[colIdx].wartosc = dodajPkt;
-              }
+              m.punkty = dodajPkt;
+              m.poprzedniePunktyZTejMszy = dodajPkt;
+
+              // Jeśli ministrant ma punkty z innych liturgii tego dnia (np. msza rano 08:00),
+              // to punkty z tej mszy (np. 17:00) sumują się z tamtymi, a nie nadpisują!
+              cellObj.wartosc = pointsFromOtherLiturgies + dodajPkt;
 
               // Jeśli to był zastępca i jest obecny, przyznaj +1 pkt ministrantowi, którego zastępuje!
               if (m.typ === 'ZASTEPCA' && m.zastepuje) {
@@ -9879,12 +9880,20 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   return nw === normOdd || nw.indexOf(normOdd) !== -1 || normOdd.indexOf(nw) !== -1;
                 });
                 if (oddWiersz && oddWiersz.komorki && oddWiersz.komorki[colIdx]) {
-                  oddWiersz.komorki[colIdx].wartosc = 1;
+                  var curOdd = (typeof oddWiersz.komorki[colIdx].wartosc === 'number') ? oddWiersz.komorki[colIdx].wartosc : 0;
+                  if (curOdd <= 0) {
+                    oddWiersz.komorki[colIdx].wartosc = 1;
+                  }
                 }
               }
             } else if (m.status === 'NIEOBECNY') {
-              if (!czyDodatkowa) {
-                wiersz.komorki[colIdx].wartosc = -5;
+              var karaThis = czyDodatkowa ? 0 : -5;
+              m.punkty = karaThis;
+              m.poprzedniePunktyZTejMszy = karaThis;
+              if (m.typ === 'ZASTEPCA') {
+                cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : (cellObj.maDyzur ? -5 : null);
+              } else if (!czyDodatkowa) {
+                cellObj.wartosc = pointsFromOtherLiturgies + karaThis;
                 if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
                   if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
                     wiersz.komorki[colIdx + 1].wartosc = null;
@@ -9892,8 +9901,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 }
               }
             } else if (m.status === 'USPRAWIEDLIWIONY') {
+              m.punkty = 0;
+              m.poprzedniePunktyZTejMszy = 0;
               if (!czyDodatkowa) {
-                wiersz.komorki[colIdx].wartosc = 0;
+                cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : 0;
                 if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
                   if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
                     wiersz.komorki[colIdx + 1].wartosc = null;
@@ -9901,9 +9912,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 }
               }
             } else if (m.status === 'ODDANY') {
-              wiersz.komorki[colIdx].wartosc = 1;
+              m.punkty = 1;
+              m.poprzedniePunktyZTejMszy = 1;
+              cellObj.wartosc = pointsFromOtherLiturgies > 0 ? (pointsFromOtherLiturgies + 1) : 1;
             } else if (m.typ === 'ZASTEPCA' && m.status === 'NIEOBECNY') {
-              wiersz.komorki[colIdx].wartosc = null;
+              cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : null;
             }
           }
         });
