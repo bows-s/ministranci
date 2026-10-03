@@ -2107,15 +2107,18 @@
         
         <!-- Karta Rangi i Poziomu XP -->
         <div style="background:#18181b; border-radius:8px; padding:14px 16px; border:1px solid #27272a; box-shadow:0 4px 16px rgba(0,0,0,0.25);">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span id="profil-ranga-ikona" style="font-size:12px; font-weight:600; color:#fafafa;">L1</span>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+            <div style="display:flex; align-items:flex-start; gap:8px;">
+              <span id="profil-ranga-ikona" style="font-size:12px; font-weight:600; color:#fafafa; margin-top:2px;">L1</span>
               <div>
-                <span id="profil-ranga-nazwa" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Młodzik</span>
-                <span id="profil-poziom-numer" style="font-size:10px; font-weight:600; background:#27272a; color:#a1a1aa; border:1px solid #3f3f46; padding:1px 6px; border-radius:4px; margin-left:4px;">Lvl 1</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span id="profil-ranga-nazwa" style="font-weight:700; font-size:15px; color:#ffffff; letter-spacing:-0.01em;">Młodzik</span>
+                  <span id="profil-poziom-numer" style="font-size:10px; font-weight:600; background:#27272a; color:#a1a1aa; border:1px solid #3f3f46; padding:1px 6px; border-radius:4px;">Lvl 1</span>
+                </div>
+                <div id="profil-ranga-opis" style="font-size:11px; color:#a1a1aa; margin-top:3px; line-height:1.35;"></div>
               </div>
             </div>
-            <span id="profil-xp-suma" style="font-size:14px; font-weight:700; color:#fafafa; letter-spacing:-0.01em;">0 XP</span>
+            <span id="profil-xp-suma" style="font-size:14px; font-weight:700; color:#fafafa; letter-spacing:-0.01em; white-space:nowrap;">0 XP</span>
           </div>
 
           <!-- Pasek postępu -->
@@ -3627,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.3';
+    var APP_VERSION = '1.5.4';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -4173,14 +4176,14 @@
     // SYSTEM GRYWALIZACJI (POZIOMY XP, ODZNAKI, PASSA) I PROFILE
     // =============================================================
     var RANGI_GAMIFIKACJI = [
-      { lvl: 1, nazwa: "Młodzik", icon: "1", minXp: 0, maxXp: 75, kolor: "#94a3b8", bg: "#f1f5f9" },
-      { lvl: 2, nazwa: "Padawan", icon: "2", minXp: 76, maxXp: 200, kolor: "#10b981", bg: "#ecfdf5" },
-      { lvl: 3, nazwa: "Strażnik Jedi", icon: "3", minXp: 201, maxXp: 400, kolor: "#0284c7", bg: "#e0f2fe" },
-      { lvl: 4, nazwa: "Rycerz Jedi", icon: "4", minXp: 401, maxXp: 700, kolor: "#8b5cf6", bg: "#f3e8ff" },
-      { lvl: 5, nazwa: "Konsul Jedi", icon: "5", minXp: 701, maxXp: 1100, kolor: "#f97316", bg: "#fff7ed" },
-      { lvl: 6, nazwa: "Mistrz Jedi", icon: "6", minXp: 1101, maxXp: 1600, kolor: "#ef4444", bg: "#fef2f2" },
-      { lvl: 7, nazwa: "Mistrz Zakonu", icon: "7", minXp: 1601, maxXp: 2300, kolor: "#d97706", bg: "#fef3c7" },
-      { lvl: 8, nazwa: "Legenda Mocy", icon: "★", minXp: 2301, maxXp: 99999, kolor: "#eab308", bg: "#fefce8" }
+      { lvl: 1, nazwa: "Młodzik", opis: "Dziecko szkolone w klanie, przed próbami na Padawana.", icon: "1", minXp: 0, maxXp: 75, kolor: "#94a3b8", bg: "#f1f5f9" },
+      { lvl: 2, nazwa: "Padawan", opis: "Szkolony bezpośrednio pod okiem Rycerza lub Mistrza.", icon: "2", minXp: 76, maxXp: 200, kolor: "#10b981", bg: "#ecfdf5" },
+      { lvl: 3, nazwa: "Starszy Padawan", opis: "Uczeń tuż przed Próbami Jedi (często dowodzący oddziałami w Wojnach Klonów).", icon: "3", minXp: 201, maxXp: 400, kolor: "#0284c7", bg: "#e0f2fe" },
+      { lvl: 4, nazwa: "Rycerz Jedi", opis: "Pełnoprawny członek Zakonu po przejściu prób.", icon: "4", minXp: 401, maxXp: 700, kolor: "#8b5cf6", bg: "#f3e8ff" },
+      { lvl: 5, nazwa: "Mistrz Jedi", opis: "Uznany Rycerz, który wyszkolił przynajmniej jednego Padawana lub wykazał się wybitnym zrozumieniem Mocy.", icon: "5", minXp: 701, maxXp: 1100, kolor: "#f97316", bg: "#fff7ed" },
+      { lvl: 6, nazwa: "Członek Wysokiej Rady", opis: "Jeden z 12 Mistrzów zasiadających w Radzie Jedi i decydujących o Zakonie.", icon: "6", minXp: 1101, maxXp: 1600, kolor: "#ef4444", bg: "#fef2f2" },
+      { lvl: 7, nazwa: "Mistrz Zakonu", opis: "Wybierany lider Rady, odpowiedzialny za bieżące dowodzenie Zakonem (np. Mace Windu).", icon: "7", minXp: 1601, maxXp: 2300, kolor: "#d97706", bg: "#fef3c7" },
+      { lvl: 8, nazwa: "Wielki Mistrz", opis: "Najwyższy rangą, najbardziej szanowany i najmądrzejszy z całego Zakonu (np. Yoda).", icon: "★", minXp: 2301, maxXp: 99999, kolor: "#eab308", bg: "#fefce8" }
     ];
 
     function wyznaczRangeGamifikacji(xp) {
@@ -4199,6 +4202,7 @@
             ranga: r,
             lvl: r.lvl,
             nazwa: r.nazwa,
+            opis: r.opis || "",
             icon: r.icon,
             kolor: r.kolor,
             bg: r.bg,
@@ -4214,6 +4218,7 @@
         ranga: RANGI_GAMIFIKACJI[0],
         lvl: 1,
         nazwa: "Młodzik",
+        opis: RANGI_GAMIFIKACJI[0].opis || "",
         icon: "1",
         kolor: "#94a3b8",
         bg: "#f1f5f9",
@@ -4661,6 +4666,10 @@
         elRangaNazwa.innerText = g.ranga.nazwa;
         elRangaNazwa.style.color = g.ranga.kolor;
       }
+      var elRangaOpis = document.getElementById('profil-ranga-opis');
+      if (elRangaOpis) {
+        elRangaOpis.innerText = g.ranga.opis || '';
+      }
       if (elPoziomNr) {
         elPoziomNr.innerText = 'Lvl ' + g.ranga.lvl;
         elPoziomNr.style.background = g.ranga.bg;
@@ -4676,7 +4685,7 @@
         if (g.ranga.brakujeDoNast > 0) {
           elXpDoNast.innerText = 'Brakuje ' + g.ranga.brakujeDoNast + ' XP do rangi ' + g.ranga.nastepnaNazwa;
         } else {
-          elXpDoNast.innerText = 'Gratulacje! Maksymalna ranga ołtarza';
+          elXpDoNast.innerText = 'Gratulacje! Najwyższy stopień w Zakonie Jedi';
         }
       }
 
