@@ -3630,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.6';
+    var APP_VERSION = '1.5.7';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -7853,7 +7853,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 } else {
                   if (nVal > 0) {
                     status = 'OBECNY';
-                    if (nVal === 4) typ = 'ZASTEPCA';
                   } else if (nVal < 0) {
                     status = 'NIEOBECNY';
                   } else if (nVal === 0) {
