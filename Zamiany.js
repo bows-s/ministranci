@@ -147,6 +147,13 @@ function obsluzZapytanieAPI(e) {
       wynik = symulujPorannePrzypomnienieDlaMinistranta(args[0]);
     } else if (funkcja === "przypomnijOGieldzie") {
       wynik = sprawdzIWyslijPrzypomnieniaGieldy(true);
+    } else if (funkcja === "wyczyscStareZamiany") {
+      wynik = wyczyscStareZamiany();
+    } else if (funkcja === "pobierzZamianyZastepstwaArkusza") {
+      var ssZ = pobierzAktywnyArkusz();
+      var shZ = ssZ.getSheetByName("Zamiany_Zastepstwa");
+      var rowsZ = (shZ && shZ.getLastRow() > 1) ? shZ.getRange(2, 1, shZ.getLastRow() - 1, 10).getDisplayValues() : [];
+      wynik = { sukces: true, rows: rowsZ };
     } else if (funkcja === "zapiszKluczFirebase") {
       var saJson = args[0];
       if (saJson && typeof saJson === "object") saJson = JSON.stringify(saJson);
@@ -501,104 +508,20 @@ function powiadomOZamianie(doKogo, ktoZaakceptowal, szczegoly) {
 // =============================================================
 // INTELIGENTNE FILTROWANIE OFERT I PORANNE PRZYPOMNIENIA O SŁUŻBIE
 // =============================================================
+function wyznaczGodzineDlaDnia(dayNum, cache) {
+  if (cache && cache.harmonogramDni) {
+    var hDay = cache.harmonogramDni[String(dayNum)] || cache.harmonogramDni[dayNum];
+    if (hDay && hDay.godzinyMszy && hDay.godzinyMszy.length > 0) {
+      return cleanTime(hDay.godzinyMszy[0]);
+    }
+  }
+  var rok = cache ? cache.currentYear : new Date().getFullYear();
+  var mIdx = cache ? cache.currentMonthIdx : new Date().getMonth();
+  return pobierzGodzineMszyWTygodniu(rok, mIdx, dayNum);
+}
+
 function przygotujDaneHarmonogramu(ss) {
   var ssObj = ss || pobierzAktywnyArkusz();
-  var mSheet = pobierzBiezacyArkuszMiesiaca(ssObj);
-  var now = new Date();
-  var currentYear = now.getFullYear();
-  var currentMonthIdx = now.getMonth();
-  var currentDay = now.getDate();
-  var daysInMonth = new Date(currentYear, currentMonthIdx + 1, 0).getDate();
-
-  if (!mSheet) {
-    // FALLBACK: Pobierz bezpośrednio z Firestore!
-    var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
-    var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
-    var docName = polishM[currentMonthIdx] + "_" + currentYear;
-    var docAlt = polishAlt[currentMonthIdx] + "_" + currentYear;
-    var fsData = pobierzDokumentFirestore("stan_grafiku", docName) || pobierzDokumentFirestore("stan_grafiku", docAlt);
-
-    if (fsData && fsData.wiersze && fsData.wiersze.length > 0) {
-      var userRowMap = {};
-      var userGrupaMap = {};
-      var colBValues = [];
-      var allBackgrounds = [];
-      var allValues = [];
-
-      for (var fi = 0; fi < fsData.wiersze.length; fi++) {
-        var fw = fsData.wiersze[fi];
-        var nNorm = oczyscNazwiskoMinistranta(fw.nazwisko || "").toLowerCase();
-        var virtualRow = fi + 3;
-        userRowMap[nNorm] = virtualRow;
-        userGrupaMap[virtualRow] = fw.grupa || "";
-        colBValues.push([fw.nazwisko || ""]);
-
-        var rowVals = [];
-        var rowBgs = [];
-        for (var ci = 0; ci < daysInMonth; ci++) {
-          var cell = (fw.komorki && fw.komorki[ci]) ? fw.komorki[ci] : {};
-          rowVals.push(cell.wartosc !== undefined ? cell.wartosc : null);
-          rowBgs.push(cell.maDyzur ? "#c6efce" : "#ffffff");
-        }
-        allValues.push(rowVals);
-        allBackgrounds.push(rowBgs);
-      }
-
-      var grupyGodziny = {};
-      (fsData.grupy || []).forEach(function(g) {
-        if (g.nazwa && g.godzinaNiedziela) grupyGodziny[g.nazwa.trim()] = cleanTime(g.godzinaNiedziela);
-      });
-
-      var zastepstwaDni = {};
-      (fsData.zamianyZastepstwa || []).forEach(function(z) {
-        if (!z || z.status === "ANULOWANA") return;
-        var zDay = parseInt(z.dzien, 10);
-        if (isNaN(zDay)) return;
-        if (!zastepstwaDni[zDay]) zastepstwaDni[zDay] = [];
-        zastepstwaDni[zDay].push({
-          id: z.id,
-          dzien: zDay,
-          oddajacy: oczyscNazwiskoMinistranta(z.oddajacy || "").toLowerCase(),
-          przejmujacy: oczyscNazwiskoMinistranta(z.przejmujacy || "").toLowerCase(),
-          godzina: cleanTime(z.godzina),
-          status: z.status
-        });
-      });
-
-      var zamianyNiedzieleList = [];
-      (fsData.zamianyNiedziele || []).forEach(function(zn) {
-        if (zn && zn.status === "ZAAKCEPTOWANA") {
-          zamianyNiedzieleList.push({
-            dzien: parseInt(zn.dzien, 10),
-            wystawiajacy: oczyscNazwiskoMinistranta(zn.wystawiajacy || "").toLowerCase(),
-            godzOddana: cleanTime(zn.godzinaOddawana || zn.godzOddana),
-            przejmujacy: oczyscNazwiskoMinistranta(zn.przejmujacy || "").toLowerCase(),
-            godzWzieta: cleanTime(zn.godzinaPrzejmujacego || zn.godzWzieta)
-          });
-        }
-      });
-
-      return {
-        ss: ssObj,
-        mSheet: null,
-        currentYear: currentYear,
-        currentMonthIdx: currentMonthIdx,
-        currentDay: currentDay,
-        daysInMonth: daysInMonth,
-        colBValues: colBValues,
-        userRowMap: userRowMap,
-        userGrupaMap: userGrupaMap,
-        allBackgrounds: allBackgrounds,
-        allValues: allValues,
-        dniSwiateczne: [],
-        zastepstwaDni: zastepstwaDni,
-        grupyGodziny: grupyGodziny,
-        zamianyNiedzieleList: zamianyNiedzieleList
-      };
-    }
-    return null;
-  }
-
   var now = new Date();
   var currentYear = now.getFullYear();
   var currentMonthIdx = now.getMonth();
@@ -607,61 +530,149 @@ function przygotujDaneHarmonogramu(ss) {
 
   var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
   var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
-  var docNameG = polishM[currentMonthIdx] + "_" + currentYear;
-  var docAltG = polishAlt[currentMonthIdx] + "_" + currentYear;
-  var fsDocG = pobierzDokumentFirestore("stan_grafiku", docNameG) || pobierzDokumentFirestore("stan_grafiku", docAltG);
+  var docName = polishM[currentMonthIdx] + "_" + currentYear;
+  var docAlt = polishAlt[currentMonthIdx] + "_" + currentYear;
+  var fsData = pobierzDokumentFirestore("stan_grafiku", docName) || pobierzDokumentFirestore("stan_grafiku", docAlt);
+
+  // 1. GŁÓWNE ŹRÓDŁO: FIRESTORE (dokładny stan aplikacji i gazetki)
+  if (fsData && fsData.wiersze && fsData.wiersze.length > 0) {
+    var userRowMap = {};
+    var userGrupaMap = {};
+    var colBValues = [];
+    var allBackgrounds = [];
+    var allValues = [];
+    var ministranciWiersze = [];
+
+    for (var fi = 0; fi < fsData.wiersze.length; fi++) {
+      var fw = fsData.wiersze[fi];
+      var rawNazw = (fw.nazwisko || "").trim();
+      if (!rawNazw) continue;
+      var upN = rawNazw.toUpperCase();
+      if (upN.indexOf("RANKING") !== -1 || upN.indexOf("MINISTRANT") !== -1 || upN.indexOf("GRUPA") !== -1) {
+        continue;
+      }
+      var nNorm = oczyscNazwiskoMinistranta(rawNazw).toLowerCase();
+      var virtualRow = ministranciWiersze.length + 3;
+      userRowMap[nNorm] = virtualRow;
+      userGrupaMap[virtualRow] = fw.grupa || "";
+      colBValues.push([rawNazw]);
+
+      var rowVals = [];
+      var rowBgs = [];
+      var komorki = fw.komorki || [];
+      for (var ci = 0; ci < daysInMonth; ci++) {
+        var cell = (komorki[ci]) ? komorki[ci] : {};
+        rowVals.push(cell.wartosc !== undefined ? cell.wartosc : null);
+        rowBgs.push(cell.maDyzur ? "#c6efce" : "#ffffff");
+      }
+      allValues.push(rowVals);
+      allBackgrounds.push(rowBgs);
+
+      ministranciWiersze.push({
+        nazwisko: rawNazw,
+        normName: nNorm,
+        grupa: fw.grupa || "",
+        komorki: komorki,
+        virtualRow: virtualRow
+      });
+    }
+
+    var grupyGodziny = {};
+    (fsData.grupy || []).forEach(function(g) {
+      if (g.nazwa && g.godzinaNiedziela) grupyGodziny[g.nazwa.trim()] = cleanTime(g.godzinaNiedziela);
+    });
+
+    var zastepstwaDni = {};
+    var listZ = (fsData.zamianyZastepstwa || []).concat(fsData.wolneZastepstwa || []);
+    listZ.forEach(function(z) {
+      if (!z || z.status === "ANULOWANA" || z.status === "WYGASLA") return;
+      var zDay = parseInt(z.dzien || z.dzienOddawany, 10);
+      if (isNaN(zDay)) return;
+      if (!zastepstwaDni[zDay]) zastepstwaDni[zDay] = [];
+      zastepstwaDni[zDay].push({
+        id: z.id,
+        dzien: zDay,
+        oddajacy: oczyscNazwiskoMinistranta(z.oddajacy || z.wystawiajacy || "").toLowerCase(),
+        przejmujacy: oczyscNazwiskoMinistranta(z.przejmujacy || "").toLowerCase(),
+        godzina: cleanTime(z.godzina),
+        status: z.status || "OCZEKUJE"
+      });
+    });
+
+    var zamianyNiedzieleList = [];
+    (fsData.zamianyNiedziele || []).forEach(function(zn) {
+      if (zn && (zn.status === "ZAAKCEPTOWANA" || zn.status === "PRZEJETE")) {
+        zamianyNiedzieleList.push({
+          dzien: parseInt(zn.dzien, 10),
+          wystawiajacy: oczyscNazwiskoMinistranta(zn.wystawiajacy || "").toLowerCase(),
+          godzOddana: cleanTime(zn.godzinaOddawana || zn.godzOddana),
+          przejmujacy: oczyscNazwiskoMinistranta(zn.przejmujacy || "").toLowerCase(),
+          godzWzieta: cleanTime(zn.godzinaPrzejmujacego || zn.godzWzieta)
+        });
+      }
+    });
+
+    return {
+      zrodlo: "FIRESTORE",
+      ss: ssObj,
+      mSheet: null,
+      currentYear: currentYear,
+      currentMonthIdx: currentMonthIdx,
+      currentDay: currentDay,
+      daysInMonth: daysInMonth,
+      colBValues: colBValues,
+      userRowMap: userRowMap,
+      userGrupaMap: userGrupaMap,
+      ministranciWiersze: ministranciWiersze,
+      allBackgrounds: allBackgrounds,
+      allValues: allValues,
+      dniSwiateczne: [],
+      zastepstwaDni: zastepstwaDni,
+      grupyGodziny: grupyGodziny,
+      harmonogramDni: fsData.harmonogramDni || {},
+      zamianyNiedzieleList: zamianyNiedzieleList,
+      fsDoc: fsData
+    };
+  }
+
+  // 2. FALLBACK: ARKUSZE GOOGLE (tylko w razie niedostępności Firestore)
+  var mSheet = pobierzBiezacyArkuszMiesiaca(ssObj);
+  if (!mSheet) return null;
 
   var maxRows = Math.min(mSheet.getLastRow(), 32);
-  var colBValues = mSheet.getRange(1, 2, maxRows, 1).getValues();
+  var colBValuesRaw = mSheet.getRange(1, 2, maxRows, 1).getValues();
 
   var userRowMap = {};
   var userGrupaMap = {};
+  var colBValues = [];
+  var validRowIndices = [];
+
   for (var r = 2; r < maxRows; r++) {
-    var rawN = colBValues[r][0].toString().trim();
+    var rawN = colBValuesRaw[r][0].toString().trim();
     if (rawN) {
+      var upRaw = rawN.toUpperCase();
+      if (upRaw.indexOf("RANKING") !== -1 || upRaw.indexOf("MINISTRANT") !== -1 || upRaw.indexOf("GRUPA") !== -1) {
+        continue;
+      }
       var norm = oczyscNazwiskoMinistranta(rawN).toLowerCase();
       userRowMap[norm] = r + 1;
+      validRowIndices.push(r);
+      colBValues.push([rawN]);
     }
-  }
-
-  if (fsDocG && fsDocG.wiersze) {
-    fsDocG.wiersze.forEach(function(fw) {
-      var nKey = oczyscNazwiskoMinistranta(fw.nazwisko || "").toLowerCase();
-      var rNum = userRowMap[nKey];
-      if (rNum && fw.grupa) {
-        userGrupaMap[rNum] = fw.grupa;
-      }
-    });
   }
 
   var allBackgrounds = mSheet.getRange(3, 4, maxRows - 2, daysInMonth).getBackgrounds();
   var allValues = mSheet.getRange(3, 4, maxRows - 2, daysInMonth).getValues();
-
-  var dniSwiateczne = [];
-  for (var dIdx = 0; dIdx < daysInMonth; dIdx++) {
-    var testDateH = new Date(currentYear, currentMonthIdx, dIdx + 1);
-    var dDay = testDateH.getDay();
-    if (dDay >= 1 && dDay <= 5) {
-      var koloroweWiersze = 0;
-      for (var rowI = 0; rowI < allBackgrounds.length; rowI++) {
-        var cBg = allBackgrounds[rowI][dIdx].toLowerCase();
-        if (cBg !== "#ffffff" && cBg !== "" && cBg !== "transparent") {
-          koloroweWiersze++;
-        }
-      }
-      if (koloroweWiersze >= 6) {
-        dniSwiateczne.push(dIdx + 1);
-      }
-    }
-  }
 
   var zSheet = ssObj.getSheetByName("Zamiany_Zastepstwa");
   var zastepstwaDni = {};
   if (zSheet && zSheet.getLastRow() > 1) {
     var zData = zSheet.getRange(2, 1, zSheet.getLastRow() - 1, 10).getDisplayValues();
     for (var zi = 0; zi < zData.length; zi++) {
+      var zMiesiac = zData[zi][1].trim();
+      if (zMiesiac && zMiesiac !== mSheet.getName()) continue;
       var zStat = zData[zi][7].trim();
-      if (zStat === "ANULOWANA") continue;
+      if (zStat === "ANULOWANA" || zStat === "WYGASLA") continue;
       var zDay = parseInt(zData[zi][2], 10);
       if (isNaN(zDay)) continue;
       if (!zastepstwaDni[zDay]) zastepstwaDni[zDay] = [];
@@ -678,34 +689,15 @@ function przygotujDaneHarmonogramu(ss) {
 
   var sundaySheet = ssObj.getSheetByName("Grafik_Niedziele");
   var grupyGodziny = wyznaczRotowaneGodzinyGrup(currentYear, currentMonthIdx);
-  if (fsDocG && fsDocG.grupy && fsDocG.grupy.length > 0) {
-    fsDocG.grupy.forEach(function(g) {
-      if (g.nazwa && g.godzinaNiedziela) grupyGodziny[g.nazwa.trim()] = cleanTime(g.godzinaNiedziela);
-    });
-  }
-  if (sundaySheet) {
-    try {
-      var gData = sundaySheet.getRange("A2:B5").getValues();
-      for (var gi = 0; gi < gData.length; gi++) {
-        var grpName = (gData[gi][0] || "").toString().trim();
-        for (var rk in grupyGodziny) {
-          if (dopasujGrupe(rk, grpName)) {
-            sundaySheet.getRange(gi + 2, 2).setValue(grupyGodziny[rk]);
-            break;
-          }
-        }
-      }
-    } catch (eG) {
-      console.warn("Nie udało się zaktualizować arkusza Grafik_Niedziele:", eG);
-    }
-  }
 
   var nSheet = ssObj.getSheetByName("Zamiany_Niedziele");
   var zamianyNiedzieleList = [];
   if (nSheet && nSheet.getLastRow() > 1) {
     var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
     for (var ni = 0; ni < nData.length; ni++) {
-      if (nData[ni][8].trim() === "ZAAKCEPTOWANA" && nData[ni][1] === mSheet.getName()) {
+      var nMiesiac = nData[ni][1].trim();
+      if (nMiesiac && nMiesiac !== mSheet.getName()) continue;
+      if (nData[ni][8].trim() === "ZAAKCEPTOWANA") {
         zamianyNiedzieleList.push({
           dzien: parseInt(nData[ni][2], 10),
           wystawiajacy: oczyscNazwiskoMinistranta(nData[ni][3]).toLowerCase(),
@@ -718,6 +710,7 @@ function przygotujDaneHarmonogramu(ss) {
   }
 
   return {
+    zrodlo: "ARKUSZ",
     ss: ssObj,
     mSheet: mSheet,
     currentYear: currentYear,
@@ -727,11 +720,13 @@ function przygotujDaneHarmonogramu(ss) {
     colBValues: colBValues,
     userRowMap: userRowMap,
     userGrupaMap: userGrupaMap,
+    ministranciWiersze: null,
     allBackgrounds: allBackgrounds,
     allValues: allValues,
-    dniSwiateczne: dniSwiateczne,
+    dniSwiateczne: [],
     zastepstwaDni: zastepstwaDni,
     grupyGodziny: grupyGodziny,
+    harmonogramDni: {},
     zamianyNiedzieleList: zamianyNiedzieleList
   };
 }
@@ -795,17 +790,17 @@ function sprawdzCzyMinistrantMaDyzurWDniu(normName, dayNum, cache) {
   for (var zi = 0; zi < zList.length; zi++) {
     var zItem = zList[zi];
     if (zItem.przejmujacy && (zItem.przejmujacy.indexOf(normName) !== -1 || normName.indexOf(zItem.przejmujacy) !== -1)) {
-      if (zItem.status === "ZAAKCEPTOWANA") {
+      if (zItem.status === "ZAAKCEPTOWANA" || zItem.status === "PRZEJETE") {
         return {
           maDyzur: true,
           typ: "ZASTEPSTWO",
-          godzina: zItem.godzina || pobierzGodzineMszyWTygodniu(cache.currentYear, cache.currentMonthIdx, dayNum),
+          godzina: zItem.godzina || wyznaczGodzineDlaDnia(dayNum, cache),
           opis: "zastępstwo (+4 pkt)"
         };
       }
     }
     if (zItem.oddajacy && (zItem.oddajacy.indexOf(normName) !== -1 || normName.indexOf(zItem.oddajacy) !== -1)) {
-      if (zItem.status === "OCZEKUJE" || zItem.status === "ZAAKCEPTOWANA") {
+      if (zItem.status === "OCZEKUJE" || zItem.status === "ZAAKCEPTOWANA" || zItem.status === "PRZEJETE") {
         return { maDyzur: false, powód: "oddał dyżur" };
       }
     }
@@ -814,17 +809,44 @@ function sprawdzCzyMinistrantMaDyzurWDniu(normName, dayNum, cache) {
   var dt = new Date(cache.currentYear, cache.currentMonthIdx, dayNum);
   var dow = dt.getDay(); // 0 = Nd, 1 = Pn, ..., 6 = Sb
 
+  // Obiekt ministranta z Firestore jeśli dostępny
+  var mObj = null;
+  if (cache.ministranciWiersze) {
+    for (var mi = 0; mi < cache.ministranciWiersze.length; mi++) {
+      var candidate = cache.ministranciWiersze[mi];
+      if (candidate.normName === normName || candidate.normName.indexOf(normName) !== -1 || normName.indexOf(candidate.normName) !== -1) {
+        mObj = candidate;
+        break;
+      }
+    }
+  }
+
   // 2. Dni w tygodniu (Pn - Pt)
   if (dow >= 1 && dow <= 5) {
-    var bg = (cache.allBackgrounds[userRow - 3][dayNum - 1] || "").toLowerCase();
-    if (bg !== "#ffffff" && bg !== "" && bg !== "transparent") {
-      var isSwieto = (cache.dniSwiateczne.indexOf(dayNum) !== -1);
-      var godzTydz = isSwieto ? "Msza w święto" : pobierzGodzineMszyWTygodniu(cache.currentYear, cache.currentMonthIdx, dayNum);
+    var maDyzurWTyg = false;
+    var uValTyg = null;
+
+    if (mObj && mObj.komorki && mObj.komorki[dayNum - 1]) {
+      var cObj = mObj.komorki[dayNum - 1];
+      maDyzurWTyg = (cObj.maDyzur === true);
+      uValTyg = cObj.wartosc;
+    } else if (cache.allBackgrounds && cache.allBackgrounds[userRow - 3]) {
+      var bg = (cache.allBackgrounds[userRow - 3][dayNum - 1] || "").toLowerCase();
+      maDyzurWTyg = (bg !== "#ffffff" && bg !== "" && bg !== "transparent");
+      uValTyg = cache.allValues ? cache.allValues[userRow - 3][dayNum - 1] : null;
+    }
+
+    if (uValTyg === 0 || uValTyg === "0") {
+      return { maDyzur: false, powód: "usprawiedliwiony" };
+    }
+
+    if (maDyzurWTyg) {
+      var godzTydz = wyznaczGodzineDlaDnia(dayNum, cache);
       return {
         maDyzur: true,
-        typ: isSwieto ? "SWIETO" : "TYDZIEN",
+        typ: "TYDZIEN",
         godzina: godzTydz,
-        opis: isSwieto ? "dyżur w święto" : "dyżur w tygodniu"
+        opis: "dyżur w tygodniu"
       };
     }
     return { maDyzur: false };
@@ -834,7 +856,12 @@ function sprawdzCzyMinistrantMaDyzurWDniu(normName, dayNum, cache) {
   if (dow === 6) {
     var nextSunday = dayNum + 1;
     if (nextSunday <= cache.daysInMonth) {
-      var uValNext = cache.allValues[userRow - 3][nextSunday - 1];
+      var uValNext = null;
+      if (mObj && mObj.komorki && mObj.komorki[nextSunday - 1]) {
+        uValNext = mObj.komorki[nextSunday - 1].wartosc;
+      } else if (cache.allValues && cache.allValues[userRow - 3]) {
+        uValNext = cache.allValues[userRow - 3][nextSunday - 1];
+      }
       if (uValNext === 0 || uValNext === "0") {
         return { maDyzur: false, powód: "usprawiedliwiony" };
       }
@@ -863,7 +890,12 @@ function sprawdzCzyMinistrantMaDyzurWDniu(normName, dayNum, cache) {
 
   // 4. Niedziela (dow === 0)
   if (dow === 0) {
-    var uValSun = cache.allValues[userRow - 3][dayNum - 1];
+    var uValSun = null;
+    if (mObj && mObj.komorki && mObj.komorki[dayNum - 1]) {
+      uValSun = mObj.komorki[dayNum - 1].wartosc;
+    } else if (cache.allValues && cache.allValues[userRow - 3]) {
+      uValSun = cache.allValues[userRow - 3][dayNum - 1];
+    }
     if (uValSun === 0 || uValSun === "0") {
       return { maDyzur: false, powód: "usprawiedliwiony" };
     }
@@ -958,13 +990,23 @@ function wyslijPorannePrzypomnieniaOSluzbie(customDate) {
 
   // 1. Sprawdzamy kto W OGÓLE w grafiku ma dzisiaj wyznaczoną służbę
   var wszyscyNaDyzurzeDzis = [];
-  for (var normKey in cache.userRowMap) {
-    var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(normKey, currentDay, cache);
-    if (checkAll.maDyzur) {
-      var rowIdx = cache.userRowMap[normKey];
-      var rawName = (cache.colBValues && cache.colBValues[rowIdx - 1]) ? cache.colBValues[rowIdx - 1][0] : normKey;
-      var cleanName = oczyscNazwiskoMinistranta(rawName);
-      wszyscyNaDyzurzeDzis.push(cleanName + " (" + checkAll.godzina + ")");
+  if (cache.ministranciWiersze && cache.ministranciWiersze.length > 0) {
+    for (var mi = 0; mi < cache.ministranciWiersze.length; mi++) {
+      var mw = cache.ministranciWiersze[mi];
+      var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(mw.normName, currentDay, cache);
+      if (checkAll.maDyzur) {
+        wszyscyNaDyzurzeDzis.push(mw.nazwisko + " (" + checkAll.godzina + ")");
+      }
+    }
+  } else {
+    for (var normKey in cache.userRowMap) {
+      var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(normKey, currentDay, cache);
+      if (checkAll.maDyzur) {
+        var rowIdx = cache.userRowMap[normKey];
+        var rawName = (cache.colBValues && cache.colBValues[rowIdx - 1]) ? cache.colBValues[rowIdx - 1][0] : normKey;
+        var cleanName = oczyscNazwiskoMinistranta(rawName);
+        wszyscyNaDyzurzeDzis.push(cleanName + " (" + checkAll.godzina + ")");
+      }
     }
   }
 
@@ -1048,13 +1090,23 @@ function wyslijWieczornePrzypomnieniaONajblizszejSluzbie(customDate) {
   var jutroYear = jutro.getFullYear();
 
   var wszyscyNaDyzurzeJutro = [];
-  for (var normKey in cache.userRowMap) {
-    var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(normKey, jutroDay, cache);
-    if (checkAll.maDyzur) {
-      var rowIdx = cache.userRowMap[normKey];
-      var rawName = (cache.colBValues && cache.colBValues[rowIdx - 1]) ? cache.colBValues[rowIdx - 1][0] : normKey;
-      var cleanName = oczyscNazwiskoMinistranta(rawName);
-      wszyscyNaDyzurzeJutro.push(cleanName + " (" + checkAll.godzina + ")");
+  if (cache.ministranciWiersze && cache.ministranciWiersze.length > 0) {
+    for (var mi = 0; mi < cache.ministranciWiersze.length; mi++) {
+      var mw = cache.ministranciWiersze[mi];
+      var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(mw.normName, jutroDay, cache);
+      if (checkAll.maDyzur) {
+        wszyscyNaDyzurzeJutro.push(mw.nazwisko + " (" + checkAll.godzina + ")");
+      }
+    }
+  } else {
+    for (var normKey in cache.userRowMap) {
+      var checkAll = sprawdzCzyMinistrantMaDyzurWDniu(normKey, jutroDay, cache);
+      if (checkAll.maDyzur) {
+        var rowIdx = cache.userRowMap[normKey];
+        var rawName = (cache.colBValues && cache.colBValues[rowIdx - 1]) ? cache.colBValues[rowIdx - 1][0] : normKey;
+        var cleanName = oczyscNazwiskoMinistranta(rawName);
+        wszyscyNaDyzurzeJutro.push(cleanName + " (" + checkAll.godzina + ")");
+      }
     }
   }
 
@@ -1181,54 +1233,131 @@ function sprawdzIWyslijPrzypomnieniaGieldy(wymuszone) {
     }
   }
 
-  // 1. Zliczamy aktywne wolne zastępstwa (wolne dyżury +4 pkt)
-  var wolneZastepstwa = [];
-  var zSheet = ss.getSheetByName("Zamiany_Zastepstwa");
-  if (zSheet && zSheet.getLastRow() > 1) {
-    var zData = zSheet.getRange(2, 1, zSheet.getLastRow() - 1, 10).getDisplayValues();
-    for (var zi = 0; zi < zData.length; zi++) {
-      var zStat = zData[zi][7].trim();
-      var zDay = parseInt(zData[zi][2], 10);
-      if (zStat === "OCZEKUJE" && !isNaN(zDay) && zDay >= currentDay) {
-        wolneZastepstwa.push({
-          dzien: zDay,
-          oddajacy: zData[zi][3],
-          godzina: zData[zi][5]
-        });
-      }
-    }
+  // Wyczyść ewentualne stare/zdezaktualizowane wpisy w arkuszach
+  try {
+    wyczyscStareZamiany(ss);
+  } catch (eClean) {
+    console.warn("Błąd w wyczyscStareZamiany podczas sprawdzania giełdy:", eClean);
   }
 
-  // 2. Zliczamy oferty wymiany (1:1 tydzień i niedziele)
+  var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+  var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+  var docName = polishM[currentMonthIdx] + "_" + currentYear;
+  var docAlt = polishAlt[currentMonthIdx] + "_" + currentYear;
+  var fsDoc = pobierzDokumentFirestore("stan_grafiku", docName) || pobierzDokumentFirestore("stan_grafiku", docAlt);
+
+  var wolneZastepstwa = [];
   var ofertyWymiany = [];
-  var tSheet = ss.getSheetByName("Zamiany_Tydzien");
-  if (tSheet && tSheet.getLastRow() > 1) {
-    var tData = tSheet.getRange(2, 1, tSheet.getLastRow() - 1, 8).getDisplayValues();
-    for (var ti = 0; ti < tData.length; ti++) {
-      var tStat = tData[ti][7].trim();
-      var tDay = parseInt(tData[ti][2], 10);
-      if (tStat === "OCZEKUJE" && !isNaN(tDay) && tDay >= currentDay) {
+
+  if (fsDoc) {
+    // 1. Wolne zastępstwa z Firestore
+    (fsDoc.wolneZastepstwa || []).forEach(function(wz) {
+      if (!wz) return;
+      var wStat = wz.status || "OCZEKUJE";
+      var wDay = parseInt(wz.dzien, 10);
+      var wGodz = cleanTime(wz.godzina);
+      var czyMinelo = (wDay === currentDay && czyMszaJuzMinaDzis(wGodz));
+      if ((wStat === "OCZEKUJE" || wStat === "AKTYWNA") && !isNaN(wDay) && wDay >= currentDay && !czyMinelo) {
+        wolneZastepstwa.push({
+          dzien: wDay,
+          oddajacy: wz.oddajacy || wz.wystawiajacy || "",
+          godzina: wGodz
+        });
+      }
+    });
+
+    // 2. Oferty wymiany tydzień z Firestore
+    (fsDoc.gieldaTydzien || []).forEach(function(gt) {
+      if (!gt) return;
+      var tStat = gt.status || "AKTYWNA";
+      var tDay = parseInt(gt.dzienOddawany || gt.dzien, 10);
+      var tGodz = cleanTime(gt.godzina);
+      var czyMinelo = (tDay === currentDay && czyMszaJuzMinaDzis(tGodz));
+      if ((tStat === "AKTYWNA" || tStat === "OCZEKUJE") && !isNaN(tDay) && tDay >= currentDay && !czyMinelo) {
         ofertyWymiany.push({
           dzien: tDay,
-          wystawiajacy: tData[ti][3],
-          typ: "Tydzień"
+          wystawiajacy: gt.wystawiajacy || "",
+          typ: "Tydzień",
+          akceptowaneDni: gt.akceptowaneDni || gt.dniAkceptowane || []
         });
       }
-    }
-  }
+    });
 
-  var nSheet = ss.getSheetByName("Zamiany_Niedziele");
-  if (nSheet && nSheet.getLastRow() > 1) {
-    var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
-    for (var ni = 0; ni < nData.length; ni++) {
-      var nStat = nData[ni][8].trim();
-      var nDay = parseInt(nData[ni][2], 10);
-      if (nStat === "OCZEKUJE" && !isNaN(nDay) && nDay >= currentDay) {
+    // 3. Oferty wymiany niedziele z Firestore
+    (fsDoc.gieldaNiedziele || []).forEach(function(gn) {
+      if (!gn) return;
+      var nStat = gn.status || "AKTYWNA";
+      var nDay = parseInt(gn.dzien || gn.dzienOddawany, 10);
+      var nGodz = cleanTime(gn.godzinaOddawana || gn.godzina);
+      var czyMinelo = (nDay === currentDay && czyMszaJuzMinaDzis(nGodz));
+      if ((nStat === "AKTYWNA" || nStat === "OCZEKUJE") && !isNaN(nDay) && nDay >= currentDay && !czyMinelo) {
         ofertyWymiany.push({
           dzien: nDay,
-          wystawiajacy: nData[ni][3],
-          typ: "Niedziela"
+          wystawiajacy: gn.wystawiajacy || "",
+          typ: "Niedziela",
+          akceptowaneGodziny: gn.akceptowaneGodziny || []
         });
+      }
+    });
+  } else {
+    // Fallback: Arkusze Google (z RYGORYSTYCZNYM filtrowaniem po nazwie miesiąca)
+    var mSheet = pobierzBiezacyArkuszMiesiaca(ss);
+    var biezacyMiesiacNazwa = mSheet ? mSheet.getName() : docName;
+
+    var zSheet = ss.getSheetByName("Zamiany_Zastepstwa");
+    if (zSheet && zSheet.getLastRow() > 1) {
+      var zData = zSheet.getRange(2, 1, zSheet.getLastRow() - 1, 10).getDisplayValues();
+      for (var zi = 0; zi < zData.length; zi++) {
+        var zMiesiac = zData[zi][1].trim();
+        var zStat = zData[zi][7].trim();
+        var zDay = parseInt(zData[zi][2], 10);
+        var zGodz = cleanTime(zData[zi][5]);
+        var czyMinelo = (zDay === currentDay && czyMszaJuzMinaDzis(zGodz));
+        if (zMiesiac === biezacyMiesiacNazwa && zStat === "OCZEKUJE" && !isNaN(zDay) && zDay >= currentDay && !czyMinelo) {
+          wolneZastepstwa.push({
+            dzien: zDay,
+            oddajacy: zData[zi][3],
+            godzina: zGodz
+          });
+        }
+      }
+    }
+
+    var tSheet = ss.getSheetByName("Zamiany_Tydzien");
+    if (tSheet && tSheet.getLastRow() > 1) {
+      var tData = tSheet.getRange(2, 1, tSheet.getLastRow() - 1, 8).getDisplayValues();
+      for (var ti = 0; ti < tData.length; ti++) {
+        var tMiesiac = tData[ti][1].trim();
+        var tStat = tData[ti][7].trim();
+        var tDay = parseInt(tData[ti][2], 10);
+        var tGodz = cleanTime(tData[ti][4]);
+        var czyMineloT = (tDay === currentDay && czyMszaJuzMinaDzis(tGodz));
+        if (tMiesiac === biezacyMiesiacNazwa && tStat === "OCZEKUJE" && !isNaN(tDay) && tDay >= currentDay && !czyMineloT) {
+          ofertyWymiany.push({
+            dzien: tDay,
+            wystawiajacy: tData[ti][3],
+            typ: "Tydzień"
+          });
+        }
+      }
+    }
+
+    var nSheet = ss.getSheetByName("Zamiany_Niedziele");
+    if (nSheet && nSheet.getLastRow() > 1) {
+      var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
+      for (var ni = 0; ni < nData.length; ni++) {
+        var nMiesiac = nData[ni][1].trim();
+        var nStat = nData[ni][8].trim();
+        var nDay = parseInt(nData[ni][2], 10);
+        var nGodz = cleanTime(nData[ni][4]);
+        var czyMineloN = (nDay === currentDay && czyMszaJuzMinaDzis(nGodz));
+        if (nMiesiac === biezacyMiesiacNazwa && nStat === "OCZEKUJE" && !isNaN(nDay) && nDay >= currentDay && !czyMineloN) {
+          ofertyWymiany.push({
+            dzien: nDay,
+            wystawiajacy: nData[ni][3],
+            typ: "Niedziela"
+          });
+        }
       }
     }
   }
@@ -1244,22 +1373,7 @@ function sprawdzIWyslijPrzypomnieniaGieldy(wymuszone) {
   }
 
   var tokenData = sheetTok.getRange(2, 1, sheetTok.getLastRow() - 1, 2).getValues();
-
-  var tytul = "";
-  var tresc = "";
-
-  if (wolneZastepstwa.length > 0) {
-    tytul = "Giełda: wolne służby do wzięcia! 📢 (+4 pkt)";
-    if (wolneZastepstwa.length === 1) {
-      var wz = wolneZastepstwa[0];
-      tresc = "Czeka wolny dyżur na " + wz.dzien + ". dzień miesiąca (godz. " + wz.godzina + "). Kliknij, przejmij i zdobądź +4 pkt!";
-    } else {
-      tresc = "Czekają wolne dyżury do wzięcia (" + wolneZastepstwa.length + " msze). Sprawdź giełdę, pomóż i zgarnij punkty!";
-    }
-  } else {
-    tytul = "Giełda dyżurów: aktywne zamiany 🔄";
-    tresc = "Na giełdzie czekają prośby o zamianę (" + ofertyWymiany.length + "). Zobacz grafik i pomóż chłopakom!";
-  }
+  var cache = przygotujDaneHarmonogramu(ss);
 
   var wyslanoLicznik = 0;
   var wyslaneDo = [];
@@ -1269,15 +1383,26 @@ function sprawdzIWyslijPrzypomnieniaGieldy(wymuszone) {
     var token = tokenData[i][1];
     if (!token || !nazwisko) continue;
 
-    // Filtrujemy oferty tak, aby ministrant widział TYLKO oferty innych osób (nigdy własne!)
+    // Filtrujemy oferty: nie własne oraz ministrant musi kwalifikować się do ich wzięcia
     var obceWolne = wolneZastepstwa.filter(function(o) {
-      return !czyToTenSamMinistrant(nazwisko, o.oddajacy);
-    });
-    var obceWymiany = ofertyWymiany.filter(function(o) {
-      return !czyToTenSamMinistrant(nazwisko, o.wystawiajacy);
+      if (czyToTenSamMinistrant(nazwisko, o.oddajacy)) return false;
+      if (cache && !czyMinistrantKwalifikujeSieDoOferty(nazwisko, { typOferty: "ZASTEPSTWO", dzien: o.dzien }, cache)) {
+        return false;
+      }
+      return true;
     });
 
-    // Jeśli dla tego ministranta nie ma żadnych obcych ofert, pomijamy go całkowicie!
+    var obceWymiany = ofertyWymiany.filter(function(o) {
+      if (czyToTenSamMinistrant(nazwisko, o.wystawiajacy)) return false;
+      if (cache && o.typ === "Tydzień") {
+        if (!czyMinistrantKwalifikujeSieDoOferty(nazwisko, { typOferty: "TYDZIEN", dzienOddawany: o.dzien, akceptowaneDni: o.akceptowaneDni }, cache)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    // Jeśli dla tego ministranta nie ma żadnych pasujących ofert, pomijamy go całkowicie
     if (obceWolne.length === 0 && obceWymiany.length === 0) {
       continue;
     }
@@ -2090,9 +2215,13 @@ function sprawdzICzyscStareZamiany(ss) {
 function wyczyscStareZamiany(optionalSs) {
   var ss = optionalSs || pobierzAktywnyArkusz();
   var biezacyArkusz = pobierzBiezacyArkuszMiesiaca(ss);
-  if (!biezacyArkusz) return;
-  var biezacyMiesiacNazwa = biezacyArkusz.getName();
   var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonthIdx = now.getMonth();
+  var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+  var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+  var biezacyMiesiacNazwa = biezacyArkusz ? biezacyArkusz.getName() : (polishM[currentMonthIdx] + "_" + currentYear);
+  var biezacyAlt = polishAlt[currentMonthIdx] + "_" + currentYear;
   var dzisDzien = now.getDate();
 
   // 1. Czyszczenie Zamiany_Tydzien
@@ -2107,10 +2236,10 @@ function wyczyscStareZamiany(optionalSs) {
       var dzienT = parseInt(rowT[2], 10);
       var statusT = rowT[7].toString().trim();
 
-      // Jeśli rekord jest z innego/poprzedniego miesiąca -> usuwamy
-      if (miesiacT !== biezacyMiesiacNazwa) continue;
-      // Anulowane -> usuwamy od razu
-      if (statusT === "ANULOWANA") continue;
+      // Jeśli rekord jest z innego/poprzedniego miesiąca lub pusty -> usuwamy
+      if (!miesiacT || (miesiacT !== biezacyMiesiacNazwa && miesiacT !== biezacyAlt)) continue;
+      // Anulowane lub wygasłe -> usuwamy od razu
+      if (statusT === "ANULOWANA" || statusT === "WYGASLA" || statusT === "PRZEKSZTALCONA_NA_WOLNY") continue;
       // Oczekujące z przeszłości -> usuwamy od razu (termin minął, nikt nie wziął)
       if (statusT === "OCZEKUJE" && dzienT < dzisDzien) continue;
       // Zaakceptowane starsze niż 7 dni -> usuwamy
@@ -2139,8 +2268,8 @@ function wyczyscStareZamiany(optionalSs) {
       var dzienN = parseInt(rowN[2], 10);
       var statusN = rowN[8].toString().trim();
 
-      if (miesiacN !== biezacyMiesiacNazwa) continue;
-      if (statusN === "ANULOWANA") continue;
+      if (!miesiacN || (miesiacN !== biezacyMiesiacNazwa && miesiacN !== biezacyAlt)) continue;
+      if (statusN === "ANULOWANA" || statusN === "WYGASLA" || statusN === "WYGASLA_USPRAWIEDLIWIONA") continue;
       if (statusN === "OCZEKUJE" && dzienN < dzisDzien) continue;
       if (statusN === "ZAAKCEPTOWANA" && dzienN < (dzisDzien - 7)) continue;
 
@@ -2173,11 +2302,14 @@ function wyczyscStareZamiany(optionalSs) {
       var rowZ = zData[m];
       var miesiacZ = rowZ[1].toString().trim();
       var dzienZ = parseInt(rowZ[2], 10);
+      var godzZ = cleanTime(rowZ[5]);
       var statusZ = rowZ[7].toString().trim();
 
-      if (miesiacZ && miesiacZ !== biezacyMiesiacNazwa) continue;
-      if (statusZ === "ANULOWANA") continue;
+      // Rekord bez miesiąca lub z innego miesiąca (np. z września w październiku) -> usuwamy natychmiast!
+      if (!miesiacZ || (miesiacZ !== biezacyMiesiacNazwa && miesiacZ !== biezacyAlt)) continue;
+      if (statusZ === "ANULOWANA" || statusZ === "WYGASLA") continue;
       if (statusZ === "OCZEKUJE" && dzienZ < dzisDzien) continue;
+      if (statusZ === "OCZEKUJE" && dzienZ === dzisDzien && czyMszaJuzMinaDzis(godzZ)) continue;
       if ((statusZ === "PRZEJETE" || statusZ === "ZREALIZOWANE" || statusZ === "NIESTAWIONY") && dzienZ < (dzisDzien - 7)) continue;
 
       zachowaneZ.push(rowZ);
@@ -2190,6 +2322,8 @@ function wyczyscStareZamiany(optionalSs) {
       }
     }
   }
+
+  return { sukces: true, wiadomosc: "Pomyślnie wyczyszczono stare i zdezaktualizowane zamiany." };
 }
 
 // ==========================================
@@ -3299,6 +3433,8 @@ function przetworzWygasajaceOferty(ss, rok, miesiacIdx, dzisDzien, nazwaMiesiaca
   var tData = tSheet.getRange(2, 1, tSheet.getLastRow() - 1, tLastCol).getDisplayValues();
 
   for (var i = 0; i < tData.length; i++) {
+    var tMonth = tData[i][1] ? tData[i][1].trim() : "";
+    if (tMonth && mSheet && tMonth !== mSheet.getName()) continue;
     var status = tData[i][7].trim();
     if (status !== "OCZEKUJE") continue;
 
@@ -3372,6 +3508,8 @@ function przetworzWygasajaceOferty(ss, rok, miesiacIdx, dzisDzien, nazwaMiesiaca
   if (nSheet && nSheet.getLastRow() > 1) {
     var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
     for (var ni = 0; ni < nData.length; ni++) {
+      var nMonth = nData[ni][1] ? nData[ni][1].trim() : "";
+      if (nMonth && mSheet && nMonth !== mSheet.getName()) continue;
       var nStatus = nData[ni][8].trim();
       if (nStatus !== "OCZEKUJE") continue;
 
@@ -5174,6 +5312,8 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
     var polishDayNames = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
     for (var zi = 0; zi < zDataAll.length; zi++) {
       var zRow = zDataAll[zi];
+      var zMonth = zRow[1] ? zRow[1].trim() : "";
+      if (zMonth && mSheet && zMonth !== mSheet.getName()) continue;
       var zId = zRow[0];
       var zDay = parseInt(zRow[2], 10);
       var zOdd = zRow[3];
@@ -5525,12 +5665,16 @@ function synchronizujDoFirestore(optionalSs) {
     var rankingiInfo = obliczRankingiIPunkty(ss, "", currentYear, currentMonthIdx);
 
     // 2. Giełda Tydzień (oferty aktywne 1:1)
+    var curMonthName = tabelaRes ? ((tabelaRes.nazwaMiesiaca || "") + "_" + currentYear) : "";
+    var curShortMonth = tabelaRes ? (tabelaRes.nazwaMiesiaca || "") : "";
     var gieldaTydzien = [];
     var tSheet = ss.getSheetByName("Zamiany_Tydzien");
     if (tSheet && tSheet.getLastRow() > 1) {
       var tLastCol = Math.max(tSheet.getLastColumn(), 10);
       var tData = tSheet.getRange(2, 1, tSheet.getLastRow() - 1, tLastCol).getDisplayValues();
       for (var t = 0; t < tData.length; t++) {
+        var tMies = tData[t][1] ? tData[t][1].trim() : "";
+        if (tMies && curMonthName && tMies !== curMonthName && tMies !== curShortMonth) continue;
         var dOdd = parseInt(tData[t][2], 10);
         var tStatus = tData[t][7].trim();
         if (tStatus === "OCZEKUJE" && dOdd >= currentDay) {
@@ -5563,6 +5707,8 @@ function synchronizujDoFirestore(optionalSs) {
     if (nSheet && nSheet.getLastRow() > 1) {
       var nData = nSheet.getRange(2, 1, nSheet.getLastRow() - 1, 9).getDisplayValues();
       for (var n = 0; n < nData.length; n++) {
+        var nMies = nData[n][1] ? nData[n][1].trim() : "";
+        if (nMies && curMonthName && nMies !== curMonthName && nMies !== curShortMonth) continue;
         var dSun = parseInt(nData[n][2], 10);
         if (nData[n][8] === "OCZEKUJE" && dSun >= currentDay) {
           gieldaNiedziele.push({
@@ -5585,6 +5731,8 @@ function synchronizujDoFirestore(optionalSs) {
       var polishDayNames = ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"];
       for (var zi = 0; zi < zDataAll.length; zi++) {
         var zRow = zDataAll[zi];
+        var zMies = zRow[1] ? zRow[1].trim() : "";
+        if (zMies && curMonthName && zMies !== curMonthName && zMies !== curShortMonth) continue;
         var zId = zRow[0];
         var zDay = parseInt(zRow[2], 10);
         var zOdd = zRow[3];
