@@ -126,16 +126,38 @@ const STALE_DNI_MINISTRANTOW = {
 };
 
 const PUNKTY_PAZDZIERNIK_KOMORKI = {
-  "Jan Radliński": { 1: 5 },
-  "Rafał Danielczok": { 1: 5 },
-  "Bartosz Rozik": { 1: 5 },
-  "Marcel Mazurkiewicz": { 1: -5 },
-  "Jakub Brytner": { 1: 2 },
-  "Franek Kik": { 1: 2 },
+  "Jan Radliński": { 1: 5, 4: 3 },
+  "Rafał Danielczok": { 1: 5, 3: 1 },
+  "Bartosz Rozik": { 1: 5, 4: 0 },
+  "Marcel Mazurkiewicz": { 1: -5, 4: -5 },
+  "Jakub Brytner": { 1: 2, 4: 3 },
+  "Franek Kik": { 1: 2, 4: 3 },
   "Maciej Erich": { 2: 7, 3: 9 },
-  "Emil Czech": { 2: 7 },
-  "Mateusz Pierścieński": { 2: -5 },
-  "Maks Erich": { 4: 0 }
+  "Ksawery Skrzypek": { 3: 3 },
+  "Emil Czech": { 2: 7, 4: 3 },
+  "Mateusz Pierścieński": { 2: -5, 4: 3 },
+  "Maks Erich": { 4: 0 },
+  "Wiktor Kowalski": { 4: -4 },
+  "Michał Kupiec": { 4: 3 },
+  "Paweł Głaz": { 4: -5 },
+  "Mikołaj Erich": { 4: 3 },
+  "Michał Danielczok": { 4: 3 }
+};
+
+const MINUSY_PAZDZIERNIK = {
+  "Marcel Mazurkiewicz": [
+    { dzien: 1, punkty: -5 },
+    { dzien: 4, punkty: -5 }
+  ],
+  "Mateusz Pierścieński": [
+    { dzien: 2, punkty: -5 }
+  ],
+  "Paweł Głaz": [
+    { dzien: 4, punkty: -5 }
+  ],
+  "Wiktor Kowalski": [
+    { dzien: 4, punkty: -5 }
+  ]
 };
 
 const MINISTRANCI_CONFIG = [
@@ -228,7 +250,9 @@ async function main() {
     }
 
     pazPunkty[m.nazwisko] = sumaOkt;
-    if (mins.length > 0) pazMinusy[m.nazwisko] = mins;
+    if (MINUSY_PAZDZIERNIK[m.nazwisko]) {
+      pazMinusy[m.nazwisko] = MINUSY_PAZDZIERNIK[m.nazwisko];
+    }
 
     wiersze.push({
       lp: lp++,
@@ -423,15 +447,171 @@ async function main() {
     liturgieDodatkowe: [],
     historiaWpisow: [
       {
-        czas: "04.10.2026 11:30",
+        czas: "04.10.2026 11:47",
         dzien: "4 października",
         godzina: "11:30",
-        liturgia: "Msza św. niedzielna",
+        liturgia: "Msza w niedzielę",
         nazwisko: "Maks Erich",
         punkty: 0,
         status: "USPRAWIEDLIWIONY (0 pkt)",
-        typ: "REGULARNY",
-        wpisal: "System (Zgłoszenie nieobecności)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 11:47",
+        dzien: "4 października",
+        godzina: "11:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Mateusz Pierścieński",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 11:47",
+        dzien: "4 października",
+        godzina: "11:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Jan Radliński",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 11:47",
+        dzien: "4 października",
+        godzina: "11:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Wiktor Kowalski",
+        punkty: -5,
+        status: "NIEOBECNY (-5 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 10:05",
+        dzien: "4 października",
+        godzina: "10:00",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Michał Danielczok",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 10:05",
+        dzien: "4 października",
+        godzina: "10:00",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Emil Czech",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 10:05",
+        dzien: "4 października",
+        godzina: "10:00",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Bartosz Rozik",
+        punkty: 0,
+        status: "USPRAWIEDLIWIONY (0 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 10:05",
+        dzien: "4 października",
+        godzina: "10:00",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Marcel Mazurkiewicz",
+        punkty: -5,
+        status: "NIEOBECNY (-5 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 10:05",
+        dzien: "4 października",
+        godzina: "10:00",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Wiktor Kowalski",
+        punkty: 1,
+        status: "OBECNY (1 pkt)",
+        typ: "DODATKOWY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 08:32",
+        dzien: "4 października",
+        godzina: "08:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Michał Kupiec",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 08:32",
+        dzien: "4 października",
+        godzina: "08:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Mikołaj Erich",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 08:32",
+        dzien: "4 października",
+        godzina: "08:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Jakub Brytner",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 08:32",
+        dzien: "4 października",
+        godzina: "08:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Franek Kik",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "04.10.2026 08:32",
+        dzien: "4 października",
+        godzina: "08:30",
+        liturgia: "Msza w niedzielę",
+        nazwisko: "Paweł Głaz",
+        punkty: -5,
+        status: "NIEOBECNY (-5 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
         zastepuje: "-"
       },
       {
@@ -442,7 +622,31 @@ async function main() {
         nazwisko: "Maciej Erich",
         punkty: 5,
         status: "OBECNY (Msza niedzielna + różaniec +5 pkt)",
-        typ: "REGULARNY",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "03.10.2026 17:45",
+        dzien: "3 października",
+        godzina: "17:00",
+        liturgia: "Msza w niedzielę (sobota 17:00)",
+        nazwisko: "Ksawery Skrzypek",
+        punkty: 3,
+        status: "OBECNY (3 pkt)",
+        typ: "DOMYSLNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "03.10.2026 17:45",
+        dzien: "3 października",
+        godzina: "17:00",
+        liturgia: "Msza w niedzielę (sobota 17:00)",
+        nazwisko: "Rafał Danielczok",
+        punkty: 1,
+        status: "OBECNY (1 pkt)",
+        typ: "DODATKOWY",
         wpisal: "Kościelny",
         zastepuje: "-"
       },
@@ -495,14 +699,74 @@ async function main() {
         zastepuje: "-"
       },
       {
-        czas: "01.10.2026 18:45",
+        czas: "01.10.2026 17:45",
         dzien: "1 października",
-        godzina: "18:00",
-        liturgia: "Msza św.",
+        godzina: "17:00",
+        liturgia: "Msza szkolna z różańcem",
+        nazwisko: "Jan Radliński",
+        punkty: 5,
+        status: "OBECNY (5 pkt)",
+        typ: "REGULARNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "01.10.2026 17:45",
+        dzien: "1 października",
+        godzina: "17:00",
+        liturgia: "Msza szkolna z różańcem",
+        nazwisko: "Rafał Danielczok",
+        punkty: 5,
+        status: "OBECNY (5 pkt)",
+        typ: "REGULARNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "01.10.2026 17:45",
+        dzien: "1 października",
+        godzina: "17:00",
+        liturgia: "Msza szkolna z różańcem",
+        nazwisko: "Bartosz Rozik",
+        punkty: 5,
+        status: "OBECNY (5 pkt)",
+        typ: "REGULARNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "01.10.2026 17:45",
+        dzien: "1 października",
+        godzina: "17:00",
+        liturgia: "Msza szkolna z różańcem",
         nazwisko: "Marcel Mazurkiewicz",
         punkty: -5,
         status: "NIEOBECNY (-5 pkt)",
         typ: "REGULARNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "01.10.2026 17:45",
+        dzien: "1 października",
+        godzina: "17:00",
+        liturgia: "Nabożeństwo różańcowe",
+        nazwisko: "Jakub Brytner",
+        punkty: 2,
+        status: "OBECNY (2 pkt)",
+        typ: "DODATKOWY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
+      {
+        czas: "01.10.2026 17:45",
+        dzien: "1 października",
+        godzina: "17:00",
+        liturgia: "Nabożeństwo różańcowe",
+        nazwisko: "Franek Kik",
+        punkty: 2,
+        status: "OBECNY (2 pkt)",
+        typ: "DODATKOWY",
         wpisal: "Kościelny",
         zastepuje: "-"
       }
