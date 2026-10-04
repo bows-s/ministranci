@@ -107,7 +107,7 @@ function czyTenSam(a, b) {
 }
 
 const STALE_DNI_MINISTRANTOW = {
-  "Maks Erich": 1,           // Poniedziałek
+  "Maks Erich": 2,           // Wtorek (zaktualizowany)
   "Jakub Brytner": 1,        // Poniedziałek
   "Ksawery Skrzypek": 2,     // Wtorek
   "Michał Kupiec": 2,        // Wtorek
@@ -132,9 +132,10 @@ const PUNKTY_PAZDZIERNIK_KOMORKI = {
   "Marcel Mazurkiewicz": { 1: -5 },
   "Jakub Brytner": { 1: 2 },
   "Franek Kik": { 1: 2 },
-  "Maciej Erich": { 2: 7, 3: 4 },
+  "Maciej Erich": { 2: 7, 3: 9 },
   "Emil Czech": { 2: 7 },
-  "Mateusz Pierścieński": { 2: -5 }
+  "Mateusz Pierścieński": { 2: -5 },
+  "Maks Erich": { 4: 0 }
 };
 
 const MINISTRANCI_CONFIG = [
@@ -421,6 +422,30 @@ async function main() {
     wolneZastepstwa: [],
     liturgieDodatkowe: [],
     historiaWpisow: [
+      {
+        czas: "04.10.2026 11:30",
+        dzien: "4 października",
+        godzina: "11:30",
+        liturgia: "Msza św. niedzielna",
+        nazwisko: "Maks Erich",
+        punkty: 0,
+        status: "USPRAWIEDLIWIONY (0 pkt)",
+        typ: "REGULARNY",
+        wpisal: "System (Zgłoszenie nieobecności)",
+        zastepuje: "-"
+      },
+      {
+        czas: "03.10.2026 17:45",
+        dzien: "3 października",
+        godzina: "17:00",
+        liturgia: "Msza św. z nabożeństwem różańcowym",
+        nazwisko: "Maciej Erich",
+        punkty: 5,
+        status: "OBECNY (Msza niedzielna + różaniec +5 pkt)",
+        typ: "REGULARNY",
+        wpisal: "Kościelny",
+        zastepuje: "-"
+      },
       {
         czas: "03.10.2026 08:30",
         dzien: "3 października",

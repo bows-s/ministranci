@@ -63,7 +63,8 @@ function getDoc(docName) {
 
 function patchDoc(docName, updateFields) {
   return new Promise((resolve, reject) => {
-    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/stan_grafiku/${encodeURIComponent(docName)}?key=${API_KEY}`;
+    const mask = Object.keys(updateFields).map(k => 'updateMask.fieldPaths=' + encodeURIComponent(k)).join('&');
+    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/stan_grafiku/${encodeURIComponent(docName)}?${mask}&key=${API_KEY}`;
     const fields = {};
     for (const k in updateFields) {
       if (Object.prototype.hasOwnProperty.call(updateFields, k)) {
