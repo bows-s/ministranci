@@ -3630,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.9';
+    var APP_VERSION = '1.5.10';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -5888,7 +5888,7 @@
                                 '</div>';
                 }
               } else {
-                var isPastTydz = czyTydzienMszaPrzeterminowana(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
+                var isPastTydz = czyTydzienZgloszeniePrzeterminowane(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
                 htmlDyzury += '<div class="dyzur-pulpit-item">' +
                                 '<div class="dyzur-pulpit-info">' +
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
@@ -5959,7 +5959,7 @@
                                 '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + (item.dzienNiedzieli || item.dzien) + ')">Wycofaj zgłoszenie</button>' +
                               '</div>';
               } else {
-                var isPastWknd = czyWeekendMszaPrzeterminowana(item.dzien, item.godzina || '', res.rok, res.miesiacIdx);
+                var isPastWknd = czyWeekendZgloszeniePrzeterminowane(item.dzien, item.godzina || '', res.rok, res.miesiacIdx);
                 htmlDyzury += '<div class="dyzur-pulpit-item">' +
                                 '<div class="dyzur-pulpit-info">' +
                                   '<div class="dyzur-pulpit-data">' + pelnaData + '</div>' +
