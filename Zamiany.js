@@ -4297,19 +4297,23 @@ function pobierzDaneDlaZakrystii(dzien, godzina, optionalSs) {
   if (!gStr) {
     // Autodetekcja godziny dla danego dnia
     if (dow === 0) {
-      var sunHours = ["08:30", "10:00", "11:30", "17:00"];
+      var sunHours = ["08:30", "10:00", "11:30"];
       var curH = now.getHours();
       var curM = now.getMinutes();
       var curTotal = curH * 60 + curM;
       var bestH = "10:00";
-      var minDiff = 9999;
-      for (var shi = 0; shi < sunHours.length; shi++) {
-        var parts = sunHours[shi].split(":");
-        var totalM = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        var diff = Math.abs(curTotal - totalM);
-        if (diff < minDiff) {
-          minDiff = diff;
-          bestH = sunHours[shi];
+      if (curTotal > 12 * 60) {
+        bestH = "11:30";
+      } else {
+        var minDiff = 9999;
+        for (var shi = 0; shi < sunHours.length; shi++) {
+          var parts = sunHours[shi].split(":");
+          var totalM = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+          var diff = Math.abs(curTotal - totalM);
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestH = sunHours[shi];
+          }
         }
       }
       gStr = bestH;

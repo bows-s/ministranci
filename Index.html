@@ -3630,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.8';
+    var APP_VERSION = '1.5.9';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -7577,17 +7577,24 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
           }
 
+          if (dow === 0 && gStr === "17:00") {
+            gStr = "11:30";
+          }
           if (!gStr) {
             if (dow === 0) {
-              var sunHours = ["08:30", "10:00", "11:30", "17:00"];
+              var sunHours = ["08:30", "10:00", "11:30"];
               var curTotal = now.getHours() * 60 + now.getMinutes();
               var bestH = "10:00";
-              var minDiff = 9999;
-              for (var shi = 0; shi < sunHours.length; shi++) {
-                var parts = sunHours[shi].split(":");
-                var totalM = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-                var diff = Math.abs(curTotal - totalM);
-                if (diff < minDiff) { minDiff = diff; bestH = sunHours[shi]; }
+              if (curTotal > 12 * 60) {
+                bestH = "11:30";
+              } else {
+                var minDiff = 9999;
+                for (var shi = 0; shi < sunHours.length; shi++) {
+                  var parts = sunHours[shi].split(":");
+                  var totalM = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+                  var diff = Math.abs(curTotal - totalM);
+                  if (diff < minDiff) { minDiff = diff; bestH = sunHours[shi]; }
+                }
               }
               gStr = bestH;
             } else if (dow === 6) {
@@ -9524,7 +9531,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
         optHtml += '<option value="08:30">08:30</option>';
         optHtml += '<option value="10:00">10:00</option>';
         optHtml += '<option value="11:30">11:30</option>';
-        optHtml += '<option value="17:00">17:00</option>';
       } else if (dow === 6) {
         if (d <= 7) {
           optHtml += '<option value="08:00">08:00 (Msza Róży Różańcowej - 4 pkt)</option>';
