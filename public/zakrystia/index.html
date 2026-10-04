@@ -3630,7 +3630,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.7';
+    var APP_VERSION = '1.5.8';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -7577,24 +7577,17 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
           }
 
-          if (dow === 0 && gStr === "17:00") {
-            gStr = "11:30";
-          }
           if (!gStr) {
             if (dow === 0) {
-              var sunHours = ["08:30", "10:00", "11:30"];
+              var sunHours = ["08:30", "10:00", "11:30", "17:00"];
               var curTotal = now.getHours() * 60 + now.getMinutes();
               var bestH = "10:00";
-              if (curTotal > 12 * 60) {
-                bestH = "11:30";
-              } else {
-                var minDiff = 9999;
-                for (var shi = 0; shi < sunHours.length; shi++) {
-                  var parts = sunHours[shi].split(":");
-                  var totalM = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-                  var diff = Math.abs(curTotal - totalM);
-                  if (diff < minDiff) { minDiff = diff; bestH = sunHours[shi]; }
-                }
+              var minDiff = 9999;
+              for (var shi = 0; shi < sunHours.length; shi++) {
+                var parts = sunHours[shi].split(":");
+                var totalM = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+                var diff = Math.abs(curTotal - totalM);
+                if (diff < minDiff) { minDiff = diff; bestH = sunHours[shi]; }
               }
               gStr = bestH;
             } else if (dow === 6) {
@@ -8048,6 +8041,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   m.stopien = sInfo.stopien;
                   m.stopienRanga = sInfo.ranga;
                 }
+                m.poprzedniePunktyZTejMszy = (typeof m.punkty === 'number') ? m.punkty : ((m.obecnyPkt || 0) + (m.bylNaRozancu ? 2 : 0) - (m.karaPunkty || 0));
               });
               var parsedTgtZ = parsujKluczMiesiaca(targetDocKey);
               zakrystiaStan = {
@@ -8064,6 +8058,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 nazwaLiturgii: dOb.nazwaLiturgii || 'Msza św.',
                 juzZapisane: true,
                 czyLiturgiaDodatkowa: (dOb.rodzajLiturgii === 'pogrzeb' || dOb.rodzajLiturgii === 'nabozenstwo'),
+                maRozaniec: (dOb.maRozaniec !== undefined) ? dOb.maRozaniec : (parsedTgtZ.miesiacIdx === 9),
                 ministranci: dOb.ministranci,
                 wszyscyMinistranciParafii: (listaUzytkownikow || []).map(function(u) { return u.nazwisko; }).filter(function(n) {
                   return n.toLowerCase() !== "kościelny" && n.toLowerCase() !== "koscielny";
@@ -8420,6 +8415,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
     }
 
     function renderujTrybZakrystia() {
+      if (zakrystiaStan) {
+        var curM = (zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth();
+        if (zakrystiaStan.maRozaniec === undefined) {
+          zakrystiaStan.maRozaniec = (curM === 9); // Październik to miesiąc różańcowy
+        }
+      }
       var naglowek = document.getElementById('zakrystia-msza-naglowek');
       var podtytul = document.getElementById('zakrystia-msza-podtytul');
       var stanInfo = document.getElementById('zakrystia-stan-zapisania');
@@ -9523,6 +9524,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         optHtml += '<option value="08:30">08:30</option>';
         optHtml += '<option value="10:00">10:00</option>';
         optHtml += '<option value="11:30">11:30</option>';
+        optHtml += '<option value="17:00">17:00</option>';
       } else if (dow === 6) {
         if (d <= 7) {
           optHtml += '<option value="08:00">08:00 (Msza Róży Różańcowej - 4 pkt)</option>';
@@ -9530,10 +9532,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
         optHtml += '<option value="17:00">17:00</option>';
       } else if (dow === 3) {
         optHtml += '<option value="08:00">08:00</option>';
-        optHtml += '<option value="18:00">18:00</option>';
       } else if (dow === 4) {
         optHtml += '<option value="17:00">17:00</option>';
-        optHtml += '<option value="18:00">18:00</option>';
       } else {
         optHtml += '<option value="18:00">18:00</option>';
       }
@@ -9844,7 +9844,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var cellObj = wiersz.komorki[colIdx];
             var curVal = (typeof cellObj.wartosc === 'number' && !isNaN(cellObj.wartosc)) ? cellObj.wartosc : 0;
             var prevFromThis = (typeof m.poprzedniePunktyZTejMszy === 'number') ? m.poprzedniePunktyZTejMszy : 0;
-            var pointsFromOtherLiturgies = curVal - prevFromThis;
+            var pointsFromOtherLiturgies = (!zakrystiaStan.juzZapisane && curVal < 0) ? 0 : (curVal - prevFromThis);
+            if (pointsFromOtherLiturgies < 0) pointsFromOtherLiturgies = 0;
 
             if (m.tylkoRozaniec) {
               var pktThis = 2;
@@ -9892,7 +9893,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
               if (m.typ === 'ZASTEPCA') {
                 cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : (cellObj.maDyzur ? -5 : null);
               } else if (!czyDodatkowa) {
-                cellObj.wartosc = pointsFromOtherLiturgies + karaThis;
+                cellObj.wartosc = pointsFromOtherLiturgies > 0 ? (pointsFromOtherLiturgies + karaThis) : karaThis;
                 if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
                   if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
                     wiersz.komorki[colIdx + 1].wartosc = null;
@@ -10160,6 +10161,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             rodzajLiturgii: zakrystiaStan.rodzajLiturgii,
             punktyLiturgii: zakrystiaStan.punktyLiturgii,
             nazwaLiturgii: zakrystiaStan.nazwaLiturgii,
+            maRozaniec: !!zakrystiaStan.maRozaniec,
             zapisano: new Date().toISOString(),
             zapisanoPrzez: (globalUser && globalUser.nazwisko) ? globalUser.nazwisko : 'Kościelny',
             ministranci: zakrystiaStan.ministranci
