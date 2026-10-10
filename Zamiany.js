@@ -2323,6 +2323,12 @@ function wyczyscStareZamiany(optionalSs) {
     }
   }
 
+  try {
+    synchronizujDoFirestore(ss);
+  } catch (eSync) {
+    Logger.log("Błąd sync do Firestore w wyczyscStareZamiany: " + eSync.message);
+  }
+
   return { sukces: true, wiadomosc: "Pomyślnie wyczyszczono stare i zdezaktualizowane zamiany." };
 }
 
