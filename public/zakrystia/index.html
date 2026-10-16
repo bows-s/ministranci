@@ -1466,7 +1466,6 @@
         <option value="Maks Erich">Maks Erich</option>
         <option value="Marcel Mazurkiewicz">Marcel Mazurkiewicz</option>
         <option value="Mateusz Pierścieński">Mateusz Pierścieński</option>
-        <option value="Mateusz Pokojski">Mateusz Pokojski</option>
         <option value="Michał Danielczok">Michał Danielczok</option>
         <option value="Michał Kupiec">Michał Kupiec</option>
         <option value="Mikołaj Erich">Mikołaj Erich</option>
@@ -1553,6 +1552,47 @@
           <div class="hero-tag">TWOJA NAJBLIŻSZA SŁUŻBA</div>
           <div id="sluzba-termin" class="hero-title">Sprawdzanie grafiku...</div>
           <div id="sluzba-detale" class="hero-subtitle">Ładowanie dyżurów...</div>
+        </div>
+
+        <!-- Karta Koloru Szat Liturgicznych -->
+        <div id="karta-liturgia-dzis" class="card" style="margin-bottom:12px; border-left:3px solid #10b981; transition:border-color 0.3s, box-shadow 0.3s;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+            <div style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#a1a1aa;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#a1a1aa;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+              <span>KOLOR SZAT LITURGICZNYCH NA DZIŚ</span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Kolorowy Orb / Piktogram Szat -->
+            <div id="liturgia-orb" style="width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:linear-gradient(135deg, #10b981, #047857); box-shadow:0 0 16px rgba(16,185,129,0.25); border:1px solid rgba(255,255,255,0.2); transition:all 0.3s ease;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M6 8h12"/>
+              </svg>
+            </div>
+
+            <!-- Dane dnia i kolor -->
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <span id="liturgia-kolor-nazwa" style="font-size:16px; font-weight:800; letter-spacing:0.04em; color:#10b981;">ZIELONY</span>
+                <span id="liturgia-ranga-badge" style="font-size:10px; font-weight:600; padding:2px 6px; border-radius:4px; background:#27272a; color:#a1a1aa; border:1px solid #3f3f46;">Dzień powszedni</span>
+              </div>
+              <div id="liturgia-tytul" style="font-size:13px; font-weight:600; color:#fafafa; margin-top:2px; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                Ładowanie kalendarza...
+              </div>
+              <div id="liturgia-okres" style="font-size:11px; color:#71717a; margin-top:1px;">
+                Okres Zwykły
+              </div>
+            </div>
+          </div>
+
+          <!-- Wskazówka dla ministranta -->
+          <div id="liturgia-wskazowka-box" style="margin-top:10px; background:rgba(255,255,255,0.03); border:1px solid #27272a; border-radius:6px; padding:8px 10px; font-size:12px; color:#d4d4d8; display:flex; align-items:flex-start; gap:8px; line-height:1.4;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a1a1aa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <div id="liturgia-wskazowka-tekst" style="flex:1;">
+              Kościelny przygotowuje ornat zielony. Ministranci zakładają alby lub komże z zieloną pelerynką.
+            </div>
+          </div>
         </div>
 
         <!-- Baner Nagrody dla TOP 3 (widoczny tylko dla laureatów, dopóki nie odbiorą nagrody) -->
@@ -1811,6 +1851,9 @@
         </div>
 
         <div id="zakrystia-nadchodzace-liturgie" style="display:none; margin-bottom:12px;"></div>
+
+
+
         <!-- Karta Aktualnej Mszy -->
         <div class="card" style="border:1px solid #3f3f46; background:#18181b;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
@@ -1830,32 +1873,32 @@
               </div>
             </div>
             <button type="button" onclick="przelaczOpcjeZaawansowaneZakrystii()" class="btn-secondary" style="width:auto; padding:6px 10px; font-size:11px; white-space:nowrap;">
-              Opcje
+              Punkty / Opcje
             </button>
           </div>
 
-          <!-- Opcje zaawansowane (zmień mszę / pogrzeb / nabożeństwo - domyślnie schowane) -->
+          <!-- Opcje zaawansowane: ręczna zmiana punktów mszy (+2, +3, +4, +5) oraz inny dzień/godzina -->
           <div id="zakrystia-opcje-zaawansowane" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid #27272a;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
               <span style="font-size:11px; font-weight:600; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.05em;">
-                Zmień rodzaj liturgii / godzinę:
+                Punkty za tę służbę (dla wszystkich obecnych):
               </span>
               <button onclick="otworzModalZmienMsze()" class="btn-secondary" style="width:auto; padding:4px 8px; font-size:11px;">
                 Inny dzień / godzina
               </button>
             </div>
-            <div id="zakrystia-liturgia-pills" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px;">
-              <button type="button" id="pill-liturgia-msza_tydzien" onclick="zakrystiaZmienRodzajLiturgii('msza_tydzien', 5, 'Msza w tygodniu')" class="liturgia-pill">
-                Msza w tyg. <b>(5 pkt)</b>
+            <div id="zakrystia-liturgia-pills" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
+              <button type="button" id="pill-punkty-2" onclick="zakrystiaUstawPunktyLiturgii(2)" class="liturgia-pill">
+                +2 pkt
               </button>
-              <button type="button" id="pill-liturgia-msza_niedziela" onclick="zakrystiaZmienRodzajLiturgii('msza_niedziela', 3, 'Msza w niedzielę')" class="liturgia-pill">
-                Niedziela <b>(3 pkt)</b>
+              <button type="button" id="pill-punkty-3" onclick="zakrystiaUstawPunktyLiturgii(3)" class="liturgia-pill">
+                +3 pkt
               </button>
-              <button type="button" id="pill-liturgia-nabozenstwo" onclick="zakrystiaZmienRodzajLiturgii('nabozenstwo', (zakrystiaStan && (zakrystiaStan.dzienTygodnia === 'niedziela' || zakrystiaStan.godzina === '15:00')) ? 3 : 2, 'Nabożeństwo')" class="liturgia-pill">
-                <span id="pill-liturgia-nabozenstwo-label">Nabożeństwo <b>(2 pkt)</b></span>
+              <button type="button" id="pill-punkty-4" onclick="zakrystiaUstawPunktyLiturgii(4)" class="liturgia-pill">
+                +4 pkt
               </button>
-              <button type="button" id="pill-liturgia-pogrzeb" onclick="zakrystiaZmienRodzajLiturgii('pogrzeb', 3, 'Pogrzeb')" class="liturgia-pill">
-                Pogrzeb <b>(3 pkt)</b>
+              <button type="button" id="pill-punkty-5" onclick="zakrystiaUstawPunktyLiturgii(5)" class="liturgia-pill">
+                +5 pkt
               </button>
             </div>
           </div>
@@ -2038,6 +2081,8 @@
       </div>
     </div>
   </div>
+
+
 
   <!-- ============================================== -->
   <!-- MODAL: PUBLICZNY PROFIL MINISTRANTA (shadcn/ui)-->
@@ -2435,22 +2480,40 @@
     </div>
   </div>
 
-  <!-- Modal Dodania Ministranta Spoza Grafiku -->
+  <!-- Modal Dodania Ministranta Spoza Grafiku (Wielokrotny Wybór) -->
   <div id="modal-dodaj-ministranta" class="modal-overlay" onclick="if(event.target === this) zamknijModalDodajMinistranta()">
-    <div class="modal-content" style="max-width:380px; width:100%; text-align:left; padding:20px; box-sizing:border-box;">
-      <h3 style="margin:0 0 12px 0; color:#60a5fa; font-size:16px; display:flex; align-items:center; gap:8px;">
-        <span>Dodaj ministranta spoza grafiku</span>
-      </h3>
-      <p id="modal-dodaj-ministranta-opis" style="font-size:13px; color:var(--text-muted); margin:0 0 12px 0;">
-        Wybierz ministranta, który przyszedł dodatkowo służyć na tej liturgii.
-      </p>
-      <div style="margin-bottom:16px;">
-        <label class="section-label">Wybierz ministranta:</label>
-        <select id="sel-dodatkowy-ministrant" style="width:100%; padding:10px; font-size:15px; border-radius:8px;"></select>
+    <div class="modal-content" style="max-width:440px; width:94%; text-align:left; padding:18px; box-sizing:border-box; max-height:90vh; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="margin:0; color:#60a5fa; font-size:16px; display:flex; align-items:center; gap:8px;">
+          <span>Dodaj ministrantów spoza grafiku</span>
+        </h3>
+        <button type="button" onclick="zamknijModalDodajMinistranta()" style="background:transparent; border:none; color:#a1a1aa; font-size:22px; cursor:pointer; line-height:1; padding:2px 6px;">✕</button>
       </div>
-      <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <p id="modal-dodaj-ministranta-opis" style="font-size:12px; color:var(--text-muted); margin:0 0 10px 0; line-height:1.4;">
+        Zaznacz ministrantów, którzy przyszli dodatkowo służyć na tej liturgii (możesz wybrać kilku naraz).
+      </p>
+
+      <div style="margin-bottom:8px;">
+        <input type="text" id="szukaj-dodatkowy-ministrant" placeholder="🔍 Szukaj ministranta..." oninput="filtrujListeDodatkowychMinistrantow()" style="width:100%; padding:9px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; box-sizing:border-box; outline:none;">
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span id="dodatkowy-licznik-dostepnych" style="font-size:11px; color:#a1a1aa; font-weight:600;">Dostępni ministranci:</span>
+        <div style="display:flex; gap:6px;">
+          <button type="button" onclick="zaznaczWszystkichDodatkowych(true)" class="btn-secondary" style="width:auto; padding:3px 8px; font-size:11px; margin:0;">Zaznacz widocznych</button>
+          <button type="button" onclick="zaznaczWszystkichDodatkowych(false)" class="btn-secondary" style="width:auto; padding:3px 8px; font-size:11px; margin:0;">Odznacz</button>
+        </div>
+      </div>
+
+      <div id="lista-dodatkowy-ministranci" style="flex:1; overflow-y:auto; max-height:280px; display:flex; flex-direction:column; gap:6px; padding-right:2px; margin-bottom:12px;">
+        <!-- Elementy generowane dynamicznie w JS -->
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #27272a; padding-top:12px;">
         <button type="button" onclick="zamknijModalDodajMinistranta()" class="btn-secondary" style="width:auto; padding:9px 16px; margin:0; font-size:13px;">Anuluj</button>
-        <button type="button" onclick="zatwierdzDodanieMinistranta()" class="btn-primary" style="width:auto; padding:8px 18px; margin:0;">Dodaj</button>
+        <button type="button" id="btn-zatwierdz-dodatkowych" onclick="zatwierdzDodanieMinistrantow()" class="btn-primary" style="width:auto; padding:9px 18px; margin:0; font-size:13px; font-weight:700;">
+          Dodaj wybranych (0)
+        </button>
       </div>
     </div>
   </div>
@@ -2572,6 +2635,7 @@
         <select id="sel-nowy-staly-dzien" style="width:100%; padding:10px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; outline:none; box-sizing:border-box;">
           <option value="1">Poniedziałek (godz. 18:00)</option>
           <option value="2">Wtorek (godz. 18:00)</option>
+          <option value="3">Środa (godz. 18:00)</option>
           <option value="4">Czwartek (godz. 17:00 - msza szkolna)</option>
           <option value="5">Piątek (godz. 18:00)</option>
         </select>
@@ -2667,6 +2731,7 @@
             });
           } catch(ePers) {}
           console.log('Firebase Firestore (Warszawa europe-central2) gotowy!');
+          try { if (typeof nasluchujLiturgiiFirestore === 'function') nasluchujLiturgiiFirestore(); } catch(eNL) {}
         }
         if (firebase.messaging) {
           try {
@@ -3026,7 +3091,6 @@
       { nazwisko: "Maks Erich", maPin: true },
       { nazwisko: "Marcel Mazurkiewicz", maPin: false },
       { nazwisko: "Mateusz Pierścieński", maPin: false },
-      { nazwisko: "Mateusz Pokojski", maPin: false },
       { nazwisko: "Michał Danielczok", maPin: true },
       { nazwisko: "Michał Kupiec", maPin: false },
       { nazwisko: "Mikołaj Erich", maPin: true },
@@ -3165,10 +3229,52 @@
       var dayOfWeek = dt.getDay();
       if (dayOfWeek === 1) return "18:00";
       if (dayOfWeek === 2) return "18:00";
-      if (dayOfWeek === 3) return "18:00";
+      if (dayOfWeek === 3) return (miesiacIdx === 9) ? "18:00" : "08:00";
       if (dayOfWeek === 4) return "17:00 (Msza szkolna)";
       if (dayOfWeek === 5) return "18:00";
       return "18:00";
+    }
+
+    function pobierzGodzineDlaDniaTygodniaModalu(d, optTargetData) {
+      var targetData = optTargetData || ((typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane) ? tabelaMiesiacaDane : ((typeof daneKolejnegoMiesiaca !== 'undefined' && daneKolejnegoMiesiaca) ? daneKolejnegoMiesiaca : null));
+      var rok = (targetData && targetData.rok) || (new Date()).getFullYear();
+      var mIdx = (targetData && targetData.miesiacIdx !== undefined) ? targetData.miesiacIdx : (new Date()).getMonth();
+
+      if (d === 4) return 'godz. 17:00 - msza szkolna';
+      if (d === 1 || d === 2 || d === 5) return 'godz. 18:00';
+
+      if (d === 3) {
+        // Środa: sprawdź gazetkę (harmonogramDni)
+        if (targetData && targetData.harmonogramDni) {
+          for (var dayKey in targetData.harmonogramDni) {
+            var dayNum = parseInt(dayKey, 10);
+            if (!isNaN(dayNum)) {
+              var dt = new Date(rok, mIdx, dayNum);
+              if (dt.getDay() === 3) {
+                var hD = targetData.harmonogramDni[dayKey];
+                if (hD && hD.msze && hD.msze.length > 0) {
+                  return 'godz. ' + hD.msze[0].godzina;
+                }
+              }
+            }
+          }
+        }
+        var isPazdziernik = (mIdx === 9 || (targetData && (targetData.nazwaMiesiaca === 'Październik' || targetData.sheetName === 'Październik')));
+        return isPazdziernik ? 'godz. 18:00' : 'godz. 08:00';
+      }
+
+      return 'godz. 18:00';
+    }
+
+    function wyznaczGodzinyDniTygodnia(optTargetData) {
+      return [
+        '',
+        pobierzGodzineDlaDniaTygodniaModalu(1, optTargetData),
+        pobierzGodzineDlaDniaTygodniaModalu(2, optTargetData),
+        pobierzGodzineDlaDniaTygodniaModalu(3, optTargetData),
+        pobierzGodzineDlaDniaTygodniaModalu(4, optTargetData),
+        pobierzGodzineDlaDniaTygodniaModalu(5, optTargetData)
+      ];
     }
 
     function czyKtosMaDyzurWTymDniu(dzien, optRok, optMiesiacIdx, optDocKey) {
@@ -3232,6 +3338,10 @@
     }
 
     function czyDzienTygodniaMaDyzury(d, optTargetData) {
+      // Dni od poniedziałku do piątku (1..5: Poniedziałek, Wtorek, Środa, Czwartek, Piątek)
+      // to zawsze pełnoprawne dni powszednie, w których w parafii jest msza św. i można mieć wyznaczony stały dzień służby.
+      if (d >= 1 && d <= 5) return true;
+
       var targetData = optTargetData || ((typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane) ? tabelaMiesiacaDane : ((typeof daneKolejnegoMiesiaca !== 'undefined' && daneKolejnegoMiesiaca) ? daneKolejnegoMiesiaca : null));
       if (!targetData || !targetData.wiersze || !targetData.wiersze.length) return false;
       
@@ -3702,7 +3812,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.5.19';
+    var APP_VERSION = '1.5.20';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -4103,7 +4213,8 @@
               renderujDane(stan2);
               ukryjSpinner();
             }
-          } else if (dbFirestore) {
+          }
+          if (dbFirestore) {
             dbFirestore.collection('stan_grafiku').doc(pobierzAktywnyKluczMiesiaca()).get().then(function(doc) {
               ukryjSpinner();
               if (doc.exists && doc.data()) {
@@ -4498,8 +4609,14 @@
           if (b1Unlocked) tarczaCount++;
           if (b2Unlocked) niezawodnyCount++;
           if (b3Unlocked) rycerzCount++;
-          if (pm.pozycja === 1) zlotoCount++;
-          else if (pm.pozycja === 2 || pm.pozycja === 3) podiumCount++;
+          var biezacaPoz = pm.pozycja;
+          var curRankM = (stan.rankingMiesiac || (tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac) || []);
+          if (curRankM && curRankM.length > 0) {
+            var rmFind = curRankM.find(function(r) { return czyToSamoNazwisko(r.nazwisko, nazwisko); });
+            if (rmFind && (rmFind.pozycja || rmFind.miejsce)) biezacaPoz = rmFind.pozycja || rmFind.miejsce;
+          }
+          if (biezacaPoz === 1) zlotoCount++;
+          else if (biezacaPoz === 2 || biezacaPoz === 3) podiumCount++;
           return;
         }
 
@@ -5110,12 +5227,22 @@
                 ? '<span style="font-size:12px; font-weight:500; color:#fb7185; background:rgba(76,5,25,0.4); border:1px solid rgba(239,68,68,0.3); padding:2px 8px; border-radius:4px; white-space:nowrap;">' + pts + ' pkt</span>'
                 : '<span style="font-size:12px; font-weight:500; color:#a1a1aa; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:4px; white-space:nowrap;">0 pkt</span>');
 
+          var curRankM = (stan.rankingMiesiac || (tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac) || []);
+          var isCurMonthEntry = (m.miesiacIdx === (tabelaMiesiacaDane ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth()) || (m.miesiac && tabelaMiesiacaDane && m.miesiac.toLowerCase() === (tabelaMiesiacaDane.nazwaMiesiaca || '').toLowerCase()));
+          var actualPoz = m.pozycja;
+          if (isCurMonthEntry && curRankM && curRankM.length > 0) {
+            var rEntry = curRankM.find(function(r) { return czyToSamoNazwisko(r.nazwisko, displayName); });
+            if (rEntry && (rEntry.pozycja || rEntry.miejsce)) {
+              actualPoz = rEntry.pozycja || rEntry.miejsce;
+            }
+          }
+
           var pozBadge = '';
-          if (m.pozycja && m.pozycja > 0) {
-            if (m.pozycja === 1) {
+          if (actualPoz && actualPoz > 0) {
+            if (actualPoz === 1) {
               pozBadge = '<span style="font-size:11px; font-weight:600; color:#fcd34d; background:rgba(120,53,15,0.4); border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:4px; margin-right:6px; white-space:nowrap;">1. miejsce</span>';
             } else {
-              pozBadge = '<span style="font-size:11px; font-weight:500; color:#d4d4d8; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:4px; margin-right:6px; white-space:nowrap;">' + m.pozycja + '. miejsce</span>';
+              pozBadge = '<span style="font-size:11px; font-weight:500; color:#d4d4d8; background:#27272a; border:1px solid #3f3f46; padding:2px 8px; border-radius:4px; margin-right:6px; white-space:nowrap;">' + actualPoz + '. miejsce</span>';
             }
           }
 
@@ -5300,7 +5427,47 @@
         var isCurrentSelected = (wybranyMiesiacRankingu === currentMonthName);
         if (isCurrentSelected) {
           if (desc) desc.innerText = 'Aktualna klasyfikacja punktowa w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || (new Date()).getFullYear()) + ').';
-          list = (stan.rankingMiesiac && stan.rankingMiesiac.length) ? stan.rankingMiesiac : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac) || []);
+          var curWiersze = (stan.wiersze && stan.wiersze.length) ? stan.wiersze : ((tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) || []);
+          if (curWiersze && curWiersze.length) {
+            list = curWiersze.filter(function(w) {
+              if (!w || !w.nazwisko) return false;
+              var nw = w.nazwisko.toLowerCase().trim();
+              return nw !== 'kościelny' && nw !== 'koscielny';
+            }).map(function(w) {
+              var p = 0;
+              if (w.komorki && Array.isArray(w.komorki)) {
+                p = w.komorki.reduce(function(acc, c) {
+                  var v = c ? c.wartosc : null;
+                  if (typeof v === 'number') return acc + v;
+                  if (typeof v === 'string') {
+                    var num = parseFloat(v.replace(',', '.'));
+                    if (!isNaN(num)) return acc + num;
+                  }
+                  return acc;
+                }, 0);
+                p = Math.round(p * 10) / 10;
+              } else {
+                p = (w.suma !== undefined && w.suma !== null) ? (parseFloat(w.suma) || 0) : 0;
+              }
+              return {
+                nazwisko: w.nazwisko,
+                punkty: p,
+                suma: p,
+                grupa: wyznaczGrupeParafialna(w.nazwisko, w.grupa)
+              };
+            }).sort(function(a, b) {
+              if (b.punkty !== a.punkty) return b.punkty - a.punkty;
+              return a.nazwisko.localeCompare(b.nazwisko, 'pl');
+            });
+            var rPoz = 1;
+            list.forEach(function(r, idx) {
+              if (idx > 0 && r.punkty < list[idx - 1].punkty) rPoz = idx + 1;
+              r.pozycja = rPoz;
+              r.miejsce = rPoz;
+            });
+          } else {
+            list = (stan.rankingMiesiac && stan.rankingMiesiac.length) ? stan.rankingMiesiac : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac) || []);
+          }
         } else {
           if (desc) desc.innerText = 'Klasyfikacja punktowa w miesiącu: ' + wybranyMiesiacRankingu + ' ' + (stan.rok || (new Date()).getFullYear()) + '.';
           var rankM = (stan.rankingiMiesiecy && stan.rankingiMiesiecy[wybranyMiesiacRankingu]) || 
@@ -5552,7 +5719,6 @@
       if (dirty) {
         var docKey = data.nazwaMiesiaca ? (data.nazwaMiesiaca + '_' + curY) : pobierzAktywnyKluczMiesiaca();
         dbFirestore.collection('stan_grafiku').doc(docKey).update({
-          wiersze: wiersze,
           gieldaNiedziele: gn,
           gieldaTydzien: gt,
           wolneZastepstwa: data.wolneZastepstwa || [],
@@ -5563,6 +5729,659 @@
         });
       }
     }
+
+    // =============================================================
+    // LITURGICZNY KALENDARZ I KOLORY SZAT
+    // =============================================================
+    var KOLORY_LITURGICZNE = {
+      zielony: {
+        nazwa: 'ZIELONY',
+        hex: '#10b981',
+        bg: 'linear-gradient(135deg, #10b981, #047857)',
+        border: '#10b981',
+        glow: 'rgba(16, 185, 129, 0.25)',
+        tekstKolor: '#10b981'
+      },
+      bialy: {
+        nazwa: 'BIAŁY / ZŁOTY',
+        hex: '#eab308',
+        bg: 'linear-gradient(135deg, #fef08a, #ca8a04)',
+        border: '#eab308',
+        glow: 'rgba(234, 179, 8, 0.25)',
+        tekstKolor: '#facc15'
+      },
+      czerwony: {
+        nazwa: 'CZERWONY',
+        hex: '#ef4444',
+        bg: 'linear-gradient(135deg, #ef4444, #b91c1c)',
+        border: '#ef4444',
+        glow: 'rgba(239, 68, 68, 0.25)',
+        tekstKolor: '#f87171'
+      },
+      fioletowy: {
+        nazwa: 'FIOLETOWY',
+        hex: '#a855f7',
+        bg: 'linear-gradient(135deg, #a855f7, #7e22ce)',
+        border: '#a855f7',
+        glow: 'rgba(168, 85, 247, 0.25)',
+        tekstKolor: '#c084fc'
+      },
+      rozowy: {
+        nazwa: 'RÓŻOWY',
+        hex: '#ec4899',
+        bg: 'linear-gradient(135deg, #f472b6, #db2777)',
+        border: '#ec4899',
+        glow: 'rgba(236, 72, 153, 0.25)',
+        tekstKolor: '#f472b6'
+      },
+      czarny: {
+        nazwa: 'CZARNY',
+        hex: '#71717a',
+        bg: 'linear-gradient(135deg, #3f3f46, #18181b)',
+        border: '#71717a',
+        glow: 'rgba(113, 113, 122, 0.25)',
+        tekstKolor: '#a1a1aa'
+      }
+    };
+
+    var liturgiaOverrideFirestore = null;
+
+    var STALE_SWIETA_LITURGIA = {
+      // STYCZEŃ
+      '01-01': { nazwa: 'Uroczystość Świętej Bożej Rodzicielki Maryi', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość nakazana. Szaty białe lub złote. Przygotuj kadzidło i dzwonki.' },
+      '01-02': { nazwa: 'Wspomnienie św. Bazylego Wielkiego i Grzegorza z Nazjanzu', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Doktorzy Kościoła. Szaty białe.' },
+      '01-06': { nazwa: 'Uroczystość Objawienia Pańskiego (Trzech Króli)', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość nakazana. Szaty białe lub złote. Przygotuj kadzidło, kredę i dzwonki.' },
+      '01-17': { nazwa: 'Wspomnienie św. Antoniego, opata', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '01-19': { nazwa: 'Wspomnienie św. Józefa Sebastiana Pelczara, bpa', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '01-21': { nazwa: 'Wspomnienie św. Agnieszki, dziewicy i męczennicy', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennica. Szaty CZERWONE.' },
+      '01-24': { nazwa: 'Wspomnienie św. Franciszka Salezego, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '01-25': { nazwa: 'Święto Nawrócenia św. Pawła, Apostoła', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Święto Apostoła (wyjątkowo szaty białe z racji Nawrócenia).' },
+      '01-26': { nazwa: 'Wspomnienie św. Tymoteusza i Tytusa, biskupów', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '01-28': { nazwa: 'Wspomnienie św. Tomasza z Akwinu, dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Doktor Anielski. Szaty białe.' },
+      '01-31': { nazwa: 'Wspomnienie św. Jana Bosko, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Patron młodzieży i ministrantów. Szaty białe.' },
+
+      // LUTY
+      '02-02': { nazwa: 'Święto Ofiarowania Pańskiego (Matki Bożej Gromnicznej)', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Szaty białe. Poświęcenie świec (gromnic), uroczysta procesja na wejście.' },
+      '02-05': { nazwa: 'Wspomnienie św. Agaty, dziewicy i męczennicy', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennica. Szaty CZERWONE. Tradycyjne poświęcenie chleba i wody.' },
+      '02-06': { nazwa: 'Wspomnienie św. Pawła Miki i Towarzyszy, męczenników', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennicy z Japonii. Szaty CZERWONE.' },
+      '02-10': { nazwa: 'Wspomnienie św. Scholastyki, dziewicy', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '02-11': { nazwa: 'Wspomnienie NMP z Lourdes (Światowy Dzień Chorego)', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe. Modlitwa i namaszczenie chorych.' },
+      '02-14': { nazwa: 'Święto św. Cyryla i Metodego, patronów Europy', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Apostołowie Słowian, Patroni Europy. Szaty białe.' },
+      '02-22': { nazwa: 'Święto Katedry św. Piotra, Apostoła', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Szaty białe.' },
+      '02-23': { nazwa: 'Wspomnienie św. Polikarpa, bpa i męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik. Szaty CZERWONE.' },
+
+      // MARZEC
+      '03-04': { nazwa: 'Święto św. Kazimierza, królewicza', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Patron młodzieży i Polski/Litwy. Szaty białe.' },
+      '03-07': { nazwa: 'Wspomnienie św. Perpetuy i Felicyty, męczennic', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennice. Szaty CZERWONE.' },
+      '03-08': { nazwa: 'Wspomnienie św. Jana Bożego, zakonnika', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '03-19': { nazwa: 'Uroczystość św. Józefa, Oblubieńca NMP', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość. Szaty białe lub złote. Główny Patron naszej parafii!' },
+      '03-25': { nazwa: 'Uroczystość Zwiastowania Pańskiego', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość Pańska. Szaty białe. Dzień Świętości Życia.' },
+
+      // KWIECIEŃ
+      '04-23': { nazwa: 'Uroczystość św. Wojciecha, bpa i męcz., Głównego Patrona Polski', kolor: 'czerwony', ranga: 'Uroczystość', wskazowka: 'Główny Patron Polski. Szaty CZERWONE (męczeństwo). Pelerynki czerwone.' },
+      '04-25': { nazwa: 'Święto św. Marka, Ewangelisty', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Święto Apostoła/Ewangelisty. Szaty CZERWONE.' },
+      '04-29': { nazwa: 'Święto św. Katarzyny ze Sieny, patronki Europy', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Doktor Kościoła, Patronka Europy. Szaty białe.' },
+
+      // MAJ
+      '05-02': { nazwa: 'Wspomnienie św. Atanazego, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '05-03': { nazwa: 'Uroczystość NMP Królowej Polski, Głównej Patronki Polski', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość narodowa i kościelna. Szaty białe/złote. Pełna asysta liturgiczna.' },
+      '05-04': { nazwa: 'Wspomnienie św. Floriana, męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Patron strażaków i Krakowa. Szaty CZERWONE.' },
+      '05-06': { nazwa: 'Święto św. Apostołów Filipa i Jakuba', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostołowie. Szaty CZERWONE.' },
+      '05-08': { nazwa: 'Uroczystość św. Stanisława, bpa i męcz., Głównego Patrona Polski', kolor: 'czerwony', ranga: 'Uroczystość', wskazowka: 'Główny Patron Polski. Szaty CZERWONE. Uroczysta asysta.' },
+      '05-14': { nazwa: 'Święto św. Macieja, Apostoła', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostoł. Szaty CZERWONE.' },
+      '05-16': { nazwa: 'Święto św. Andrzeja Boboli, prezbitera i męcz., Patrona Polski', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Patron Polski i jedności. Szaty CZERWONE.' },
+      '05-24': { nazwa: 'Wspomnienie NMP Wspomożycielki Wiernych', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '05-26': { nazwa: 'Wspomnienie św. Filipa Neri, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '05-29': { nazwa: 'Wspomnienie św. Urszuli Ledóchowskiej, dziewicy', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '05-31': { nazwa: 'Święto Nawiedzenia NMP', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Święto Maryjne. Szaty białe.' },
+
+      // CZERWIEC
+      '06-01': { nazwa: 'Wspomnienie św. Justyna, męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik. Szaty CZERWONE.' },
+      '06-03': { nazwa: 'Wspomnienie św. Karola Lwangi i Towarzyszy, męczenników', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennicy z Ugandy. Szaty CZERWONE.' },
+      '06-05': { nazwa: 'Wspomnienie św. Bonifacego, bpa i męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Apostoł Niemiec, męczennik. Szaty CZERWONE.' },
+      '06-11': { nazwa: 'Wspomnienie św. Barnaby, Apostoła', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Apostoł. Szaty CZERWONE.' },
+      '06-13': { nazwa: 'Wspomnienie św. Antoniego z Padwy, prezb. i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe. Poświęcenie lilii.' },
+      '06-17': { nazwa: 'Wspomnienie św. Alberta Chmielowskiego, zakonnika', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Brat Albert. Szaty białe.' },
+      '06-21': { nazwa: 'Wspomnienie św. Alojzego Gonzagi, zakonnika', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Patron młodzieży i ministrantów. Szaty białe.' },
+      '06-24': { nazwa: 'Uroczystość Narodzenia św. Jana Chrzciciela', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość. Szaty białe lub złote.' },
+      '06-28': { nazwa: 'Wspomnienie św. Ireneusza, bpa i męcz., dK', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik i Doktor Kościoła. Szaty CZERWONE.' },
+      '06-29': { nazwa: 'Uroczystość Świętych Apostołów Piotra i Pawła', kolor: 'czerwony', ranga: 'Uroczystość', wskazowka: 'Apostołowie i Męczennicy. Szaty CZERWONE. Taca na Stolicę Apostolską (świętopietrze).' },
+
+      // LIPIEC
+      '07-03': { nazwa: 'Święto św. Tomasza, Apostoła', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostoł. Szaty CZERWONE.' },
+      '07-06': { nazwa: 'Wspomnienie bł. Marii Teresy Ledóchowskiej', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Matka Afryki. Szaty białe.' },
+      '07-08': { nazwa: 'Wspomnienie św. Jana z Dukli, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '07-11': { nazwa: 'Święto św. Benedykta, opata, patrona Europy', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Ojciec mnichów zachodnich, Patron Europy. Szaty białe.' },
+      '07-12': { nazwa: 'Wspomnienie św. Brunona Bonifacego z Kwerfurtu, bpa i męcz.', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik. Szaty CZERWONE.' },
+      '07-15': { nazwa: 'Wspomnienie św. Bonawentury, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '07-16': { nazwa: 'Wspomnienie NMP z Góry Karmel (Szkaplerznej)', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe. Nakładanie szkaplerza świętego.' },
+      '07-22': { nazwa: 'Święto św. Marii Magdaleny', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Apostołka Apostołów. Szaty białe.' },
+      '07-23': { nazwa: 'Święto św. Brygidy, patronki Europy', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Patronka Europy. Szaty białe.' },
+      '07-25': { nazwa: 'Święto św. Jakuba, Apostoła', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostoł. Szaty CZERWONE. Wspomnienie św. Krzysztofa i błogosławieństwo kierowców.' },
+      '07-26': { nazwa: 'Wspomnienie św. Joachima i Anny, rodziców NMP', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Dzień Dziadków. Szaty białe.' },
+      '07-29': { nazwa: 'Wspomnienie św. Marty, Marii i Łazarza', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Przyjaciele Pana Jezusa. Szaty białe.' },
+      '07-31': { nazwa: 'Wspomnienie św. Ignacego z Loyoli, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Założyciel jezuitów. Szaty białe.' },
+
+      // SIERPIEŃ
+      '08-01': { nazwa: 'Wspomnienie św. Alfonsa Marii de Liguori, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '08-06': { nazwa: 'Święto Przemienienia Pańskiego', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Święto Pańskie na Górze Tabor. Szaty białe lub złote.' },
+      '08-08': { nazwa: 'Wspomnienie św. Dominika, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Założyciel dominikanów. Szaty białe.' },
+      '08-09': { nazwa: 'Święto św. Teresy Benedykty od Krzyża (Edyty Stein), męcz.', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Męczennica i patronka Europy. Szaty CZERWONE.' },
+      '08-10': { nazwa: 'Święto św. Wawrzyńca, diakona i męczennika', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Diakon i męczennik. Szaty CZERWONE. Pelerynki czerwone.' },
+      '08-11': { nazwa: 'Wspomnienie św. Klary, dziewicy', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '08-14': { nazwa: 'Wspomnienie św. Maksymiliana Marii Kolbego, męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik miłości w Auschwitz. Szaty CZERWONE. Pelerynki czerwone.' },
+      '08-15': { nazwa: 'Uroczystość Wniebowzięcia NMP (Matki Bożej Zielnej)', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość nakazana. Szaty białe lub złote. Poświęcenie ziół i kwiatów.' },
+      '08-17': { nazwa: 'Wspomnienie św. Jacka, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Główny Patron Metropolii Krakowskiej. Szaty białe.' },
+      '08-20': { nazwa: 'Wspomnienie św. Bernarda, opata i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '08-21': { nazwa: 'Wspomnienie św. Piusa X, papieża', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Papież wczesnej Komunii św. Szaty białe.' },
+      '08-22': { nazwa: 'Wspomnienie NMP Królowej', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '08-24': { nazwa: 'Święto św. Bartłomieja, Apostoła', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostoł. Szaty CZERWONE.' },
+      '08-26': { nazwa: 'Uroczystość NMP Częstochowskiej', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość w Polsce. Szaty białe lub złote. Jasnogórska Pani.' },
+      '08-27': { nazwa: 'Wspomnienie św. Moniki', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Matka św. Augustyna. Szaty białe.' },
+      '08-28': { nazwa: 'Wspomnienie św. Augustyna, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '08-29': { nazwa: 'Wspomnienie Męczeństwa św. Jana Chrzciciela', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Ścięcie Jana Chrzciciela. Szaty CZERWONE.' },
+
+      // WRZESIEŃ
+      '09-03': { nazwa: 'Wspomnienie św. Grzegorza Wielkiego, papieża i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '09-08': { nazwa: 'Święto Narodzenia NMP (Matki Bożej Siewnej)', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Święto Maryjne. Szaty białe. Poświęcenie ziarna siewnego.' },
+      '09-12': { nazwa: 'Wspomnienie Najświętszego Imienia Maryi', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Wiktoria Wiedeńska Jana III Sobieskiego. Szaty białe.' },
+      '09-13': { nazwa: 'Wspomnienie św. Jana Chryzostoma, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Jan Złotousty. Szaty białe.' },
+      '09-14': { nazwa: 'Święto Podwyższenia Krzyża Świętego', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Święto Pańskie Krzyża. Szaty CZERWONE. Pelerynki czerwone.' },
+      '09-15': { nazwa: 'Wspomnienie NMP Bolesnej', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '09-16': { nazwa: 'Wspomnienie św. Korneliusza i Cypriana, męczenników', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennicy. Szaty CZERWONE.' },
+      '09-18': { nazwa: 'Święto św. Stanisława Kostki, patrona Polski i młodzieży', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Główny Patron ministrantów i młodzieży! Szaty białe.' },
+      '09-20': { nazwa: 'Wspomnienie św. Andrzeja Kim Taegon i Towarzyszy, męczenników', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennicy koreańscy. Szaty CZERWONE.' },
+      '09-21': { nazwa: 'Święto św. Mateusza, Apostoła i Ewangelisty', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostoł i Ewangelista. Szaty CZERWONE.' },
+      '09-23': { nazwa: 'Wspomnienie św. Pio z Pietrelciny (Ojca Pio), prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Ojciec Pio, stygmatyk. Szaty białe.' },
+      '09-27': { nazwa: 'Wspomnienie św. Wincentego a Paulo, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '09-28': { nazwa: 'Wspomnienie św. Wacława, męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik, Patron Czech. Szaty CZERWONE.' },
+      '09-29': { nazwa: 'Święto Świętych Archaniołów Michała, Gabriela i Rafała', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Święci Archaniołowie. Szaty białe.' },
+      '09-30': { nazwa: 'Wspomnienie św. Hieronima, prezbitera i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Tłumacz Wulgaty. Szaty białe.' },
+
+      // PAŹDZIERNIK
+      '10-01': { nazwa: 'Wspomnienie św. Teresy od Dzieciątka Jezus, dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Mała Teresa, Patronka Misji. Szaty białe.' },
+      '10-02': { nazwa: 'Wspomnienie Świętych Aniołów Stróżów', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Aniołowie Stróżowie. Szaty białe.' },
+      '10-04': { nazwa: 'Wspomnienie św. Franciszka z Asyżu', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Biedaczyna z Asyżu. Szaty białe.' },
+      '10-05': { nazwa: 'Wspomnienie św. Faustyny Kowalskiej, dziewicy', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Apostołka Bożego Miłosierdzia. Szaty białe.' },
+      '10-07': { nazwa: 'Wspomnienie NMP Różańcowej', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Miesiąc różańcowy. Szaty białe. Nabożeństwo różańcowe.' },
+      '10-13': { nazwa: 'Wspomnienie bł. Honorata Koźmińskiego / Nabożeństwo fatimskie', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Wspomnienie liturgiczne. Szaty CZERWONE (lub białe). Kościelny przygotowuje ornat czerwony i pelerynki.' },
+      '10-15': { nazwa: 'Wspomnienie św. Teresy od Jezusa (z Avila), dz. i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Wielka Teresa, Reformatorka Karmelu. Szaty białe.' },
+      '10-16': { nazwa: 'Święto św. Jadwigi Śląskiej', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Patronka Polski i Śląska. Szaty białe.' },
+      '10-17': { nazwa: 'Wspomnienie św. Ignacego Antiocheńskiego, bpa i męcz.', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik pierwszych wieków. Szaty CZERWONE.' },
+      '10-18': { nazwa: 'Święto św. Łukasza, Ewangelisty', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Ewangelista. Szaty CZERWONE. Dzień Służby Zdrowia.' },
+      '10-19': { nazwa: 'Wspomnienie bł. Jerzego Popiełuszki, prezbitera i męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik prawdy i wolności w Polsce. Szaty CZERWONE.' },
+      '10-20': { nazwa: 'Wspomnienie św. Jana Kantego, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Patron profesorów i studentów. Szaty białe.' },
+      '10-22': { nazwa: 'Wspomnienie św. Jana Pawła II, papieża', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Święty Papież Polak! Szaty białe.' },
+      '10-28': { nazwa: 'Święto Świętych Apostołów Szymona i Judy Tadeusza', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostołowie. Szaty CZERWONE.' },
+
+      // LISTOPAD
+      '11-01': { nazwa: 'Uroczystość Wszystkich Świętych', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość nakazana. Szaty białe lub złote. Procesja na cmentarz.' },
+      '11-02': { nazwa: 'Wspomnienie Wszystkich Wiernych Zmarłych (Dzień Zaduszny)', kolor: 'fioletowy', ranga: 'Wspomnienie', wskazowka: 'Szaty fioletowe lub czarne. Procesja za zmarłych, wypominki.' },
+      '11-04': { nazwa: 'Wspomnienie św. Karola Boromeusza, bpa', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Patron Karola Wojtyły. Szaty białe.' },
+      '11-09': { nazwa: 'Święto Rocznicy Poświęcenia Bazyliki Laterańskiej', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Matka i Głowa kościołów świata. Szaty białe.' },
+      '11-10': { nazwa: 'Wspomnienie św. Leona Wielkiego, papieża i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '11-11': { nazwa: 'Wspomnienie św. Marcina z Tours / Narodowe Święto Niepodległości', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe. Uroczysta modlitwa w intencji Ojczyzny.' },
+      '11-12': { nazwa: 'Wspomnienie św. Jozafata, bpa i męczennika', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennik jedności Kościoła. Szaty CZERWONE.' },
+      '11-17': { nazwa: 'Wspomnienie św. Elżbiety Węgierskiej, zakonnicy', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Patronka dzieł miłosierdzia. Szaty białe.' },
+      '11-18': { nazwa: 'Wspomnienie bł. Karoliny Kózkówny, dziewicy i męczennicy', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Patronka KSM i polskiej młodzieży. Szaty CZERWONE.' },
+      '11-20': { nazwa: 'Wspomnienie św. Rafała Kalinowskiego, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Karmelita bosy, powstaniec styczniowy. Szaty białe.' },
+      '11-21': { nazwa: 'Wspomnienie Ofiarowania NMP', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '11-22': { nazwa: 'Wspomnienie św. Cecylii, dziewicy i męczennicy', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Patronka muzyki kościelnej, organistów i chórów. Szaty CZERWONE.' },
+      '11-24': { nazwa: 'Wspomnienie św. Andrzeja Dung-Lac i Towarzyszy, męczenników', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennicy wietnamscy. Szaty CZERWONE.' },
+      '11-30': { nazwa: 'Święto św. Andrzeja, Apostoła', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Apostoł. Szaty CZERWONE.' },
+
+      // GRUDZIEŃ
+      '12-03': { nazwa: 'Wspomnienie św. Franciszka Ksawerego, prezbitera', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Patron misji katolickich. Szaty białe.' },
+      '12-04': { nazwa: 'Wspomnienie św. Barbary, dziewicy i męczennicy', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Patronka górników i dobrej śmierci. Szaty CZERWONE.' },
+      '12-06': { nazwa: 'Wspomnienie św. Mikołaja, biskupa', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Biskup z Miry. Szaty białe.' },
+      '12-07': { nazwa: 'Wspomnienie św. Ambrożego, bpa i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Doktor Kościoła. Szaty białe.' },
+      '12-08': { nazwa: 'Uroczystość Niepokalanego Poczęcia NMP', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość Maryjna. Szaty białe lub biało-niebieskie/złote.' },
+      '12-13': { nazwa: 'Wspomnienie św. Łucji, dziewicy i męczennicy', kolor: 'czerwony', ranga: 'Wspomnienie', wskazowka: 'Męczennica. Szaty CZERWONE.' },
+      '12-14': { nazwa: 'Wspomnienie św. Jana od Krzyża, prezb. i dK', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' },
+      '12-25': { nazwa: 'Uroczystość Narodzenia Pańskiego (Boże Narodzenie)', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość nakazana. Szaty białe lub złote. Pełna asysta, kadzidło i dzwonki.' },
+      '12-26': { nazwa: 'Święto św. Szczepana, pierwszego męczennika', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Drugi dzień świąt: Pierwszy Męczennik! Szaty CZERWONE. Pelerynki czerwone.' },
+      '12-27': { nazwa: 'Święto św. Jana, Apostoła i Ewangelisty', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Szaty białe. Tradycyjne błogosławieństwo wina po Mszy św.' },
+      '12-28': { nazwa: 'Święto Świętych Młodzianków, męczenników', kolor: 'czerwony', ranga: 'Święto', wskazowka: 'Niewinni Męczennicy z Betlejem. Szaty CZERWONE.' }
+    };
+
+    var LIT_DNI_TYGODNIA = ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'];
+    var LIT_DNI_SKROTY = ['Nd', 'Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob'];
+    var LIT_MIESIACE_GEN = ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
+    var LIT_RZYMSKIE = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV', 'XXVI', 'XXVII', 'XXVIII', 'XXIX', 'XXX', 'XXXI', 'XXXII', 'XXXIII', 'XXXIV'];
+
+    function litAddDays(d, n) {
+      var res = new Date(d.getTime());
+      res.setDate(res.getDate() + n);
+      return res;
+    }
+
+    function litDiffDays(d1, d2) {
+      var t1 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate()).getTime();
+      var t2 = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate()).getTime();
+      return Math.round((t1 - t2) / (1000 * 60 * 60 * 24));
+    }
+
+    function litSameDay(d1, d2) {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
+    }
+
+    function wyznaczWielkanoc(rok) {
+      var a = rok % 19;
+      var b = Math.floor(rok / 100);
+      var c = rok % 100;
+      var d = Math.floor(b / 4);
+      var e = b % 4;
+      var f = Math.floor((b + 8) / 25);
+      var g = Math.floor((b - f + 1) / 3);
+      var h = (19 * a + b - d - g + 15) % 30;
+      var i = Math.floor(c / 4);
+      var k = c % 4;
+      var l = (32 + 2 * e + 2 * i - h - k) % 7;
+      var m = Math.floor((a + 11 * h + 22 * l) / 451);
+      var miesiac = Math.floor((h + l - 7 * m + 114) / 31);
+      var dzien = ((h + l - 7 * m + 114) % 31) + 1;
+      return new Date(rok, miesiac - 1, dzien, 12, 0, 0);
+    }
+
+    function wyznaczAdwentStart(rok) {
+      var bNar = new Date(rok, 11, 25, 12, 0, 0);
+      var dayOfWeek = bNar.getDay();
+      var daysTo4thSun = (dayOfWeek === 0) ? 7 : dayOfWeek;
+      var niedz4 = litAddDays(bNar, -daysTo4thSun);
+      return litAddDays(niedz4, -21);
+    }
+
+    function wyznaczChrzestPanski(rok) {
+      var trzechKroli = new Date(rok, 0, 6, 12, 0, 0);
+      var day = trzechKroli.getDay();
+      var daysToSun = (7 - day) % 7;
+      if (daysToSun === 0) daysToSun = 7;
+      return litAddDays(trzechKroli, daysToSun);
+    }
+
+    function wyznaczDaneLiturgiczne(date) {
+      var d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+      var rok = d.getFullYear();
+      var dayOfWeek = d.getDay();
+      var mm = String(d.getMonth() + 1).padStart(2, '0');
+      var dd = String(d.getDate()).padStart(2, '0');
+      var kluczStale = mm + '-' + dd;
+
+      var easter = wyznaczWielkanoc(rok);
+      var offsetEaster = litDiffDays(d, easter);
+      var adventStart = wyznaczAdwentStart(rok);
+      var chrzest = wyznaczChrzestPanski(rok);
+      var bozeNarodzenie = new Date(rok, 11, 25, 12, 0, 0);
+
+      // 1. Ruchome uroczystości i święta cyklu paschalnego
+      if (offsetEaster === -46) {
+        return { nazwa: 'Środa Popielcowa', okres: 'Wielki Post', kolor: 'fioletowy', ranga: 'Wielki Post', wskazowka: 'Początek Wielkiego Postu. Szaty fioletowe. Obrzęd posypania głów popiołem.' };
+      }
+      if (offsetEaster === -21 && dayOfWeek === 0) {
+        return { nazwa: 'IV Niedziela Wielkiego Postu (Laetare)', okres: 'Wielki Post', kolor: 'rozowy', ranga: 'Niedziela', wskazowka: 'Niedziela radości w Wielkim Poście. Szaty RÓŻOWE (lub fioletowe).' };
+      }
+      if (offsetEaster === -7) {
+        return { nazwa: 'Niedziela Palmowa (Męki Pańskiej)', okres: 'Wielki Post', kolor: 'czerwony', ranga: 'Wielki Tydzień', wskazowka: 'Szaty CZERWONE. Procesja z palmami, uroczyste czytanie Męki Pańskiej.' };
+      }
+      if (offsetEaster === -3) {
+        return { nazwa: 'Wielki Czwartek (Msza Wieczerzy Pańskiej)', okres: 'Triduum Paschalne', kolor: 'bialy', ranga: 'Triduum Paschalne', wskazowka: 'Święto kapłanów i ministrantów! Szaty białe/złote. Przeniesienie Najświętszego Sakramentu do Ciemnicy.' };
+      }
+      if (offsetEaster === -2) {
+        return { nazwa: 'Wielki Piątek Męki Pańskiej', okres: 'Triduum Paschalne', kolor: 'czerwony', ranga: 'Triduum Paschalne', wskazowka: 'Liturgia Męki Pańskiej. Szaty CZERWONE. Adoracja Krzyża, kołatki zamiast dzwonków.' };
+      }
+      if (offsetEaster === -1) {
+        return { nazwa: 'Wielka Sobota (Wigilia Paschalna)', okres: 'Triduum Paschalne', kolor: 'bialy', ranga: 'Triduum Paschalne', wskazowka: 'Matka wszystkich wigilii. Szaty białe/złote. Poświęcenie ognia, Paschał, radosne Alleluja.' };
+      }
+      if (offsetEaster === 0) {
+        return { nazwa: 'Niedziela Zmartwychwstania Pańskiego', okres: 'Okres Wielkanocny', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Największa uroczystość chrześcijańska! Szaty białe lub złote. Procesja rezurekcyjna.' };
+      }
+      if (offsetEaster >= 1 && offsetEaster <= 7) {
+        if (offsetEaster === 1) return { nazwa: 'Poniedziałek Wielkanocny', okres: 'Oktawa Wielkanocy', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Oktawa Wielkanocy. Szaty białe lub złote.' };
+        if (offsetEaster === 7) return { nazwa: 'II Niedziela Wielkanocna (Miłosierdzia Bożego)', okres: 'Okres Wielkanocny', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Święto Miłosierdzia Bożego. Szaty białe lub złote.' };
+        return { nazwa: LIT_DNI_TYGODNIA[dayOfWeek] + ' w Oktawie Wielkanocy', okres: 'Oktawa Wielkanocy', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Oktawa Wielkanocy. Szaty białe.' };
+      }
+      if (offsetEaster === 42 && dayOfWeek === 0) {
+        return { nazwa: 'Uroczystość Wniebowstąpienia Pańskiego', okres: 'Okres Wielkanocny', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość Pańska. Szaty białe lub złote.' };
+      }
+      if (offsetEaster === 49) {
+        return { nazwa: 'Uroczystość Zesłania Ducha Świętego (Zielone Świątki)', okres: 'Okres Wielkanocny', kolor: 'czerwony', ranga: 'Uroczystość', wskazowka: 'Szaty CZERWONE (ogień Ducha Świętego). Kończy Okres Wielkanocny. Pelerynki czerwone.' };
+      }
+      if (offsetEaster === 50) {
+        return { nazwa: 'Święto NMP Matki Kościoła', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Święto w Polsce po Zesłaniu Ducha Świętego. Szaty białe.' };
+      }
+      if (offsetEaster === 53) {
+        return { nazwa: 'Święto Jezusa Chrystusa Najwyższego i Wiecznego Kapłana', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Szaty białe.' };
+      }
+      if (offsetEaster === 56) {
+        return { nazwa: 'Uroczystość Najświętszej Trójcy', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość Pańska. Szaty białe lub złote.' };
+      }
+      if (offsetEaster === 60) {
+        return { nazwa: 'Uroczystość Najświętszego Ciała i Krwi Chrystusa (Boże Ciało)', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość nakazana. Szaty białe/złote. Wielka procesja eucharystyczna do 4 ołtarzy.' };
+      }
+      if (offsetEaster === 68) {
+        return { nazwa: 'Uroczystość Najświętszego Serca Pana Jezusa', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość. Szaty białe.' };
+      }
+      if (offsetEaster === 69) {
+        return { nazwa: 'Wspomnienie Niepokalanego Serca NMP', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Wspomnienie', wskazowka: 'Szaty białe.' };
+      }
+
+      // 2. Niedziela Chrystusa Króla (ostatnia niedziela przed Adwentem)
+      var niedzielaKrola = litAddDays(adventStart, -7);
+      if (litSameDay(d, niedzielaKrola)) {
+        return { nazwa: 'Uroczystość Jezusa Chrystusa Króla Wszechświata', okres: 'Okres Zwykły', kolor: 'bialy', ranga: 'Uroczystość', wskazowka: 'Uroczystość Pańska kończąca rok liturgiczny. Szaty białe lub złote.' };
+      }
+
+      // 3. Sprawdź stałe uroczystości, święta i wspomnienia
+      var stale = STALE_SWIETA_LITURGIA[kluczStale];
+      if (stale) {
+        var czyWyzszaNiedziela = false;
+        if (dayOfWeek === 0) {
+          // W niedziele Adwentu, Wielkiego Postu i Wielkanocy tylko Uroczystość może ustąpić lub nie
+          if ((d >= adventStart && d < bozeNarodzenie) || (offsetEaster >= -46 && offsetEaster <= 49)) {
+            if (stale.ranga !== 'Uroczystość') czyWyzszaNiedziela = true;
+          } else {
+            // W Niedziele Zwykłe Uroczystości i Święta Pańskie wypierają niedzielę, wspomnienia ustępują niedzieli
+            if (stale.ranga === 'Wspomnienie') czyWyzszaNiedziela = true;
+          }
+        }
+        if (!czyWyzszaNiedziela) {
+          return {
+            nazwa: stale.nazwa,
+            okres: stale.ranga === 'Uroczystość' ? 'Uroczystość' : (stale.ranga === 'Święto' ? 'Święto' : 'Wspomnienie'),
+            kolor: stale.kolor,
+            ranga: stale.ranga,
+            wskazowka: stale.wskazowka
+          };
+        }
+      }
+
+      // 4. Okres Wielkiego Postu
+      if (offsetEaster > -46 && offsetEaster < 0) {
+        var tydzWP = Math.floor((offsetEaster + 46) / 7) + 1;
+        var nrTydzStr = LIT_RZYMSKIE[tydzWP] || tydzWP;
+        if (dayOfWeek === 0) {
+          return { nazwa: nrTydzStr + ' Niedziela Wielkiego Postu', okres: 'Wielki Post', kolor: 'fioletowy', ranga: 'Niedziela', wskazowka: 'Szaty fioletowe. Gorzkie Żale, brak radosnego Gloria i Alleluja.' };
+        }
+        return { nazwa: LIT_DNI_TYGODNIA[dayOfWeek] + ', ' + nrTydzStr + ' Tydzień Wielkiego Postu', okres: 'Wielki Post', kolor: 'fioletowy', ranga: 'Dzień powszedni', wskazowka: 'Wielki Post. Szaty fioletowe. Czas pokuty i modlitwy.' };
+      }
+
+      // 5. Okres Wielkanocny
+      if (offsetEaster > 0 && offsetEaster < 49) {
+        var tydzWlk = Math.floor(offsetEaster / 7) + 1;
+        var nrTydzWlkStr = LIT_RZYMSKIE[tydzWlk] || tydzWlk;
+        if (dayOfWeek === 0) {
+          return { nazwa: nrTydzWlkStr + ' Niedziela Wielkanocna', okres: 'Okres Wielkanocny', kolor: 'bialy', ranga: 'Niedziela', wskazowka: 'Okres Wielkanocny. Radosne Alleluja, szaty białe lub złote.' };
+        }
+        return { nazwa: LIT_DNI_TYGODNIA[dayOfWeek] + ', ' + nrTydzWlkStr + ' Tydzień Wielkanocny', okres: 'Okres Wielkanocny', kolor: 'bialy', ranga: 'Dzień powszedni', wskazowka: 'Okres Wielkanocny. Szaty białe. Paschał przy ołtarzu.' };
+      }
+
+      // 6. Okres Adwentu
+      if (d >= adventStart && d < bozeNarodzenie) {
+        var dniOdAdw = litDiffDays(d, adventStart);
+        var tydzAdw = Math.floor(dniOdAdw / 7) + 1;
+        var nrTydzAdwStr = LIT_RZYMSKIE[tydzAdw] || tydzAdw;
+        if (tydzAdw === 3 && dayOfWeek === 0) {
+          return { nazwa: 'III Niedziela Adwentu (Gaudete)', okres: 'Adwent', kolor: 'rozowy', ranga: 'Niedziela', wskazowka: 'Niedziela radości! Szaty RÓŻOWE (lub fioletowe). Roraty, wieniec adwentowy.' };
+        }
+        if (dayOfWeek === 0) {
+          return { nazwa: nrTydzAdwStr + ' Niedziela Adwentu', okres: 'Adwent', kolor: 'fioletowy', ranga: 'Niedziela', wskazowka: 'Adwent. Szaty fioletowe. Wieniec adwentowy przy ołtarzu.' };
+        }
+        return { nazwa: LIT_DNI_TYGODNIA[dayOfWeek] + ', ' + nrTydzAdwStr + ' Tydzień Adwentu', okres: 'Adwent', kolor: 'fioletowy', ranga: 'Dzień powszedni', wskazowka: 'Msze roratnie o NMP (często szaty białe na samych Roratach), szaty dnia: fioletowe.' };
+      }
+
+      // 7. Okres Narodzenia Pańskiego
+      if ((d.getMonth() === 11 && d.getDate() >= 25) || (d.getMonth() === 0 && d <= chrzest)) {
+        if (d.getMonth() === 0 && litSameDay(d, chrzest)) {
+          return { nazwa: 'Święto Chrztu Pańskiego', okres: 'Okres Narodzenia Pańskiego', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Kończy Okres Bożego Narodzenia. Szaty białe.' };
+        }
+        if (dayOfWeek === 0 && d.getMonth() === 11) {
+          return { nazwa: 'Święto Świętej Rodziny: Jezusa, Maryi i Józefa', okres: 'Okres Narodzenia Pańskiego', kolor: 'bialy', ranga: 'Święto', wskazowka: 'Szaty białe lub złote.' };
+        }
+        return { nazwa: LIT_DNI_TYGODNIA[dayOfWeek] + ' w Okresie Narodzenia Pańskiego', okres: 'Okres Narodzenia Pańskiego', kolor: 'bialy', ranga: 'Dzień powszedni', wskazowka: 'Okres Bożego Narodzenia. Szaty białe lub złote. Kolędy.' };
+      }
+
+      // 8. Okres Zwykły
+      var nrTygodniaZwyklego = 1;
+      if (d < easter) {
+        var poniedzialekPoChrzcie = litAddDays(chrzest, 1);
+        var dniOdStartu = litDiffDays(d, poniedzialekPoChrzcie);
+        nrTygodniaZwyklego = Math.floor(dniOdStartu / 7) + 1;
+      } else {
+        var dniPrzedKrolem = litDiffDays(niedzielaKrola, d);
+        var tygPrzedKrolem = Math.floor((dniPrzedKrolem + (dayOfWeek === 0 ? 0 : (7 - dayOfWeek))) / 7);
+        nrTygodniaZwyklego = 34 - tygPrzedKrolem;
+        if (nrTygodniaZwyklego < 1) nrTygodniaZwyklego = 1;
+        if (nrTygodniaZwyklego > 34) nrTygodniaZwyklego = 34;
+      }
+
+      var nrTydzZwyklyStr = LIT_RZYMSKIE[nrTygodniaZwyklego] || nrTygodniaZwyklego;
+      if (dayOfWeek === 0) {
+        return {
+          nazwa: nrTydzZwyklyStr + ' Niedziela Zwykła',
+          okres: 'Okres Zwykły',
+          kolor: 'zielony',
+          ranga: 'Niedziela',
+          wskazowka: 'Szaty ZIELONE (zieleń to symbol nadziei i życia). Komże / alby z zielonymi pelerynkami.'
+        };
+      }
+
+      return {
+        nazwa: LIT_DNI_TYGODNIA[dayOfWeek] + ', ' + nrTydzZwyklyStr + ' Tydzień Zwykły',
+        okres: 'Okres Zwykły',
+        kolor: 'zielony',
+        ranga: 'Dzień powszedni',
+        wskazowka: 'Dzień powszedni w Okresie Zwykłym. Szaty ZIELONE. Komża / alba z zieloną pelerynką.'
+      };
+    }
+
+    var aktualnyLiturgiaTryb = 'dzis';
+
+    function nasluchujLiturgiiFirestore() {
+      try {
+        var db = (typeof window !== 'undefined' && window.dbFirestore) || (typeof dbFirestore !== 'undefined' ? dbFirestore : null);
+        if (!db) return;
+        db.collection('konfiguracja').doc('liturgia_dzis')
+          .onSnapshot(function(doc) {
+            if (doc && doc.exists) {
+              liturgiaOverrideFirestore = doc.data();
+              try {
+                renderujKarteLiturgii(new Date());
+                aktualizujPigulkiZakrystiaLiturgia();
+              } catch(eR) {}
+            }
+          }, function(err) {
+            console.warn('Liturgia Firestore listener error:', err);
+          });
+      } catch(e) {
+        console.warn('nasluchujLiturgiiFirestore catch:', e);
+      }
+    }
+
+    function ustawKolorLiturgicznyWZakrystii(kolor) {
+      if (!czyMaDostepDoZakrystii(globalUser ? globalUser.nazwisko : '')) {
+        pokazToast('Brak uprawnień do zmiany koloru liturgicznego.');
+        return;
+      }
+      var dzis = new Date();
+      var y = dzis.getFullYear();
+      var m = String(dzis.getMonth() + 1).padStart(2, '0');
+      var d = String(dzis.getDate()).padStart(2, '0');
+      var dataYMD = y + '-' + m + '-' + d;
+
+      var paleta = KOLORY_LITURGICZNE[kolor] || KOLORY_LITURGICZNE.czerwony;
+      var litDzis = wyznaczDaneLiturgiczne(dzis);
+
+      var nazwa = litDzis.nazwa;
+      var wskazowka = 'Kościelny przygotowuje ornat ' + paleta.nazwa.toLowerCase() + '. Ministranci zakładają odpowiednie szaty.';
+      if (kolor === 'czerwony') {
+        nazwa = 'Wspomnienie liturgiczne / Męczeństwo (szaty czerwone)';
+        wskazowka = 'Kościelny przygotowuje ornat CZERWONY. Ministranci zakładają alby lub komże z czerwoną pelerynką.';
+      } else if (kolor === 'bialy') {
+        nazwa = 'Święto / Wspomnienie / Msza wotywna (szaty białe)';
+        wskazowka = 'Kościelny przygotowuje ornat BIAŁY lub złoty. Ministranci zakładają komże/alby.';
+      } else if (kolor === 'zielony') {
+        nazwa = 'Dzień powszedni / Niedziela zwykła (szaty zielone)';
+        wskazowka = 'Kościelny przygotowuje ornat ZIELONY. Pelerynki zielone.';
+      } else if (kolor === 'fioletowy') {
+        nazwa = 'Dzień pokutny / Msza żałobna (szaty fioletowe)';
+        wskazowka = 'Kościelny przygotowuje ornat FIOLETOWY. Ministranci zakładają fioletowe pelerynki.';
+      } else if (kolor === 'rozowy') {
+        nazwa = 'Niedziela Gaudete / Laetare (szaty różowe)';
+        wskazowka = 'Kościelny przygotowuje ornat RÓŻOWY.';
+      } else if (kolor === 'czarny') {
+        nazwa = 'Liturgia żałobna (szaty czarne)';
+        wskazowka = 'Kościelny przygotowuje ornat CZARNY.';
+      }
+
+      var payload = {
+        data: dataYMD,
+        kolor: kolor,
+        nazwa: nazwa,
+        ranga: 'Wspomnienie / Wybór zakrystii',
+        okres: litDzis.okres || 'Okres Zwykły',
+        wskazowka: wskazowka,
+        zmienil: globalUser ? globalUser.nazwisko : 'Zakrystia',
+        zmieniono: new Date().toISOString()
+      };
+
+      liturgiaOverrideFirestore = payload;
+      aktualizujPigulkiZakrystiaLiturgia();
+      renderujKarteLiturgii(new Date(), 'dzis');
+
+      var db = (typeof window !== 'undefined' && window.dbFirestore) || (typeof dbFirestore !== 'undefined' ? dbFirestore : null);
+      if (db) {
+        db.collection('konfiguracja').doc('liturgia_dzis').set(payload)
+          .then(function() {
+            pokazToast('Ustawiono kolor ' + paleta.nazwa + ' dla wszystkich ministrantów!');
+          })
+          .catch(function(err) {
+            console.error('Błąd zapisu koloru liturgii:', err);
+            pokazToast('Błąd zapisu: ' + err.message);
+          });
+      } else {
+        pokazToast('Ustawiono lokalnie kolor ' + paleta.nazwa);
+      }
+    }
+
+    function aktualizujPigulkiZakrystiaLiturgia() {
+      var dzis = new Date();
+      var y = dzis.getFullYear();
+      var m = String(dzis.getMonth() + 1).padStart(2, '0');
+      var d = String(dzis.getDate()).padStart(2, '0');
+      var dataYMD = y + '-' + m + '-' + d;
+
+      var aktywnyKolor = 'czerwony';
+      if (liturgiaOverrideFirestore && liturgiaOverrideFirestore.kolor && liturgiaOverrideFirestore.data === dataYMD) {
+        aktywnyKolor = liturgiaOverrideFirestore.kolor;
+      } else {
+        var lit = wyznaczDaneLiturgiczne(dzis);
+        aktywnyKolor = lit.kolor;
+      }
+
+      var kolory = ['czerwony', 'bialy', 'zielony', 'fioletowy', 'rozowy', 'czarny'];
+      kolory.forEach(function(k) {
+        var btn = document.getElementById('btn-zak-' + k);
+        if (!btn) return;
+        var pal = KOLORY_LITURGICZNE[k];
+        if (k === aktywnyKolor) {
+          btn.style.background = pal.bg || pal.hex;
+          btn.style.color = '#ffffff';
+          btn.style.boxShadow = '0 0 10px ' + pal.glow;
+          btn.style.borderColor = pal.border;
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.color = pal.tekstKolor || '#a1a1aa';
+          btn.style.boxShadow = 'none';
+          btn.style.borderColor = pal.border;
+        }
+      });
+
+      var opisEl = document.getElementById('zakrystia-liturgia-aktualny-opis');
+      if (opisEl) {
+        var palAktywny = KOLORY_LITURGICZNE[aktywnyKolor] || KOLORY_LITURGICZNE.czerwony;
+        var nazwaOpisu = (liturgiaOverrideFirestore && liturgiaOverrideFirestore.data === dataYMD) ? (liturgiaOverrideFirestore.nazwa || palAktywny.nazwa) : (wyznaczDaneLiturgiczne(dzis).nazwa);
+        opisEl.innerHTML = '<span style="color:' + palAktywny.tekstKolor + '; font-weight:700;">' + palAktywny.nazwa + '</span> • ' + nazwaOpisu;
+      }
+    }
+
+    function renderujKarteLiturgii(dataObj) {
+      if (!dataObj) dataObj = new Date();
+      var y = dataObj.getFullYear();
+      var m = String(dataObj.getMonth() + 1).padStart(2, '0');
+      var dStrPad = String(dataObj.getDate()).padStart(2, '0');
+      var dataYMD = y + '-' + m + '-' + dStrPad;
+
+      var lit;
+      if (liturgiaOverrideFirestore && liturgiaOverrideFirestore.kolor && liturgiaOverrideFirestore.data === dataYMD) {
+        lit = {
+          nazwa: liturgiaOverrideFirestore.nazwa || 'Wspomnienie liturgiczne',
+          okres: liturgiaOverrideFirestore.okres || 'Okres Zwykły',
+          kolor: liturgiaOverrideFirestore.kolor,
+          ranga: liturgiaOverrideFirestore.ranga || 'Wspomnienie',
+          wskazowka: liturgiaOverrideFirestore.wskazowka || 'Szaty liturgiczne według wskazania kościelnego.'
+        };
+      } else {
+        lit = wyznaczDaneLiturgiczne(dataObj);
+      }
+
+      var paleta = KOLORY_LITURGICZNE[lit.kolor] || KOLORY_LITURGICZNE.zielony;
+
+      var karta = document.getElementById('karta-liturgia-dzis');
+      var elKolor = document.getElementById('liturgia-kolor-nazwa');
+      var elTytul = document.getElementById('liturgia-tytul');
+      var elOkres = document.getElementById('liturgia-okres');
+      var elRanga = document.getElementById('liturgia-ranga-badge');
+      var elOrb = document.getElementById('liturgia-orb');
+      var elWsk = document.getElementById('liturgia-wskazowka-tekst');
+
+      if (karta) {
+        karta.style.borderLeft = '3px solid ' + paleta.border;
+        karta.style.boxShadow = '0 0 20px -3px ' + paleta.glow;
+      }
+
+      if (elKolor) {
+        elKolor.innerText = paleta.nazwa;
+        elKolor.style.color = paleta.tekstKolor;
+      }
+
+      if (elTytul) {
+        elTytul.innerText = lit.nazwa;
+      }
+
+      if (elOkres) {
+        elOkres.innerText = lit.okres;
+      }
+
+      if (elRanga) {
+        elRanga.innerText = lit.ranga;
+      }
+
+      if (elOrb) {
+        elOrb.style.background = paleta.bg;
+        elOrb.style.boxShadow = '0 0 16px ' + paleta.glow;
+      }
+
+      if (elWsk) {
+        elWsk.innerText = lit.wskazowka;
+      }
+    }
+
+    // Inicjalizacja nasłuchiwania w Firestore oraz wstępny render
+    try {
+      nasluchujLiturgiiFirestore();
+    } catch(eLitSync) {}
+
+    try {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          renderujKarteLiturgii(new Date(), 'dzis');
+        });
+      } else {
+        renderujKarteLiturgii(new Date(), 'dzis');
+      }
+    } catch(eLitInit) {}
 
     // =============================================================
     // RENDEROWANIE DANYCH GRAFIKU I GIEŁDY
@@ -5594,6 +6413,11 @@
       try {
         if (res.nazwisko) sprawdzNagrodyDlaMinistranta(res.nazwisko);
       } catch(eN) { console.warn('sprawdzNagrody error:', eN); }
+
+      // Aktualizacja koloru szat liturgicznych na pulpicie
+      try {
+        renderujKarteLiturgii(new Date());
+      } catch(eLit) { console.warn('renderujKarteLiturgii error:', eLit); }
 
       // Aktualizacja karty grywalizacji i poziomu na pulpicie
       try {
@@ -5914,6 +6738,9 @@
                                 '<div class="dyzur-pulpit-data">' + pelnaData + ' <span class="badge-plus4">+4 PKT</span></div>' +
                                 '<div class="dyzur-pulpit-opis" style="color:' + (borderColPrzej === '#ef4444' ? '#f87171' : '#34d399') + '; font-weight:500;">' + statusTekstPrzej + '</div>' +
                               '</div>' +
+                              ((item.dane.status === 'PRZEJETE' && !czyMszaJuzSieRozpoczela(item.dzien, cleanTime(item.dane.godzina) || '18:00', res.rok, res.miesiacIdx))
+                                ? '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="wycofajPrzyjeteZastepstwo(\'' + item.dane.id + '\', ' + item.dzien + ', \'' + pobierzAktywnyKluczMiesiaca() + '\')">Wycofaj się z zastępstwa</button>'
+                                : '') +
                             '</div>';
             } else if (item.typ === 'tydzien') {
               var godzWTyg = pobierzGodzineDlaDniaTygodnia(res.rok, res.miesiacIdx, item.dzien);
@@ -6301,8 +7128,14 @@
             ? '<span style="font-size:10px; font-weight:700; color:#93c5fd; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle; text-transform:uppercase;">Nowy miesiąc</span>' 
             : '';
 
-          tileW.innerHTML = '<span class="tile-main">Niedziela ' + wObj.dzien + ' ' + wObj.nazwaMiesiaca + badgeNextW + '</span>' +
-                            '<span class="tile-sub">Z sobotą ' + (wObj.dzien - 1) + ' | Godzina: <b>' + wObj.godzina + '</b>' + (wObj.dopisek || '') + '</span>';
+          var mainText = (wObj.godzina === '17:00')
+            ? ('Sobota ' + (wObj.dzien - 1) + ' ' + wObj.nazwaMiesiaca + ' (wigilijna)')
+            : ('Niedziela ' + wObj.dzien + ' ' + wObj.nazwaMiesiaca);
+          var subText = (wObj.godzina === '17:00')
+            ? ('Godzina: <b>17:00</b>' + (wObj.dopisek || ''))
+            : ('Z sobotą ' + (wObj.dzien - 1) + ' | Godzina: <b>' + wObj.godzina + '</b>' + (wObj.dopisek || ''));
+          tileW.innerHTML = '<span class="tile-main">' + mainText + badgeNextW + '</span>' +
+                            '<span class="tile-sub">' + subText + '</span>';
           boxWeekendy.appendChild(tileW);
         });
         aktualizujGodzineWeekendu();
@@ -6479,7 +7312,7 @@
                          '<span style="font-weight:700; color:#ffffff; font-size:14px; letter-spacing:-0.01em;">' + on.wystawiajacy + badgeMonthW + '</span>' +
                          '<span class="badge-gielda badge-gielda-weekend">Weekend</span>' +
                        '</div>' +
-                       '<div style="font-size:13px; color:#fafafa;">Oddaje: <b>Niedziela ' + on.dzien + ' ' + on.nazwaMiesiacaGen + '</b>, godz. <b>' + godzOdd + '</b></div>' +
+                       '<div style="font-size:13px; color:#fafafa;">Oddaje: <b>' + (godzOdd === '17:00' ? ('Sobota ' + (on.dzien - 1) + ' ' + on.nazwaMiesiacaGen) : ('Niedziela ' + on.dzien + ' ' + on.nazwaMiesiacaGen)) + '</b>, godz. <b>' + godzOdd + '</b></div>' +
                        '<div style="font-size:12px; color:#a1a1aa; margin-top:4px;">Może przyjąć: <span style="color:#ffffff; font-weight:600;">' + (akceptowaneGodz.length ? akceptowaneGodz.join(', ') : 'dowolną') + '</span></div>';
 
             if (isMyOfferWknd) {
@@ -6693,7 +7526,25 @@
       var nLower = nClean.toLowerCase();
 
       // 1. Wiersz użytkownika z tabeli
-      var wiersze = docData.wiersze || (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) || [];
+      var rawWiersze = docData.wiersze || (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) || [];
+      var wiersze = rawWiersze.filter(function(w) {
+        var nw = (w && w.nazwisko ? w.nazwisko : '').toLowerCase().trim();
+        return nw && nw.indexOf('pokojsk') === -1;
+      });
+      wiersze.forEach(function(w) {
+        if (w && w.komorki && Array.isArray(w.komorki)) {
+          var sumK = w.komorki.reduce(function(acc, c) {
+            var v = c ? c.wartosc : null;
+            if (typeof v === 'number') return acc + v;
+            if (typeof v === 'string') {
+              var p = parseFloat(v.replace(',', '.'));
+              if (!isNaN(p)) return acc + p;
+            }
+            return acc;
+          }, 0);
+          w.suma = Math.round(sumK * 10) / 10;
+        }
+      });
       var userRow = wiersze.find(function(w) {
         var nw = (w.nazwisko || "").trim().toLowerCase();
         return nw && (nw === nLower || nw.indexOf(nLower) !== -1 || nLower.indexOf(nw) !== -1);
@@ -6702,11 +7553,20 @@
       // 2. Zamiany i zastępstwa dla tego użytkownika
       var mojeOddaneZastepstwa = {};
       var mojePrzejeteZastepstwa = {};
-      var wszystkieZastepstwa = (docData.zamianyZastepstwa && docData.zamianyZastepstwa.length)
-        ? docData.zamianyZastepstwa
-        : ((tabelaMiesiacaDane && tabelaMiesiacaDane.zamianyZastepstwa && tabelaMiesiacaDane.zamianyZastepstwa.length)
-            ? tabelaMiesiacaDane.zamianyZastepstwa
-            : []);
+      var rawZList = [].concat(docData.zamianyZastepstwa || [], docData.wolneZastepstwa || []);
+      if (rawZList.length === 0 && tabelaMiesiacaDane) {
+        rawZList = [].concat(tabelaMiesiacaDane.zamianyZastepstwa || [], tabelaMiesiacaDane.wolneZastepstwa || []);
+      }
+      var seenZKeys = {};
+      var wszystkieZastepstwa = [];
+      rawZList.forEach(function(z) {
+        if (!z) return;
+        var zk = z.id || (z.dzien + '_' + z.oddajacy + '_' + z.przejmujacy);
+        if (!seenZKeys[zk]) {
+          seenZKeys[zk] = true;
+          wszystkieZastepstwa.push(z);
+        }
+      });
 
       wszystkieZastepstwa.forEach(function(z) {
         var oddNorm = (z.oddajacy || "").trim().toLowerCase();
@@ -6736,17 +7596,17 @@
 
       // 3. Moje dyżury stałe w tygodniu roboczym (ŚCIŚLE PONIEDZIAŁEK - PIĄTEK!)
       var mojeDyzuryTydzien = [];
-      if (userRow && userRow.komorki) {
-        for (var d = 1; d <= daysInMonth; d++) {
-          var dt = new Date(currentYear, currentMonthIdx, d);
-          var dow = dt.getDay(); // 0: Niedziela, 1..5: Pn..Pt, 6: Sobota
-          if (dow >= 1 && dow <= 5) {
-            var k = userRow.komorki[d - 1];
-            if (k && k.maDyzur) {
-              var nagl = (docData.dniNaglowek && docData.dniNaglowek[d - 1]) ? docData.dniNaglowek[d - 1] : null;
-              if (!nagl || (!nagl.czyNiedziela && !nagl.czySobota)) {
-                mojeDyzuryTydzien.push(d);
-              }
+      var myStalyDzien = (userRow && userRow.stalyDzienTygodnia !== undefined && userRow.stalyDzienTygodnia !== null) ? userRow.stalyDzienTygodnia : -1;
+      for (var d = 1; d <= daysInMonth; d++) {
+        var dt = new Date(currentYear, currentMonthIdx, d);
+        var dow = dt.getDay(); // 0: Niedziela, 1..5: Pn..Pt, 6: Sobota
+        if (dow >= 1 && dow <= 5) {
+          var k = (userRow && userRow.komorki) ? userRow.komorki[d - 1] : null;
+          var nagl = (docData.dniNaglowek && docData.dniNaglowek[d - 1]) ? docData.dniNaglowek[d - 1] : null;
+          if (!nagl || (!nagl.czyNiedziela && !nagl.czySobota)) {
+            var maDyzurWTymDniu = (myStalyDzien > 0 && dow === myStalyDzien) || (k && k.maDyzur);
+            if (maDyzurWTymDniu) {
+              mojeDyzuryTydzien.push(d);
             }
           }
         }
@@ -6784,13 +7644,32 @@
         if (dt.getDay() === 0) {
           var naglSun = (docData.dniNaglowek && docData.dniNaglowek[day - 1]) ? docData.dniNaglowek[day - 1] : null;
           var kSun = (userRow && userRow.komorki) ? userRow.komorki[day - 1] : null;
-          if (kSun && kSun.maDyzur) {
+          var kSat = (day > 1 && userRow && userRow.komorki) ? userRow.komorki[day - 2] : null;
+          var isSatVigil = (mojaGodzinaNiedziela === "17:00");
+          var hasWeekendDyzur = !!(userGrupa && userGrupa.length > 0) || (isSatVigil ? ((kSat && kSat.maDyzur) || (kSun && kSun.maDyzur)) : (kSun && kSun.maDyzur));
+          if (hasWeekendDyzur) {
             var isOddane = !!(mojeOddaneZastepstwa[day] && (mojeOddaneZastepstwa[day].status === "OCZEKUJE" || mojeOddaneZastepstwa[day].status === "PRZEJETE" || mojeOddaneZastepstwa[day].status === "ZREALIZOWANE"));
-            var isUspraw = (kSun.wartosc === 0 || kSun.wartosc === "0" || isOddane);
+            var checkCell = isSatVigil ? ((kSat && kSat.wartosc !== null && kSat.wartosc !== undefined && kSat.wartosc !== "") ? kSat : kSun) : kSun;
+            var isUspraw = (checkCell && (checkCell.wartosc === 0 || checkCell.wartosc === "0")) || isOddane;
             godzinyWeekendy[day] = {
               godzina: (naglSun && naglSun.godzina) || mojaGodzinaNiedziela,
               czyZamienione: false,
               czyUsprawiedliwiony: isUspraw
+            };
+          }
+        }
+      }
+
+      // Jeśli ministrant ma dyżur w soboty o 17:00 i miesiąc kończy się w sobotę (np. 31 października)
+      if (mojaGodzinaNiedziela === "17:00" && daysInMonth >= 31) {
+        var dtLast = new Date(currentYear, currentMonthIdx, daysInMonth);
+        if (dtLast.getDay() === 6) {
+          var kLastSat = (userRow && userRow.komorki) ? userRow.komorki[daysInMonth - 1] : null;
+          if (kLastSat && kLastSat.maDyzur) {
+            godzinyWeekendy[daysInMonth + 1] = {
+              godzina: mojaGodzinaNiedziela,
+              czyZamienione: false,
+              czyUsprawiedliwiony: (kLastSat.wartosc === 0 || kLastSat.wartosc === "0")
             };
           }
         }
@@ -7060,31 +7939,68 @@
         };
       }
 
-      // 6. Rankingi i punkty (zabezpieczone przed nadpisaniem pustymi danymi)
-      var rawMiesiac = (docData.rankingMiesiac && docData.rankingMiesiac.length)
-        ? docData.rankingMiesiac
-        : ((docData.ranking && docData.ranking.length)
-            ? docData.ranking
-            : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac && tabelaMiesiacaDane.rankingMiesiac.length)
-                ? tabelaMiesiacaDane.rankingMiesiac
-                : []));
+      // 6. Rankingi i punkty (ZAWSZE dynamicznie wyliczane bezpośrednio z wierszy obecności w tabeli)
+      var rankingMiesiac = [];
+      if (wiersze && wiersze.length > 0) {
+        rankingMiesiac = wiersze.filter(function(w) {
+          if (!w || !w.nazwisko) return false;
+          var n = w.nazwisko.toLowerCase().trim();
+          return n !== 'kościelny' && n !== 'koscielny' && n.indexOf('pokojsk') === -1;
+        }).map(function(w) {
+          var p = (w.suma !== undefined && w.suma !== null) ? w.suma : 0;
+          return {
+            nazwisko: w.nazwisko,
+            punkty: p,
+            suma: p,
+            grupa: w.grupa
+          };
+        }).sort(function(a, b) {
+          if (b.punkty !== a.punkty) return b.punkty - a.punkty;
+          return a.nazwisko.localeCompare(b.nazwisko, 'pl');
+        });
 
-      var rankingMiesiac = rawMiesiac.filter(function(r) {
-        if (!r || !r.nazwisko) return false;
-        var n = r.nazwisko.toLowerCase().trim();
-        return n !== 'kościelny' && n !== 'koscielny';
-      }).map(function(r, idx) {
-        var p = (r.punkty !== undefined && r.punkty !== null) ? r.punkty : ((r.suma !== undefined && r.suma !== null) ? r.suma : 0);
-        var poz = (r.pozycja !== undefined && r.pozycja !== null) ? r.pozycja : ((r.miejsce !== undefined && r.miejsce !== null) ? r.miejsce : (idx + 1));
-        return {
-          nazwisko: r.nazwisko,
-          punkty: p,
-          suma: p,
-          pozycja: poz,
-          miejsce: poz,
-          grupa: r.grupa
-        };
-      });
+        var pozM = 1;
+        rankingMiesiac.forEach(function(r, idx) {
+          if (idx > 0 && r.punkty < rankingMiesiac[idx - 1].punkty) pozM = idx + 1;
+          r.pozycja = pozM;
+          r.miejsce = pozM;
+        });
+      } else {
+        var rawMiesiac = (docData.rankingMiesiac && docData.rankingMiesiac.length)
+          ? docData.rankingMiesiac
+          : ((docData.ranking && docData.ranking.length)
+              ? docData.ranking
+              : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMiesiac && tabelaMiesiacaDane.rankingMiesiac.length)
+                  ? tabelaMiesiacaDane.rankingMiesiac
+                  : []));
+
+        rankingMiesiac = rawMiesiac.filter(function(r) {
+          if (!r || !r.nazwisko) return false;
+          var n = r.nazwisko.toLowerCase().trim();
+          return n !== 'kościelny' && n !== 'koscielny' && n.indexOf('pokojsk') === -1;
+        }).map(function(r, idx) {
+          var p = (r.punkty !== undefined && r.punkty !== null) ? r.punkty : ((r.suma !== undefined && r.suma !== null) ? r.suma : 0);
+          var poz = (r.pozycja !== undefined && r.pozycja !== null) ? r.pozycja : ((r.miejsce !== undefined && r.miejsce !== null) ? r.miejsce : (idx + 1));
+          return {
+            nazwisko: r.nazwisko,
+            punkty: p,
+            suma: p,
+            pozycja: poz,
+            miejsce: poz,
+            grupa: r.grupa
+          };
+        });
+      }
+
+      // Synchronizacja obiektu docData oraz tabelaMiesiacaDane z aktualnym rankingiem
+      if (docData) {
+        docData.rankingMiesiac = rankingMiesiac;
+        docData.ranking = rankingMiesiac;
+      }
+      if (typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane) {
+        tabelaMiesiacaDane.rankingMiesiac = rankingMiesiac;
+        tabelaMiesiacaDane.ranking = rankingMiesiac;
+      }
 
       var rawRok = (docData.rankingRok && docData.rankingRok.length)
         ? docData.rankingRok
@@ -7107,11 +8023,14 @@
         var sumaPoprzednich = 0;
         var foundCur = false;
         var pmList = (r.punktyPoMiesiacach && Array.isArray(r.punktyPoMiesiacach)) ? r.punktyPoMiesiacach.slice() : [];
+        var matchRM = rankingMiesiac.find(function(rm) { return czyToSamoNazwisko(rm.nazwisko, r.nazwisko); });
+        var pozMies = (matchRM && (matchRM.pozycja || matchRM.miejsce)) ? (matchRM.pozycja || matchRM.miejsce) : undefined;
         for (var pi = 0; pi < pmList.length; pi++) {
           var pItem = pmList[pi];
           var isCurM = (pItem.miesiacIdx === currentMonthIdx || (pItem.miesiac && pItem.miesiac.toLowerCase() === currentMonthName.toLowerCase()));
           if (isCurM) {
             pItem.punkty = biezacePunkty;
+            if (pozMies !== undefined) pItem.pozycja = pozMies;
             foundCur = true;
           } else {
             sumaPoprzednich += (pItem.punkty || 0);
@@ -7122,7 +8041,8 @@
             miesiacIdx: currentMonthIdx,
             miesiac: currentMonthName,
             rok: currentYear,
-            punkty: biezacePunkty
+            punkty: biezacePunkty,
+            pozycja: pozMies
           });
         }
         var totalRok = (pmList.length > 0) ? (sumaPoprzednich + biezacePunkty) : ((r.punkty !== undefined ? r.punkty : (r.suma || 0)));
@@ -7174,22 +8094,15 @@
       var punktyMinus = 0;
       var pozycjaMinus = 0;
 
-      for (var rm = 0; rm < rankingMiesiac.length; rm++) {
-        var rName = (rankingMiesiac[rm].nazwisko || "").trim().toLowerCase();
-        if (rName && (rName === nLower || rName.indexOf(nLower) !== -1 || nLower.indexOf(rName) !== -1)) {
-          punktyMiesiac = rankingMiesiac[rm].punkty !== undefined ? rankingMiesiac[rm].punkty : punktyMiesiac;
-          pozycjaMiesiac = rankingMiesiac[rm].pozycja || (rm + 1);
-          break;
-        }
+      var matchUserRM = rankingMiesiac.find(function(rm) { return czyToSamoNazwisko(rm.nazwisko, nClean); });
+      if (matchUserRM) {
+        pozycjaMiesiac = matchUserRM.pozycja || matchUserRM.miejsce || 0;
       }
 
-      for (var ry = 0; ry < rankingRok.length; ry++) {
-        var ryName = (rankingRok[ry].nazwisko || "").trim().toLowerCase();
-        if (ryName && (ryName === nLower || ryName.indexOf(nLower) !== -1 || nLower.indexOf(ryName) !== -1)) {
-          punktyRok = rankingRok[ry].punkty !== undefined ? rankingRok[ry].punkty : punktyRok;
-          pozycjaRok = rankingRok[ry].pozycja || (ry + 1);
-          break;
-        }
+      var matchUserRY = rankingRok.find(function(ry) { return czyToSamoNazwisko(ry.nazwisko, nClean); });
+      if (matchUserRY) {
+        punktyRok = matchUserRY.punkty !== undefined ? matchUserRY.punkty : punktyMiesiac;
+        pozycjaRok = matchUserRY.pozycja || matchUserRY.miejsce || 0;
       }
 
       var szczegolyMinusow = [];
@@ -7344,6 +8257,10 @@
               var stan = generujStanZFirestore(globalUser.nazwisko, doc.data());
               if (stan) renderujDane(stan);
             }
+            var modalRanking = document.getElementById('modal-ranking');
+            if (modalRanking && modalRanking.style.display === 'flex') {
+              przelaczTabRankingu(aktywnyTabRankingu || 'miesiac');
+            }
           }
         }, function(err) {
           console.warn('Firestore onSnapshot info:', err);
@@ -7385,6 +8302,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       pokazWidok('zakrystia');
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
+      try { aktualizujPigulkiZakrystiaLiturgia(); } catch(ePl) {}
       wczytajDaneDlaZakrystii(wybranyDzien, wybranaGodzina, true, optDocKey, optOverrideRodzaj, optOverridePkt, optOverrideNazwa);
     }
 
@@ -7488,69 +8406,68 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (!nazwisko) return false;
       var n = nazwisko.toLowerCase().trim();
       return n.indexOf('maciej erich') !== -1 || n.indexOf('maciej erlich') !== -1 ||
-             n.indexOf('maks erich') !== -1 ||
+             n.indexOf('maks erich') !== -1 || n.indexOf('maks erlich') !== -1 ||
+             n.indexOf('maksymilian erich') !== -1 || n.indexOf('maksymilian erlich') !== -1 ||
              n.indexOf('michał kupiec') !== -1 || n.indexOf('michal kupiec') !== -1 ||
+             n.indexOf('michał danielczok') !== -1 || n.indexOf('michal danielczok') !== -1 ||
              n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 || n.indexOf('mikołaj erlich') !== -1 || n.indexOf('mikolaj erlich') !== -1 ||
              n.indexOf('emil czech') !== -1;
     }
     var czyJestLektorem = czyJestCzytajacym;
 
+    var PROFIL_MINISTRANTOW_BAZA = {
+      "maks erich": { stopien: "Animator", ranga: 5 },
+      "mateusz pierścieński": { stopien: "Starszy ministrant", ranga: 3 },
+      "wiktor kowalski": { stopien: "Starszy ministrant", ranga: 3 },
+      "jan radliński": { stopien: "Młodszy ministrant", ranga: 2 },
+      "maciej erich": { stopien: "Animator", ranga: 5 },
+      "mikołaj erich": { stopien: "Lektor", ranga: 4 },
+      "ksawery skrzypek": { stopien: "Starszy ministrant", ranga: 3 },
+      "rafał danielczok": { stopien: "Młodszy ministrant", ranga: 2 },
+      "michał kupiec": { stopien: "Animator", ranga: 5 },
+      "paweł głaz": { stopien: "Starszy ministrant", ranga: 3 },
+      "jakub brytner": { stopien: "Młodszy ministrant", ranga: 2 },
+      "franek kik": { stopien: "Kandydat", ranga: 1 },
+      "michał danielczok": { stopien: "Animator", ranga: 5 },
+      "emil czech": { stopien: "Lektor", ranga: 4 },
+      "bartosz rozik": { stopien: "Młodszy ministrant", ranga: 2 },
+      "marcel mazurkiewicz": { stopien: "Młodszy ministrant", ranga: 2 },
+      "mateusz pokojski": { stopien: "Starszy ministrant", ranga: 3 },
+      "wojtek pszczółkowski": { stopien: "Młodszy ministrant", ranga: 2 },
+      "piotr matuszczyk": { stopien: "Młodszy ministrant", ranga: 2 }
+    };
+
     function wyznaczStopienMinistranta(nazwisko, wiersze) {
       var s = (nazwisko || '').toString().trim();
-      var sLower = s.toLowerCase();
 
-      // Animatorzy w parafii (czytający):
-      if (sLower.indexOf('maciej erich') !== -1 || sLower.indexOf('maciej erlich') !== -1 ||
-          sLower.indexOf('maks erich') !== -1 || sLower.indexOf('maks erlich') !== -1 ||
-          sLower.indexOf('maksymilian erich') !== -1 || sLower.indexOf('maksymilian erlich') !== -1 ||
-          sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1) {
-        return { stopien: "Animator", ranga: 5 };
-      }
-      // Lektorzy w parafii (czytający):
-      if (sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
-          sLower.indexOf('mikołaj erlich') !== -1 || sLower.indexOf('mikolaj erlich') !== -1 ||
-          sLower.indexOf('emil czech') !== -1) {
-        return { stopien: "Lektor", ranga: 4 };
-      }
-      // Znani ministranci (fallback hierarchii parafialnej):
-      if (sLower.indexOf('paweł głaz') !== -1 || sLower.indexOf('pawel glaz') !== -1) {
-        return { stopien: "Starszy ministrant", ranga: 3 };
-      }
-      if (sLower.indexOf('jakub brytner') !== -1) {
-        return { stopien: "Młodszy ministrant", ranga: 2 };
-      }
-      if (sLower.indexOf('mateusz') !== -1) {
-        return { stopien: "Młodszy ministrant", ranga: 2 };
-      }
-      if (sLower.indexOf('franek kik') !== -1 || sLower.indexOf('franciszek kik') !== -1) {
-        return { stopien: "Kandydat", ranga: 1 };
-      }
-
-      if (wiersze && wiersze.length) {
-        var wRow = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, nazwisko); });
-        if (wRow && wRow.stopien) {
-          var st = wRow.stopien;
-          var r = wRow.stopienRanga || 2;
-          if (r >= 4 && !czyJestLektorem(nazwisko)) {
-            st = "Starszy ministrant";
-            r = 3;
-          }
-          return { stopien: st, ranga: r };
+      // 1. Sprawdź profil z Firestore konfiguracja/uzytkownicy (jeśli wczytany)
+      if (typeof listaUzytkownikow !== 'undefined' && Array.isArray(listaUzytkownikow)) {
+        var uItem = listaUzytkownikow.find(function(u) { return u && u.nazwisko && czyToSamoNazwisko(u.nazwisko, s); });
+        if (uItem && uItem.stopien) {
+          return { stopien: uItem.stopien, ranga: uItem.ranga || uItem.stopienRanga || 2 };
         }
       }
 
-      // Hierarchia zapasowa:
-      if (/\b(animator|prezes|ceremoniarz)\b/i.test(s)) {
-        if (czyJestLektorem(nazwisko)) return { stopien: "Animator", ranga: 5 };
-        return { stopien: "Starszy ministrant", ranga: 3 };
+      // 2. Sprawdź autorytatywny profil stały parafii
+      for (var pKey in PROFIL_MINISTRANTOW_BAZA) {
+        if (czyToSamoNazwisko(pKey, s)) {
+          return { stopien: PROFIL_MINISTRANTOW_BAZA[pKey].stopien, ranga: PROFIL_MINISTRANTOW_BAZA[pKey].ranga };
+        }
       }
-      if (/\blektor\b/i.test(s)) {
-        if (czyJestLektorem(nazwisko)) return { stopien: "Lektor", ranga: 4 };
-        return { stopien: "Starszy ministrant", ranga: 3 };
+
+      // 3. Fallback: z wierszy tabeli jeśli istnieją
+      if (wiersze && wiersze.length) {
+        var wRow = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, s); });
+        if (wRow && wRow.stopien) {
+          return { stopien: wRow.stopien, ranga: wRow.stopienRanga || 2 };
+        }
       }
-      if (/\bstarszy(\s+ministrant)?\b/i.test(s)) return { stopien: "Starszy ministrant", ranga: 3 };
+
+      // 4. Fallback ogólny
+      if (/\b(animator|prezes|ceremoniarz)\b/i.test(s)) return { stopien: "Animator", ranga: 5 };
+      if (/\blektor\b/i.test(s)) return { stopien: "Lektor", ranga: 4 };
+      if (/\bstarszy\b/i.test(s)) return { stopien: "Starszy ministrant", ranga: 3 };
       if (/\bkandydat\b/i.test(s)) return { stopien: "Kandydat", ranga: 1 };
-      if (/\bmłodszy(\s+ministrant)?\b/i.test(s) || /\bmlodszy(\s+ministrant)?\b/i.test(s)) return { stopien: "Młodszy ministrant", ranga: 2 };
       return { stopien: "Młodszy ministrant", ranga: 2 };
     }
 
@@ -7949,9 +8866,104 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
           });
         } else if (domyslnyRodzaj === 'nabozenstwo' && !isFirstSatRose) {
-          // Odrębne nabożeństwo różańcowe (np. niedziela 15:00, nabożeństwo w tygodniu)
-          // Na nabożeństwach nie ma przymusowego dyżuru, osoby są dodawane przyciskiem "DODAJ MINISTRANTA",
-          // a jeśli obecność już była zapisana — wczytywana z bazy poniżej.
+          // Automatycznie proponuj ministrantów ze służby powiązanej z tym nabożeństwem
+          // (przed mszą w tygodniu, po mszy w czwartek, lub przed mszą weekendową):
+          var linkedMassHour = (dow === 0 || dow === 6) ? '17:00' : (dow === 4 ? '17:45' : '18:00');
+          for (var i = 0; i < wiersze.length; i++) {
+            var w = wiersze[i];
+            var kCur = (w.komorki && w.komorki[colIdx]) ? w.komorki[colIdx] : null;
+            var kSun = (w.komorki && w.komorki[sunColIdx]) ? w.komorki[sunColIdx] : null;
+
+            var maDyzurNaMszy = false;
+            var opisDyzuru = 'Dyżur z mszy tego dnia';
+            if (dow === 0) {
+              // Niedziela: po nabożeństwie o 15:00 jest msza o 17:00, proponujemy ministrantów z grupy 17:00
+              var userGodzNd = wyznaczGodzineWeekendowaDlaGrupy(w.grupa, w.nazwisko);
+              maDyzurNaMszy = (userGodzNd === '17:00') || ((kSun && kSun.maDyzur) && (userGodzNd === '17:00'));
+              opisDyzuru = 'Dyżur przed mszą 17:00';
+            } else if (dow === 6) {
+              // Sobota: nabożeństwo o 16:15 jest przed mszą wigilijną o 17:00, proponujemy grupę ze mszy 17:00
+              var userGodzSb = wyznaczGodzineWeekendowaDlaGrupy(w.grupa, w.nazwisko);
+              maDyzurNaMszy = (userGodzSb === '17:00') || ((kSun && kSun.maDyzur) && (userGodzSb === '17:00')) || !!(kCur && kCur.maDyzur);
+              opisDyzuru = 'Dyżur przed mszą sobotnią 17:00';
+            } else if (dow === 4) {
+              // Czwartek: nabożeństwo jest po mszy szkolnej (17:45), proponujemy ministrantów ze mszy z czwartku
+              var stalyD4 = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia !== null) ? w.stalyDzienTygodnia : -1;
+              maDyzurNaMszy = (stalyD4 === 4) || !!(kCur && kCur.maDyzur);
+              opisDyzuru = 'Dyżur po mszy szkolnej (czwartek)';
+            } else {
+              // Dni powszednie (pn, wt, śr, pt): nabożeństwo jest przed mszą o 18:00
+              var stalyDWeek = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia !== null) ? w.stalyDzienTygodnia : -1;
+              maDyzurNaMszy = (stalyDWeek === dow) || !!(kCur && kCur.maDyzur);
+              opisDyzuru = 'Dyżur przed mszą 18:00';
+            }
+
+            // Jeśli ministrant oddał swój dyżur z powiązanej mszy, nie proponuj go jako domyślnego uczestnika nabożeństwa:
+            if (maDyzurNaMszy) {
+              var ofZ = znajdzOferteDlaMinistranta(w.nazwisko, dNum, linkedMassHour);
+              if (ofZ && (ofZ.status === 'PRZEJETE' || ofZ.status === 'OCZEKUJE' || ofZ.status === 'ZREALIZOWANE')) {
+                maDyzurNaMszy = false;
+              }
+            }
+
+            if (maDyzurNaMszy) {
+              var stInfoW = wyznaczStopienMinistranta(w.nazwisko, wiersze);
+              ministranci.push({
+                nazwisko: w.nazwisko,
+                normName: w.nazwisko.toLowerCase(),
+                grupa: w.grupa || 'Ogólna',
+                stopien: w.stopien || stInfoW.stopien,
+                stopienRanga: w.stopienRanga || stInfoW.ranga,
+                funkcja: null,
+                strona: null,
+                typ: 'DODATKOWY', // Nabożeństwo to dobrowolna służba dodatkowa (+2 pkt), NIGDY kara -5 pkt!
+                zastepuje: null,
+                status: 'OBECNY',
+                domyslnyStatus: 'OBECNY',
+                obecnyPkt: domyslnePkt, // np. 2 pkt w tygodniu, 3 pkt w niedzielę
+                opisGieldy: opisDyzuru,
+                poprzedniaWartosc: null,
+                poprzedniePunktyZTejMszy: 0
+              });
+            }
+          }
+
+          // Zaproponuj również zastępców, którzy przejęli dyżur na powiązanej mszy (np. Maciej Erich za Ksawerego Skrzypek):
+          var allZastepstwaNabozenstwa = [].concat(daneTabeli.zamianyZastepstwa || [], daneTabeli.wolneZastepstwa || []).filter(function(z) {
+            if (!z || (z.status !== 'PRZEJETE' && z.status !== 'ZREALIZOWANE') || !z.przejmujacy) return false;
+            var matchDay = (z.dzien === dNum) || (dow === 6 && z.dzien === (dNum + 1));
+            if (!matchDay) return false;
+            var zGodz = cleanTime(z.godzina);
+            if (!zGodz || zGodz === linkedMassHour || (linkedMassHour === '18:00' && (!zGodz || zGodz === '18:00'))) return true;
+            return false;
+          });
+
+          for (var zni = 0; zni < allZastepstwaNabozenstwa.length; zni++) {
+            var ofeN = allZastepstwaNabozenstwa[zni];
+            var normPN = ofeN.przejmujacy.toLowerCase().trim();
+            var existsN = ministranci.some(function(m) { return czyToSamoNazwisko(m.nazwisko, ofeN.przejmujacy); });
+            if (!existsN) {
+              var pRowN = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, ofeN.przejmujacy); });
+              var stInfoPN = wyznaczStopienMinistranta(ofeN.przejmujacy, wiersze);
+              ministranci.push({
+                nazwisko: ofeN.przejmujacy,
+                normName: normPN,
+                grupa: pRowN ? pRowN.grupa : 'Zastępca',
+                stopien: pRowN ? pRowN.stopien : stInfoPN.stopien,
+                stopienRanga: pRowN ? pRowN.stopienRanga : stInfoPN.ranga,
+                funkcja: null,
+                strona: null,
+                typ: 'DODATKOWY',
+                zastepuje: ofeN.oddajacy,
+                status: 'OBECNY',
+                domyslnyStatus: 'OBECNY',
+                obecnyPkt: domyslnePkt,
+                opisGieldy: 'Zastępca z mszy ' + linkedMassHour + ' (' + ofeN.oddajacy + ')',
+                poprzedniaWartosc: pRowN && pRowN.komorki && pRowN.komorki[colIdx] ? pRowN.komorki[colIdx].wartosc : null,
+                poprzedniePunktyZTejMszy: 0
+              });
+            }
+          }
         } else {
           // ZWYKŁA MSZA GRAFIKOWA (np. 18:00 w tygodniu, lub godziny niedzielne)
           for (var i = 0; i < wiersze.length; i++) {
@@ -7962,11 +8974,20 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var maDyzur = false;
             if (isWeekendMass) {
               var userGodz = wyznaczGodzineWeekendowaDlaGrupy(w.grupa, w.nazwisko);
-              maDyzur = (kSun && kSun.maDyzur) && (userGodz === gStr);
+              if (dow === 6 && cleanG === "17:00") {
+                maDyzur = (userGodz === "17:00") || !!(kCur && kCur.maDyzur);
+              } else {
+                maDyzur = (userGodz === gStr || userGodz === cleanG) || ((kSun && kSun.maDyzur) && (userGodz === gStr));
+              }
+            } else if (dow === 6) {
+              // W sobotę rano (08:00 Msza Róży Różańcowej lub inne godziny przed 17:00):
+              // Żadna grupa nie ma dyżuru grafikowego! Kropki w kolumnie soboty należą do 17:00.
+              // Sobota 08:00 jest dobrowolna (+4 pkt) - brak kary -5 pkt, brak narzuconej grupy.
+              maDyzur = false;
             } else {
-              // W tygodniu dyżur mają TYLKO ministranci z zaznaczonym maDyzur dla tego dnia.
-              // Nie wciągamy osób które mają punkty z pogrzebu ani innych liturgii!
-              maDyzur = !!(kCur && kCur.maDyzur);
+              // W tygodniu (pn-pt):
+              var stalyD = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia !== null) ? w.stalyDzienTygodnia : -1;
+              maDyzur = (stalyD === dow) || !!(kCur && kCur.maDyzur);
             }
 
             if (maDyzur) {
@@ -8054,8 +9075,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
 
           // Dodanie zastępców z giełdy, którzy przejęli dyżur na tę mszę (+4 pkt)
-          var allZastepstwaDnia = (daneTabeli.zamianyZastepstwa || []).filter(function(z) {
-            if ((z.status !== 'PRZEJETE' && z.status !== 'ZREALIZOWANE') || !z.przejmujacy) return false;
+          var allZastepstwaDnia = [].concat(daneTabeli.zamianyZastepstwa || [], daneTabeli.wolneZastepstwa || []).filter(function(z) {
+            if (!z || (z.status !== 'PRZEJETE' && z.status !== 'ZREALIZOWANE') || !z.przejmujacy) return false;
             var matchDay = (z.dzien === dNum) || (isWeekendMass && (z.dzien === dSun || z.dzien === dNum));
             if (!matchDay) return false;
             var zGodz = cleanTime(z.godzina);
@@ -8138,6 +9159,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 });
                 if (dOb.rodzajLiturgii) zakrystiaStan.rodzajLiturgii = dOb.rodzajLiturgii;
                 if (dOb.punktyLiturgii) zakrystiaStan.punktyLiturgii = dOb.punktyLiturgii;
+                if (dOb.recznieUstawionePunkty !== undefined) zakrystiaStan.recznieUstawionePunkty = dOb.recznieUstawionePunkty;
                 if (dOb.nazwaLiturgii) zakrystiaStan.nazwaLiturgii = dOb.nazwaLiturgii;
                 if (dOb.maRozaniec !== undefined) zakrystiaStan.maRozaniec = dOb.maRozaniec;
               } else {
@@ -8571,48 +9593,33 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (b) b.style.display = (b.style.display === "none" ? "block" : "none");
     }
 
-    function zakrystiaZmienRodzajLiturgii(rodzaj, punkty, nazwa) {
+    function zakrystiaUstawPunktyLiturgii(nowePunkty) {
       if (!zakrystiaStan) return;
-      var curD = zakrystiaStan.dzien;
-      var curR = zakrystiaStan.rok || (new Date()).getFullYear();
-      var curM = (zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth();
-      var dow = (new Date(curR, curM, curD)).getDay();
-      var docKey = zakrystiaStan.docKey || pobierzAktywnyKluczMiesiaca();
+      nowePunkty = parseInt(nowePunkty, 10) || 3;
+      zakrystiaStan.punktyLiturgii = nowePunkty;
+      zakrystiaStan.recznieUstawionePunkty = true;
 
-      if (rodzaj === 'nabozenstwo') {
-        var hDzien = (tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni) ? (tabelaMiesiacaDane.harmonogramDni[curD] || tabelaMiesiacaDane.harmonogramDni['' + curD]) : null;
-        var nabGodz = '17:15';
-        if (dow === 0) nabGodz = '15:00';
-        else if (dow === 4) nabGodz = '17:45';
-        else if (dow === 6) nabGodz = '16:15';
-
-        if (hDzien && hDzien.nabozenstwa && hDzien.nabozenstwa.length > 0) {
-          nabGodz = cleanTime(hDzien.nabozenstwa[0].godzina) || nabGodz;
-          if (hDzien.nabozenstwa[0].punkty) punkty = hDzien.nabozenstwa[0].punkty;
-          if (hDzien.nabozenstwa[0].nazwa) nazwa = hDzien.nabozenstwa[0].nazwa;
-        }
-        wczytajDaneDlaZakrystii(curD, nabGodz, true, docKey, 'nabozenstwo', punkty, nazwa);
-        pokazToast('Przełączono na: ' + nazwa + ' (' + nabGodz + ')');
-        return;
-      } else if (rodzaj === 'msza_tydzien') {
-        var massGodz = (dow === 4) ? '17:00' : '18:00';
-        var hDzienM = (tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni) ? (tabelaMiesiacaDane.harmonogramDni[curD] || tabelaMiesiacaDane.harmonogramDni['' + curD]) : null;
-        if (hDzienM && hDzienM.msze && hDzienM.msze.length > 0) {
-          massGodz = cleanTime(hDzienM.msze[0].godzina) || massGodz;
-        }
-        wczytajDaneDlaZakrystii(curD, massGodz, true, docKey, 'msza_tydzien', 5, (dow === 4 ? 'Msza św. szkolna' : 'Msza w tygodniu'));
-        pokazToast('Przełączono na mszę św. (' + massGodz + ')');
-        return;
-      } else if (rodzaj === 'msza_niedziela') {
-        var sunGodz = (dow === 6) ? '17:00' : '10:00';
-        wczytajDaneDlaZakrystii(curD, sunGodz, true, docKey, 'msza_niedziela', 3, (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę'));
-        pokazToast('Przełączono na mszę niedzielną (' + sunGodz + ')');
-        return;
-      } else if (rodzaj === 'pogrzeb') {
-        wczytajDaneDlaZakrystii(curD, zakrystiaStan.godzina || '11:00', true, docKey, 'pogrzeb', 3, 'Pogrzeb');
-        pokazToast('Przełączono na pogrzeb');
-        return;
+      // Zaktualizuj punkty dla wszystkich ministrantów na tej mszy (w tym służących dodatkowo!)
+      if (zakrystiaStan.ministranci && zakrystiaStan.ministranci.length > 0) {
+        zakrystiaStan.ministranci.forEach(function(m) {
+          if (m.typ === 'ZASTEPCA') {
+            // Zastępca zachowuje punkty ze swojej oferty giełdy (np. 4 pkt w tygodniu)
+          } else {
+            m.obecnyPkt = nowePunkty;
+          }
+          if (m.status === 'OBECNY') {
+            m.punkty = m.obecnyPkt + (m.bylNaRozancu ? 2 : 0) - (m.karaPunkty || 0);
+          }
+        });
       }
+
+      renderujTrybZakrystia();
+      pokazToast('Ustawiono: +' + nowePunkty + ' pkt za tę mszę dla wszystkich');
+    }
+
+    // Bezpieczny alias wsteczny:
+    function zakrystiaZmienRodzajLiturgii(rodzaj, punkty, nazwa) {
+      zakrystiaUstawPunktyLiturgii(punkty);
     }
 
     function renderujTrybZakrystia() {
@@ -8642,18 +9649,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
       }
 
-      // Aktualizacja etykiety nabożeństwa na kaflu (3 pkt w niedzielę / 2 pkt w tygodniu)
-      var pillRozLabel = document.getElementById('pill-liturgia-nabozenstwo-label');
-      if (pillRozLabel) {
-        var isSunNab = (zakrystiaStan && (zakrystiaStan.dzienTygodnia === 'niedziela' || zakrystiaStan.godzina === '15:00'));
-        pillRozLabel.innerHTML = 'Nabożeństwo <b>(' + (isSunNab ? '3' : '2') + ' pkt)</b>';
-      }
-
-      // Podświetlenie aktywnego rodzaju liturgii
-      ['msza_tydzien', 'msza_niedziela', 'nabozenstwo', 'pogrzeb'].forEach(function(r) {
-        var pill = document.getElementById('pill-liturgia-' + r);
+      // Podświetlenie aktywnej liczby punktów (+2, +3, +4, +5)
+      var curPts = (zakrystiaStan && zakrystiaStan.punktyLiturgii) ? zakrystiaStan.punktyLiturgii : ((zakrystiaStan && zakrystiaStan.dzienTygodnia === 'niedziela') ? 3 : 5);
+      [2, 3, 4, 5].forEach(function(p) {
+        var pill = document.getElementById('pill-punkty-' + p);
         if (pill) {
-          if (zakrystiaStan.rodzajLiturgii === r) pill.classList.add('active');
+          if (curPts === p) pill.classList.add('active');
           else pill.classList.remove('active');
         }
       });
@@ -8662,7 +9663,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (podtytul) {
         var typMszy = zakrystiaStan.nazwaLiturgii || ((zakrystiaStan.dzienTygodnia === 'niedziela') ? 'Msza w niedzielę' : 'Msza w tygodniu');
         var czystyTyp = typMszy.replace(/\s*\([^)]*\)/g, '').trim();
-        podtytul.innerHTML = czystyTyp + ' • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów';
+        podtytul.innerHTML = czystyTyp + ' • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów' + ' • <b>+' + curPts + ' pkt</b>';
       }
 
       if (stanInfo) {
@@ -8671,7 +9672,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       if (!zakrystiaStan.ministranci || zakrystiaStan.ministranci.length === 0) {
         kontener.innerHTML = '<div style="text-align:center; padding:30px; background:#18181b; border-radius:12px; border:1px dashed #cbd5e1; color:#a1a1aa;">' +
-                               '' +
                                '<b>Brak zaplanowanych ministrantów na tę mszę.</b><br>' +
                                '<span style="font-size:12px;">Możesz dodać ministrantów, którzy przyszli służyć, klikając poniższy przycisk:</span><br><br>' +
                                '<button onclick="otworzModalDodajMinistranta()" class="btn-secondary" style="width:auto; padding:8px 16px;">Dodaj ministranta</button>' +
@@ -8690,16 +9690,22 @@ function czyMaDostepDoZakrystii(nazwisko) {
         else if (m.status === 'USPRAWIEDLIWIONY') cardClass += ' is-excused';
 
         var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
-        var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa);
-        var ptsDlaObecnego = zakrystiaStan.punktyLiturgii;
+        var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
+        var ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
         if (m.typ === 'ZASTEPCA') {
-          ptsDlaObecnego = 4;
+          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
         } else if (m.typ === 'DODATKOWY') {
-          if (czyDodatkowa) {
+          if (zakrystiaStan.recznieUstawionePunkty) {
+            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
+          } else if (typeof m.obecnyPkt === 'number') {
+            ptsDlaObecnego = m.obecnyPkt;
+          } else if (czyDodatkowa) {
             ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
           } else {
             ptsDlaObecnego = czyNiedziela ? 1 : 2;
           }
+        } else {
+          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
         }
 
         var badgeHtml = '';
@@ -8772,8 +9778,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
           buttonsHtml = '<button type="button" class="btn-status-toggle status-obecny' + (isZastObecny ? ' active' : '') + '" style="flex:1;" onclick="zakrystiaUstawStatus(' + i + ', \'OBECNY\')">Zastępca obecny (+4 pkt)</button>' +
                         '<button type="button" class="btn-status-toggle status-nieobecny' + (isZastNieobecny ? ' active' : '') + '" style="flex:1;" onclick="zakrystiaUstawStatus(' + i + ', \'NIEOBECNY\')">Nie przyszedł (0 pkt)</button>';
         } else {
+          var isNabozenstwo = (zakrystiaStan && (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa));
+          var nieobecnyBtnText = isNabozenstwo ? 'Nieobecny (0 pkt)' : 'Nieobecny (-5 pkt)';
           buttonsHtml = '<button type="button" class="' + btnObecnyClass + '" style="flex:1;" onclick="zakrystiaUstawStatus(' + i + ', \'OBECNY\')">Obecny (' + pktLabel + ')</button>' +
-                        '<button type="button" class="' + btnNieobecnyClass + '" style="flex:1;" onclick="zakrystiaUstawStatus(' + i + ', \'NIEOBECNY\')">Nieobecny (-5 pkt)</button>';
+                        '<button type="button" class="' + btnNieobecnyClass + '" style="flex:1;" onclick="zakrystiaUstawStatus(' + i + ', \'NIEOBECNY\')">' + nieobecnyBtnText + '</button>';
         }
 
         var stopienBadge = '';
@@ -9140,69 +10148,212 @@ function czyMaDostepDoZakrystii(nazwisko) {
     }
 
     function otworzModalDodajMinistranta() {
-      var sel = document.getElementById('sel-dodatkowy-ministrant');
-      if (!sel) return;
-      sel.innerHTML = '<option value="">Wybierz ministranta...</option>';
-      var obecniNazwiska = (zakrystiaStan.ministranci || []).map(function(m) { return m.nazwisko.toLowerCase(); });
-      var wszyscy = zakrystiaStan.wszyscyMinistranciParafii || [];
+      var kontenerListy = document.getElementById('lista-dodatkowy-ministranci');
+      var searchInput = document.getElementById('szukaj-dodatkowy-ministrant');
+      var btnZatwierdz = document.getElementById('btn-zatwierdz-dodatkowych');
+      var licznikEl = document.getElementById('dodatkowy-licznik-dostepnych');
+      if (!kontenerListy) return;
+
+      if (searchInput) searchInput.value = '';
+
+      var obecniNazwiska = (zakrystiaStan && zakrystiaStan.ministranci ? zakrystiaStan.ministranci : []).map(function(m) {
+        return (m.nazwisko || '').toLowerCase().trim();
+      });
+
+      var wRows = (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) ? tabelaMiesiacaDane.wiersze : [];
+      var wszyscy = (zakrystiaStan && zakrystiaStan.wszyscyMinistranciParafii && zakrystiaStan.wszyscyMinistranciParafii.length) 
+        ? zakrystiaStan.wszyscyMinistranciParafii 
+        : Object.keys(PROFIL_MINISTRANTOW_BAZA).map(function(k) {
+            return k.split(' ').map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+          });
+
+      // Filtrujemy tylko tych, których nie ma jeszcze na liście
+      var dostepni = [];
       wszyscy.forEach(function(name) {
-        if (obecniNazwiska.indexOf(name.toLowerCase()) === -1) {
-          var opt = document.createElement('option');
-          opt.value = name;
-          opt.innerText = name;
-          sel.appendChild(opt);
+        var nLow = name.toLowerCase().trim();
+        if (nLow.indexOf('kościelny') !== -1 || nLow.indexOf('koscielny') !== -1 || nLow.indexOf('pokojsk') !== -1) return;
+        var juzJest = obecniNazwiska.some(function(obN) { return czyToSamoNazwisko(obN, name); });
+        if (!juzJest && dostepni.indexOf(name) === -1) {
+          dostepni.push(name);
         }
       });
+
+      // Sortuj hierarchicznie: Animatorzy -> Lektorzy -> Starsi -> Młodsi -> Kandydaci
+      dostepni.sort(function(a, b) {
+        var stA = wyznaczStopienMinistranta(a, wRows);
+        var stB = wyznaczStopienMinistranta(b, wRows);
+        if (stB.ranga !== stA.ranga) return stB.ranga - stA.ranga;
+        return a.localeCompare(b, 'pl');
+      });
+
+      if (licznikEl) {
+        licznikEl.innerText = 'Dostępni ministranci (' + dostepni.length + '):';
+      }
+
+      if (dostepni.length === 0) {
+        kontenerListy.innerHTML = '<div style="text-align:center; padding:20px; color:#a1a1aa; font-size:13px;">Wszyscy ministranci parafii są już dopisani do tej mszy.</div>';
+        if (btnZatwierdz) {
+          btnZatwierdz.disabled = true;
+          btnZatwierdz.style.opacity = '0.5';
+          btnZatwierdz.innerText = 'Dodaj wybranych (0)';
+        }
+      } else {
+        var html = '';
+        dostepni.forEach(function(name) {
+          var stInfo = wyznaczStopienMinistranta(name, wRows);
+          var wRow = (wRows || []).find(function(r) { return czyToSamoNazwisko(r.nazwisko, name); });
+          var gr = wyznaczGrupeParafialna(name, wRow ? wRow.grupa : '');
+          var safeName = name.replace(/"/g, '&quot;');
+          html += '<label class="dodatkowy-item-row" data-name="' + name.toLowerCase() + '" style="display:flex; align-items:center; gap:10px; padding:10px 12px; background:#27272a; border:1px solid #3f3f46; border-radius:8px; cursor:pointer; user-select:none; transition:all 0.15s ease;">' +
+                    '<input type="checkbox" value="' + safeName + '" class="chk-dodatkowy-ministrant" onchange="zaktualizujLicznikWybranychDodatkowych()" style="width:18px; height:18px; cursor:pointer; accent-color:#3b82f6;">' +
+                    '<div style="flex:1;">' +
+                      '<div style="font-weight:700; color:#fafafa; font-size:13.5px;">' + name + '</div>' +
+                      '<div style="font-size:11px; color:#a1a1aa; display:flex; gap:6px; align-items:center; margin-top:2px;">' +
+                        '<span style="color:#60a5fa; font-weight:600;">' + stInfo.stopien + '</span>' +
+                        '<span style="color:#52525b;">•</span>' +
+                        '<span>' + gr + '</span>' +
+                      '</div>' +
+                    '</div>' +
+                  '</label>';
+        });
+        kontenerListy.innerHTML = html;
+        zaktualizujLicznikWybranychDodatkowych();
+      }
+
       var opisEl = document.getElementById('modal-dodaj-ministranta-opis');
       if (opisEl && zakrystiaStan) {
-        var czyDod = (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || zakrystiaStan.rodzajLiturgii === 'pogrzeb');
-        var czyNd = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
-        var pktDod = czyDod ? (zakrystiaStan.punktyLiturgii || 2) : (czyNd ? 1 : 2);
+        var pktDod = zakrystiaStan.recznieUstawionePunkty ? zakrystiaStan.punktyLiturgii : ((zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela') ? 1 : 2);
+        if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || zakrystiaStan.rodzajLiturgii === 'pogrzeb') {
+          pktDod = zakrystiaStan.punktyLiturgii || 2;
+        }
         var litNazwa = zakrystiaStan.nazwaLiturgii || 'liturgii';
-        opisEl.innerText = 'Wybierz ministranta, który przyszedł dodatkowo służyć na: ' + litNazwa + '. Otrzyma punkty za obecność (+' + pktDod + ' pkt).';
+        opisEl.innerText = 'Zaznacz ministrantów, którzy przyszli dodatkowo na: ' + litNazwa + ' (otrzymają +' + pktDod + ' pkt).';
       }
+
       document.getElementById('modal-dodaj-ministranta').style.display = 'flex';
+      if (searchInput) searchInput.focus();
     }
 
     function zamknijModalDodajMinistranta() {
-      document.getElementById('modal-dodaj-ministranta').style.display = 'none';
+      var modal = document.getElementById('modal-dodaj-ministranta');
+      if (modal) modal.style.display = 'none';
     }
 
-    function zatwierdzDodanieMinistranta() {
-      var sel = document.getElementById('sel-dodatkowy-ministrant');
-      var name = sel ? sel.value : '';
-      if (!name) { alert('Wybierz ministranta z listy.'); return; }
-      zamknijModalDodajMinistranta();
+    function filtrujListeDodatkowychMinistrantow() {
+      var q = (document.getElementById('szukaj-dodatkowy-ministrant') ? document.getElementById('szukaj-dodatkowy-ministrant').value : '').toLowerCase().trim();
+      var rows = document.querySelectorAll('.dodatkowy-item-row');
+      rows.forEach(function(row) {
+        var name = row.getAttribute('data-name') || '';
+        if (!q || name.indexOf(q) !== -1) {
+          row.style.display = 'flex';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    function zaznaczWszystkichDodatkowych(stan) {
+      var chks = document.querySelectorAll('.chk-dodatkowy-ministrant');
+      chks.forEach(function(chk) {
+        var row = chk.closest('.dodatkowy-item-row');
+        if (row && row.style.display !== 'none') {
+          chk.checked = !!stan;
+        }
+      });
+      zaktualizujLicznikWybranychDodatkowych();
+    }
+
+    function zaktualizujLicznikWybranychDodatkowych() {
+      var chks = document.querySelectorAll('.chk-dodatkowy-ministrant');
+      var wybraneCount = 0;
+      chks.forEach(function(chk) {
+        var row = chk.closest('.dodatkowy-item-row');
+        if (chk.checked) {
+          wybraneCount++;
+          if (row) {
+            row.style.borderColor = '#3b82f6';
+            row.style.background = 'rgba(59,130,246,0.12)';
+          }
+        } else {
+          if (row) {
+            row.style.borderColor = '#3f3f46';
+            row.style.background = '#27272a';
+          }
+        }
+      });
+
+      var btnZatwierdz = document.getElementById('btn-zatwierdz-dodatkowych');
+      if (btnZatwierdz) {
+        if (wybraneCount > 0) {
+          btnZatwierdz.disabled = false;
+          btnZatwierdz.style.opacity = '1';
+          btnZatwierdz.innerText = (wybraneCount === 1) ? 'Dodaj wybranego (1)' : ('Dodaj wybranych (' + wybraneCount + ')');
+        } else {
+          btnZatwierdz.disabled = true;
+          btnZatwierdz.style.opacity = '0.5';
+          btnZatwierdz.innerText = 'Dodaj wybranych (0)';
+        }
+      }
+    }
+
+    function zatwierdzDodanieMinistrantow() {
+      var chks = document.querySelectorAll('.chk-dodatkowy-ministrant:checked');
+      if (!chks || chks.length === 0) {
+        alert('Zaznacz co najmniej jednego ministranta.');
+        return;
+      }
 
       if (!zakrystiaStan.ministranci) zakrystiaStan.ministranci = [];
       var wRows = (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) ? tabelaMiesiacaDane.wiersze : [];
-      var stInfoAdd = wyznaczStopienMinistranta(name, wRows);
-      zakrystiaStan.ministranci.push({
-        nazwisko: name,
-        normName: name.toLowerCase(),
-        grupa: 'Służy dodatkowo',
-        stopien: stInfoAdd.stopien,
-        stopienRanga: stInfoAdd.ranga,
-        funkcja: null,
-        strona: null,
-        typ: 'DODATKOWY',
-        zastepuje: null,
-        status: 'OBECNY',
-        domyslnyStatus: 'OBECNY',
-        obecnyPkt: (function() {
-          if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || zakrystiaStan.rodzajLiturgii === 'pogrzeb') {
-            return zakrystiaStan.punktyLiturgii || (zakrystiaStan.dzienTygodnia === 'niedziela' ? 3 : 2);
-          } else if (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela') {
-            return 1;
-          } else {
-            return 2; // zwykła msza w tygodniu: 2 pkt dla służącego dodatkowo (5 pkt mają wyłącznie wyznaczeni w dyżurze)
-          }
-        })(),
-        poprzedniaWartosc: null
+
+      var pktDlaDodatkowego = 2;
+      if (zakrystiaStan.recznieUstawionePunkty) {
+        pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 3;
+      } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || zakrystiaStan.rodzajLiturgii === 'pogrzeb') {
+        pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || (zakrystiaStan.dzienTygodnia === 'niedziela' ? 3 : 2);
+      } else if (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela') {
+        pktDlaDodatkowego = 1;
+      } else {
+        pktDlaDodatkowego = 2;
+      }
+
+      var dodaniNazwiska = [];
+      chks.forEach(function(chk) {
+        var name = chk.value;
+        if (!name) return;
+        var exists = zakrystiaStan.ministranci.some(function(m) { return czyToSamoNazwisko(m.nazwisko, name); });
+        if (!exists) {
+          var stInfoAdd = wyznaczStopienMinistranta(name, wRows);
+          var pRow = wRows.find(function(w) { return czyToSamoNazwisko(w.nazwisko, name); });
+          zakrystiaStan.ministranci.push({
+            nazwisko: name,
+            normName: name.toLowerCase(),
+            grupa: (pRow && pRow.grupa) ? pRow.grupa : 'Służy dodatkowo',
+            stopien: stInfoAdd.stopien,
+            stopienRanga: stInfoAdd.ranga,
+            funkcja: null,
+            strona: null,
+            typ: 'DODATKOWY',
+            zastepuje: null,
+            status: 'OBECNY',
+            domyslnyStatus: 'OBECNY',
+            obecnyPkt: pktDlaDodatkowego,
+            punkty: pktDlaDodatkowego,
+            opisGieldy: '',
+            poprzedniaWartosc: null
+          });
+          dodaniNazwiska.push(name);
+        }
       });
 
+      zamknijModalDodajMinistranta();
       renderujTrybZakrystia();
-      pokazToast('Dodano: ' + name);
+      pokazToast('Dodano (' + dodaniNazwiska.length + '): ' + dodaniNazwiska.join(', '));
+    }
+
+    // Alias dla wstecznej kompatybilności:
+    function zatwierdzDodanieMinistranta() {
+      zatwierdzDodanieMinistrantow();
     }
 
     var aktywnyMinistrantKaryIdx = -1;
@@ -9305,6 +10456,28 @@ function czyMaDostepDoZakrystii(nazwisko) {
       zamknijModalKaryZakrystia();
     }
 
+    function normalizujNazwiskoScisle(s) {
+      return String(s || '').toLowerCase()
+        .replace(/ł/g, 'l').replace(/ą/g, 'a').replace(/ę/g, 'e').replace(/ś/g, 's')
+        .replace(/ć/g, 'c').replace(/ż/g, 'z').replace(/ź/g, 'z').replace(/ń/g, 'n').replace(/ó/g, 'o')
+        .replace(/\s+/g, ' ').trim();
+    }
+
+    // Ścisłe dopasowanie wiersza ministranta (pełne imię i nazwisko) - nigdy nie trafia w cudzy wiersz
+    function znajdzWierszMinistranta(wiersze, nazwisko) {
+      var szukane = normalizujNazwiskoScisle(nazwisko);
+      if (!szukane || !Array.isArray(wiersze)) return null;
+      var dokladny = wiersze.find(function(w) { return w && normalizujNazwiskoScisle(w.nazwisko) === szukane; });
+      if (dokladny) return dokladny;
+      var tM = szukane.split(' ');
+      if (tM.length < 2) return null;
+      var kandydaci = wiersze.filter(function(w) {
+        var tW = normalizujNazwiskoScisle(w && w.nazwisko).split(' ');
+        return tW.length >= 2 && tW[0] === tM[0] && tW[tW.length - 1] === tM[tM.length - 1];
+      });
+      return kandydaci.length === 1 ? kandydaci[0] : null;
+    }
+
     async function zakrystiaZapiszObecnosc() {
       if (!czyMaDostepDoZakrystii(globalUser ? globalUser.nazwisko : "")) {
         alert("Brak uprawnień do zapisywania obecności w zakrystii.");
@@ -9330,61 +10503,82 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
       if (spinner) spinner.style.display = 'inline';
 
-      // 1. Zaktualizuj komórki w pamięci lokalnej
+      // 1. Zaktualizuj komórki w pamięci lokalnej z obsługą niezależnych slotów liturgii
       var colIdx = zakrystiaStan.dzien - 1;
       var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
-      var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa);
-      var odejmijPkt = zakrystiaStan.punktyLiturgii || 3;
+      var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
+      var gKey = (zakrystiaStan.godzina || 'msza').trim();
 
-      if (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze) {
-        // Najpierw cofnij punkty dla osób usuniętych z tej mszy:
-        (zakrystiaStan.usunieci || []).forEach(function(u) {
-          var normU = (u.nazwisko || '').toLowerCase().trim();
-          var wierszU = tabelaMiesiacaDane.wiersze.find(function(w) {
-            var nw = (w.nazwisko || '').toLowerCase().trim();
-            return nw === normU || nw.indexOf(normU) !== -1 || normU.indexOf(nw) !== -1;
-          });
-          if (wierszU && wierszU.komorki && wierszU.komorki[colIdx]) {
-            var maDyz = !!wierszU.komorki[colIdx].maDyzur;
-            if (czyDodatkowa) {
-              var curVal = parseFloat(wierszU.komorki[colIdx].wartosc) || 0;
-              var nowaVal = curVal - odejmijPkt;
-              if (nowaVal <= 0) {
-                wierszU.komorki[colIdx].wartosc = maDyz ? 0 : null;
-              } else {
-                wierszU.komorki[colIdx].wartosc = nowaVal;
-              }
-            } else {
-              if (!maDyz) {
-                wierszU.komorki[colIdx].wartosc = null;
-              }
+      var targetDocKey = (zakrystiaStan && zakrystiaStan.docKey) || pobierzAktywnyKluczMiesiaca();
+      var isNextMonthZapis = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
+      var tabelaDoModyfikacji = isNextMonthZapis ? (daneKolejnegoMiesiaca || tabelaMiesiacaDane) : tabelaMiesiacaDane;
+
+      if (tabelaDoModyfikacji && tabelaDoModyfikacji.wiersze) {
+        // Funkcja pomocnicza: oblicza sumaryczną wartość punktów komórki ze wszystkich niezależnych liturgii danego dnia
+        function obliczSumeLiturgiiKomorki(cell) {
+          if (!cell) return null;
+          if (!cell.liturgie || typeof cell.liturgie !== 'object') {
+            return (typeof cell.wartosc === 'number') ? cell.wartosc : null;
+          }
+          var klucze = Object.keys(cell.liturgie);
+          if (klucze.length === 0) {
+            if (cell.maDyzur && cell.czyUsprawiedliwiony) return 0;
+            return null;
+          }
+          var sumaDnia = 0;
+          for (var ki = 0; ki < klucze.length; ki++) {
+            var itemL = cell.liturgie[klucze[ki]];
+            var valL = (typeof itemL === 'number') ? itemL : (itemL && typeof itemL.punkty === 'number' ? itemL.punkty : parseFloat(itemL));
+            if (!isNaN(valL)) {
+              sumaDnia += valL;
             }
+          }
+          return sumaDnia;
+        }
+
+        // Najpierw usuń slot tej konkretnej liturgii dla osób usuniętych z obecności:
+        (zakrystiaStan.usunieci || []).forEach(function(u) {
+          var wierszU = znajdzWierszMinistranta(tabelaDoModyfikacji.wiersze, u.nazwisko);
+          if (wierszU && wierszU.komorki && wierszU.komorki[colIdx]) {
+            var cellU = wierszU.komorki[colIdx];
+            if (cellU.liturgie && cellU.liturgie[gKey] !== undefined) {
+              delete cellU.liturgie[gKey];
+            }
+            cellU.wartosc = obliczSumeLiturgiiKomorki(cellU);
           }
         });
 
         (zakrystiaStan.ministranci || []).forEach(function(m) {
-          var normM = m.nazwisko.toLowerCase().trim();
-          var wiersz = tabelaMiesiacaDane.wiersze.find(function(w) {
-            var normW = (w.nazwisko || '').toLowerCase().trim();
-            return normW === normM || normW.indexOf(normM) !== -1 || normM.indexOf(normW) !== -1;
-          });
+          var wiersz = znajdzWierszMinistranta(tabelaDoModyfikacji.wiersze, m.nazwisko);
+          if (!wiersz) {
+            console.warn('Zakrystia: nie znaleziono wiersza w grafiku dla', m.nazwisko);
+            return;
+          }
           if (wiersz && wiersz.komorki && wiersz.komorki[colIdx]) {
             var cellObj = wiersz.komorki[colIdx];
-            var curVal = (typeof cellObj.wartosc === 'number' && !isNaN(cellObj.wartosc)) ? cellObj.wartosc : 0;
-            var prevFromThis = (typeof m.poprzedniePunktyZTejMszy === 'number') ? m.poprzedniePunktyZTejMszy : 0;
-            var pointsFromOtherLiturgies = (!zakrystiaStan.juzZapisane && curVal < 0) ? 0 : (curVal - prevFromThis);
-            if (pointsFromOtherLiturgies < 0) pointsFromOtherLiturgies = 0;
+            cellObj.liturgie = cellObj.liturgie || {};
+
+            var isNabozenstwoOrDod = czyDodatkowa || (zakrystiaStan && zakrystiaStan.rodzajLiturgii === 'nabozenstwo') || m.typ === 'DODATKOWY';
 
             if (m.tylkoRozaniec) {
               var pktThis = 2;
               m.punkty = pktThis;
               m.poprzedniePunktyZTejMszy = pktThis;
-              cellObj.wartosc = pointsFromOtherLiturgies + pktThis;
+              cellObj.liturgie[gKey] = pktThis;
             } else if (m.status === 'OBECNY') {
-              var dodajPkt = zakrystiaStan.punktyLiturgii || 3;
-              if (m.typ === 'ZASTEPCA') dodajPkt = 4;
-              else if (m.typ === 'DODATKOWY') {
-                dodajPkt = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
+              var dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
+              if (m.typ === 'ZASTEPCA') {
+                dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
+              } else if (m.typ === 'DODATKOWY') {
+                if (zakrystiaStan.recznieUstawionePunkty) {
+                  dodajPkt = zakrystiaStan.punktyLiturgii || 3;
+                } else if (typeof m.obecnyPkt === 'number') {
+                  dodajPkt = m.obecnyPkt;
+                } else if (czyDodatkowa) {
+                  dodajPkt = zakrystiaStan.punktyLiturgii || 3;
+                } else {
+                  dodajPkt = czyNiedziela ? 1 : 2;
+                }
               }
               if (m.bylNaRozancu) {
                 dodajPkt += 2;
@@ -9395,62 +10589,60 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
               m.punkty = dodajPkt;
               m.poprzedniePunktyZTejMszy = dodajPkt;
+              cellObj.liturgie[gKey] = dodajPkt;
 
-              // Jeśli ministrant ma punkty z innych liturgii tego dnia (np. msza rano 08:00),
-              // to punkty z tej mszy (np. 17:00) sumują się z tamtymi, a nie nadpisują!
-              cellObj.wartosc = pointsFromOtherLiturgies + dodajPkt;
-
-              // Jeśli to był zastępca i jest obecny, przyznaj +1 pkt ministrantowi, którego zastępuje!
+              // Jeśli to był zastępca i jest obecny, przyznaj +1 pkt ministrantowi, którego zastępuje na tę mszę!
               if (m.typ === 'ZASTEPCA' && m.zastepuje) {
-                var normOdd = m.zastepuje.toLowerCase().trim();
-                var oddWiersz = tabelaMiesiacaDane.wiersze.find(function(w) {
-                  var nw = (w.nazwisko || '').toLowerCase().trim();
-                  return nw === normOdd || nw.indexOf(normOdd) !== -1 || normOdd.indexOf(nw) !== -1;
-                });
+                var oddWiersz = znajdzWierszMinistranta(tabelaDoModyfikacji.wiersze, m.zastepuje);
                 if (oddWiersz && oddWiersz.komorki && oddWiersz.komorki[colIdx]) {
-                  var curOdd = (typeof oddWiersz.komorki[colIdx].wartosc === 'number') ? oddWiersz.komorki[colIdx].wartosc : 0;
-                  if (curOdd <= 0) {
-                    oddWiersz.komorki[colIdx].wartosc = 1;
-                  }
-                }
-              }
-            } else if (m.status === 'NIEOBECNY') {
-              var karaThis = czyDodatkowa ? 0 : -5;
-              m.punkty = karaThis;
-              m.poprzedniePunktyZTejMszy = karaThis;
-              if (m.typ === 'ZASTEPCA') {
-                cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : (cellObj.maDyzur ? -5 : null);
-              } else if (!czyDodatkowa) {
-                cellObj.wartosc = pointsFromOtherLiturgies > 0 ? (pointsFromOtherLiturgies + karaThis) : karaThis;
-                if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
-                  if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
-                    wiersz.komorki[colIdx + 1].wartosc = null;
-                  }
-                }
-              }
-            } else if (m.status === 'USPRAWIEDLIWIONY') {
-              m.punkty = 0;
-              m.poprzedniePunktyZTejMszy = 0;
-              if (!czyDodatkowa) {
-                cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : 0;
-                if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
-                  if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
-                    wiersz.komorki[colIdx + 1].wartosc = null;
-                  }
+                  var oddCell = oddWiersz.komorki[colIdx];
+                  oddCell.liturgie = oddCell.liturgie || {};
+                  oddCell.liturgie[gKey] = 1;
+                  oddCell.wartosc = obliczSumeLiturgiiKomorki(oddCell);
                 }
               }
             } else if (m.status === 'ODDANY') {
               m.punkty = 1;
               m.poprzedniePunktyZTejMszy = 1;
-              cellObj.wartosc = pointsFromOtherLiturgies > 0 ? (pointsFromOtherLiturgies + 1) : 1;
-            } else if (m.typ === 'ZASTEPCA' && m.status === 'NIEOBECNY') {
-              cellObj.wartosc = pointsFromOtherLiturgies > 0 ? pointsFromOtherLiturgies : null;
+              cellObj.liturgie[gKey] = 1;
+            } else if (m.status === 'USPRAWIEDLIWIONY') {
+              m.punkty = 0;
+              m.poprzedniePunktyZTejMszy = 0;
+              cellObj.liturgie[gKey] = 0;
+              if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
+                if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
+                  wiersz.komorki[colIdx + 1].wartosc = null;
+                }
+              }
+            } else if (m.status === 'NIEOBECNY') {
+              if (m.typ === 'ZASTEPCA') {
+                delete cellObj.liturgie[gKey];
+                m.punkty = 0;
+                m.poprzedniePunktyZTejMszy = 0;
+              } else if (isNabozenstwoOrDod) {
+                delete cellObj.liturgie[gKey];
+                m.punkty = 0;
+                m.poprzedniePunktyZTejMszy = 0;
+              } else {
+                var karaThis = -5;
+                m.punkty = karaThis;
+                m.poprzedniePunktyZTejMszy = karaThis;
+                cellObj.liturgie[gKey] = karaThis;
+                if (zakrystiaStan.godzina === '17:00' && colIdx + 1 < wiersz.komorki.length) {
+                  if (wiersz.komorki[colIdx + 1] && (wiersz.komorki[colIdx + 1].wartosc === 0 || wiersz.komorki[colIdx + 1].wartosc === '0')) {
+                    wiersz.komorki[colIdx + 1].wartosc = null;
+                  }
+                }
+              }
             }
+
+            // OSTATECZNA WARTOŚĆ KOMÓRKI TO ZAWSZE DOKŁADNA SUMA WSZYSTKICH JEJ LITURGII!
+            cellObj.wartosc = obliczSumeLiturgiiKomorki(cellObj);
           }
         });
 
         // Przeliczenie sum punktów w tabeli
-        tabelaMiesiacaDane.wiersze.forEach(function(w) {
+        tabelaDoModyfikacji.wiersze.forEach(function(w) {
           if (w.komorki) {
             w.suma = w.komorki.reduce(function(acc, c) {
               var v = parseFloat(c.wartosc);
@@ -9461,25 +10653,37 @@ function czyMaDostepDoZakrystii(nazwisko) {
         });
 
         // BŁYSKAWICZNE PRZELICZENIE RANKINGU (synchronizacja w ułamku sekundy!)
-        var rankingNowy = tabelaMiesiacaDane.wiersze
-          .filter(function(w) { return w.nazwisko && w.suma !== undefined; })
+        var rankingNowy = tabelaDoModyfikacji.wiersze
+          .filter(function(w) {
+            if (!w || !w.nazwisko) return false;
+            var n = w.nazwisko.toLowerCase().trim();
+            return n !== 'kościelny' && n !== 'koscielny' && n.indexOf('pokojsk') === -1;
+          })
           .map(function(w) {
+            var p = (w.suma !== undefined && w.suma !== null) ? w.suma : 0;
             return {
               nazwisko: w.nazwisko,
-              punkty: w.suma,
-              suma: w.suma,
+              punkty: p,
+              suma: p,
               grupa: w.grupa
             };
           })
-          .sort(function(a, b) { return b.punkty - a.punkty; });
+          .sort(function(a, b) {
+            if (b.punkty !== a.punkty) return b.punkty - a.punkty;
+            return a.nazwisko.localeCompare(b.nazwisko, 'pl');
+          });
         var poz = 1;
         rankingNowy.forEach(function(r, idx) {
           if (idx > 0 && r.punkty < rankingNowy[idx - 1].punkty) poz = idx + 1;
           r.pozycja = poz;
           r.miejsce = poz;
         });
-        tabelaMiesiacaDane.ranking = rankingNowy;
-        tabelaMiesiacaDane.rankingMiesiac = rankingNowy;
+        tabelaDoModyfikacji.ranking = rankingNowy;
+        tabelaDoModyfikacji.rankingMiesiac = rankingNowy;
+        if (tabelaMiesiacaDane && tabelaMiesiacaDane !== tabelaDoModyfikacji) {
+          tabelaMiesiacaDane.ranking = rankingNowy;
+          tabelaMiesiacaDane.rankingMiesiac = rankingNowy;
+        }
 
         // Dynamiczne przeliczenie rankingu rocznego w locie:
         if (tabelaMiesiacaDane.rankingRok && Array.isArray(tabelaMiesiacaDane.rankingRok)) {
@@ -9495,10 +10699,15 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var curRok = tabelaMiesiacaDane.rok || (new Date()).getFullYear();
             var sumPrev = 0;
             var foundM = false;
+            var matchRM = rankingNowy.find(function(rn) {
+              return czyToSamoNazwisko(rn.nazwisko, r.nazwisko);
+            });
+            var rnMiejsce = (matchRM && (matchRM.pozycja || matchRM.miejsce)) ? (matchRM.pozycja || matchRM.miejsce) : undefined;
             if (r.punktyPoMiesiacach && Array.isArray(r.punktyPoMiesiacach)) {
               r.punktyPoMiesiacach.forEach(function(pm) {
                 if (pm.miesiac === curMName || pm.miesiacIdx === curMIdx) {
                   pm.punkty = mPts;
+                  if (rnMiejsce) pm.pozycja = rnMiejsce;
                   foundM = true;
                 } else {
                   sumPrev += (pm.punkty || 0);
@@ -9506,7 +10715,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
               });
             }
             if (!foundM && r.punktyPoMiesiacach) {
-              r.punktyPoMiesiacach.push({ miesiac: curMName, miesiacIdx: curMIdx, rok: curRok, punkty: mPts });
+              r.punktyPoMiesiacach.push({ miesiac: curMName, miesiacIdx: curMIdx, rok: curRok, punkty: mPts, pozycja: rnMiejsce });
             }
             r.punkty = Math.round((sumPrev + mPts) * 10) / 10;
             r.suma = r.punkty;
@@ -9622,10 +10831,21 @@ function czyMaDostepDoZakrystii(nazwisko) {
           if (m.tylkoRozaniec) {
             pts = 2;
           } else if (m.status === 'OBECNY') {
-            if (m.typ === 'ZASTEPCA') pts = 4;
-            else if (m.typ === 'DODATKOWY') {
-              pts = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
-            } else pts = zakrystiaStan.punktyLiturgii;
+            if (m.typ === 'ZASTEPCA') {
+              pts = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
+            } else if (m.typ === 'DODATKOWY') {
+              if (zakrystiaStan.recznieUstawionePunkty) {
+                pts = zakrystiaStan.punktyLiturgii || 3;
+              } else if (typeof m.obecnyPkt === 'number') {
+                pts = m.obecnyPkt;
+              } else if (czyDodatkowa) {
+                pts = zakrystiaStan.punktyLiturgii || 3;
+              } else {
+                pts = czyNiedziela ? 1 : 2;
+              }
+            } else {
+              pts = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
+            }
             if (m.bylNaRozancu) pts += 2;
             if (m.karaPunkty && m.karaPunkty > 0) pts -= m.karaPunkty;
           } else if (m.status === 'NIEOBECNY') {
@@ -9657,6 +10877,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
 
         try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+
+        // Natychmiastowe odświeżenie pulpitu dla aktualnie zalogowanego użytkownika
+        if (globalUser && globalUser.nazwisko) {
+          var stanNowy = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
+          if (stanNowy) renderujDane(stanNowy);
+        }
       }
 
       zakrystiaStan.juzZapisane = true;
@@ -9678,6 +10904,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var promises = [];
           if (tabelaDoZapisu) {
             promises.push(dbFirestore.collection('stan_grafiku').doc(targetDocKey).set(tabelaDoZapisu, { merge: true }));
+            var wariantKlucza = wyznaczWariantKluczaMiesiaca(targetDocKey);
+            if (wariantKlucza && wariantKlucza !== targetDocKey) {
+              promises.push(dbFirestore.collection('stan_grafiku').doc(wariantKlucza).set(tabelaDoZapisu, { merge: true }));
+            }
           }
           promises.push(dbFirestore.collection('obecnosc').doc(logId).set({
             dzien: zakrystiaStan.dzien,
@@ -9688,6 +10918,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             dataTekst: zakrystiaStan.dataTekst,
             rodzajLiturgii: zakrystiaStan.rodzajLiturgii,
             punktyLiturgii: zakrystiaStan.punktyLiturgii,
+            recznieUstawionePunkty: !!zakrystiaStan.recznieUstawionePunkty,
             nazwaLiturgii: zakrystiaStan.nazwaLiturgii,
             maRozaniec: !!zakrystiaStan.maRozaniec,
             zapisano: new Date().toISOString(),
@@ -9738,10 +10969,21 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (m.tylkoRozaniec) {
           pts = 2;
         } else if (m.status === 'OBECNY') {
-          if (m.typ === 'ZASTEPCA') pts = 4;
-          else if (m.typ === 'DODATKOWY') {
-            pts = czyDodatkowa ? (zakrystiaStan.punktyLiturgii || 3) : (czyNiedziela ? 1 : 2);
-          } else pts = zakrystiaStan.punktyLiturgii;
+          if (m.typ === 'ZASTEPCA') {
+            pts = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
+          } else if (m.typ === 'DODATKOWY') {
+            if (zakrystiaStan.recznieUstawionePunkty) {
+              pts = zakrystiaStan.punktyLiturgii || 3;
+            } else if (typeof m.obecnyPkt === 'number') {
+              pts = m.obecnyPkt;
+            } else if (czyDodatkowa) {
+              pts = zakrystiaStan.punktyLiturgii || 3;
+            } else {
+              pts = czyNiedziela ? 1 : 2;
+            }
+          } else {
+            pts = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
+          }
           if (m.bylNaRozancu) pts += 2;
           if (m.karaPunkty && m.karaPunkty > 0) pts -= m.karaPunkty;
         } else if (m.status === 'NIEOBECNY') {
@@ -9856,6 +11098,20 @@ function czyMaDostepDoZakrystii(nazwisko) {
       wczytajTabeleMiesiaca(true);
     }
 
+    function wyznaczWariantKluczaMiesiaca(docId) {
+      if (!docId) return docId;
+      var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+      var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+      var parts = docId.split('_');
+      var mName = parts[0];
+      var yPart = parts[1] || '2026';
+      for (var i = 0; i < 12; i++) {
+        if (polishM[i] === mName) return polishAlt[i] + '_' + yPart;
+        if (polishAlt[i] === mName) return polishM[i] + '_' + yPart;
+      }
+      return docId;
+    }
+
     function wczytajTabeleMiesiaca(wymus) {
       var kontener = document.getElementById('tabela-miesiaca-scroll');
       var docId = wybranyMiesiacTabeli || pobierzAktywnyKluczMiesiaca();
@@ -9891,25 +11147,53 @@ function czyMaDostepDoZakrystii(nazwisko) {
         kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#38bdf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie grafiku ' + docId.replace('_', ' ') + '...</div>';
       }
 
+      function zastosujDaneDoc(fData) {
+        autoRozliczWygasleOfertyFirestore(fData);
+        tabelaPrzegladanyMiesiacDane = Object.assign({}, tabelaPrzegladanyMiesiacDane || {}, fData);
+        if (isCurrent) {
+          tabelaMiesiacaDane = Object.assign({}, tabelaMiesiacaDane || {}, fData);
+          try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
+        }
+        try { localStorage.setItem(cacheKey, JSON.stringify(tabelaPrzegladanyMiesiacDane)); } catch(e) {}
+        renderujFiltryTabeli();
+        renderujTabeleMiesiaca();
+      }
+
       // 2. ZAWSZE pobierz najnowsze dane z bazy Firestore w tle (Stale-While-Revalidate - gwarancja aktualności!)
       if (dbFirestore) {
+        var altDocId = wyznaczWariantKluczaMiesiaca(docId);
         dbFirestore.collection('stan_grafiku').doc(docId).get().then(function(doc) {
           if (doc.exists && doc.data() && doc.data().wiersze && doc.data().wiersze.length) {
-            var fData = doc.data();
-            autoRozliczWygasleOfertyFirestore(fData);
-            tabelaPrzegladanyMiesiacDane = Object.assign({}, tabelaPrzegladanyMiesiacDane || {}, fData);
-            if (isCurrent) {
-              tabelaMiesiacaDane = Object.assign({}, tabelaMiesiacaDane || {}, fData);
-              try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
-            }
-            try { localStorage.setItem(cacheKey, JSON.stringify(tabelaPrzegladanyMiesiacDane)); } catch(e) {}
-            renderujFiltryTabeli();
-            renderujTabeleMiesiaca();
+            zastosujDaneDoc(doc.data());
+            return;
+          }
+          if (altDocId && altDocId !== docId) {
+            dbFirestore.collection('stan_grafiku').doc(altDocId).get().then(function(altDoc) {
+              if (altDoc.exists && altDoc.data() && altDoc.data().wiersze && altDoc.data().wiersze.length) {
+                zastosujDaneDoc(altDoc.data());
+                return;
+              }
+              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+            }).catch(function() {
+              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+            });
             return;
           }
           if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
         }).catch(function(e) {
           console.warn('Firestore tabela fallback:', e);
+          if (altDocId && altDocId !== docId) {
+            dbFirestore.collection('stan_grafiku').doc(altDocId).get().then(function(altDoc) {
+              if (altDoc.exists && altDoc.data() && altDoc.data().wiersze && altDoc.data().wiersze.length) {
+                zastosujDaneDoc(altDoc.data());
+                return;
+              }
+              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+            }).catch(function() {
+              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+            });
+            return;
+          }
           if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
         });
       } else {
@@ -9958,6 +11242,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
         if (typeof item === 'object') return (item.nazwa || item.grupa || '');
         return String(item);
       }).filter(Boolean);
+      if (normalizedGrupy.length === 0) {
+        normalizedGrupy = ['I GRUPA (CZERWONA)', 'II GRUPA (POMARAŃCZOWA)', 'III GRUPA (ZIELONA)', 'IV GRUPA (ŻÓŁTA)'];
+      }
 
       var grupy = ['Wszyscy'].concat(normalizedGrupy);
       var html = '';
@@ -9988,14 +11275,21 @@ function czyMaDostepDoZakrystii(nazwisko) {
     }
 
     function wyznaczGrupeParafialna(nazwisko, grupa) {
-      if (grupa && (grupa.indexOf('CZERWON') !== -1 || grupa.indexOf('POMARAŃCZ') !== -1 || grupa.indexOf('POMARANCZ') !== -1 || grupa.indexOf('ZIELON') !== -1 || grupa.indexOf('ŻÓŁT') !== -1 || grupa.indexOf('ZOLT') !== -1)) {
-        return grupa;
+      if (grupa && typeof grupa === 'string') {
+        var gUp = grupa.toUpperCase().trim();
+        if (gUp.indexOf('POMARAŃCZ') !== -1 || gUp.indexOf('POMARANCZ') !== -1 || /\bII\b|\bII GRUPA\b|^II\s/.test(gUp)) return 'II GRUPA (POMARAŃCZOWA)';
+        if (gUp.indexOf('ZIELON') !== -1 || /\bIII\b|\bIII GRUPA\b|^III\s/.test(gUp)) return 'III GRUPA (ZIELONA)';
+        if (gUp.indexOf('ŻÓŁT') !== -1 || gUp.indexOf('ZOLT') !== -1 || /\bIV\b|\bIV GRUPA\b|^IV\s/.test(gUp)) return 'IV GRUPA (ŻÓŁTA)';
+        if (gUp.indexOf('CZERWON') !== -1 || /\bI\b|\bI GRUPA\b|^I\s/.test(gUp)) return 'I GRUPA (CZERWONA)';
       }
-      var n = (nazwisko || '').toLowerCase();
-      if (/maks|pier[sś]|radli|wiktor/.test(n)) return 'I GRUPA (CZERWONA)';
-      if (/maciej|pokojsk|skrzypek|rafał|rafal/.test(n)) return 'II GRUPA (POMARAŃCZOWA)';
-      if (/kupiec|g[łl]az|miko[łl]|brytner|kik/.test(n)) return 'III GRUPA (ZIELONA)';
-      if (/micha[łl]s*danielczok|mazurkiewicz|czech|rozik/.test(n)) return 'IV GRUPA (ŻÓŁTA)';
+      var n = (nazwisko || '').toLowerCase().trim();
+      if (!n) return 'I GRUPA (CZERWONA)';
+      if (/maks|pier[sś]|radli|pszcz/.test(n)) return 'I GRUPA (CZERWONA)';
+      if (/maciej|skrzypek|rafa[łl]|pokojsk/.test(n)) return 'II GRUPA (POMARAŃCZOWA)';
+      if (/kupiec|g[łl]az|brytner|kik/.test(n)) return 'III GRUPA (ZIELONA)';
+      if (/danielczok|mazurkiewicz|czech|rozik|matuszczyk/.test(n)) return 'IV GRUPA (ŻÓŁTA)';
+      if (/wiktor/.test(n)) return 'I GRUPA (CZERWONA)';
+      if (/miko[łl]/.test(n)) return 'II GRUPA (POMARAŃCZOWA)';
       return 'I GRUPA (CZERWONA)';
     }
 
@@ -10025,13 +11319,34 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
         dodaneNazwiska[nClean] = true;
 
-        if (aktywnyFiltrGrupy !== 'Wszyscy' && w.grupa !== aktywnyFiltrGrupy) {
+        var grRow = wyznaczGrupeParafialna(w.nazwisko, w.grupa);
+        w.grupa = grRow;
+
+        if (aktywnyFiltrGrupy !== 'Wszyscy' && grRow !== aktywnyFiltrGrupy) {
           return false;
         }
         if (q && w.nazwisko.toLowerCase().indexOf(q) === -1) {
           return false;
         }
         return true;
+      });
+
+      var kolejnośćGrupTabela = {
+        "I GRUPA (CZERWONA)": 1,
+        "II GRUPA (POMARAŃCZOWA)": 2,
+        "III GRUPA (ZIELONA)": 3,
+        "IV GRUPA (ŻÓŁTA)": 4
+      };
+      przefiltrowane.sort(function(a, b) {
+        var ga = kolejnośćGrupTabela[wyznaczGrupeParafialna(a.nazwisko, a.grupa)] || 99;
+        var gb = kolejnośćGrupTabela[wyznaczGrupeParafialna(b.nazwisko, b.grupa)] || 99;
+        if (ga !== gb) return ga - gb;
+
+        // W ramach grupy sortuj według rangi stopnia (Animator -> Lektor -> Starszy -> Młodszy -> Kandydat):
+        var stA = wyznaczStopienMinistranta(a.nazwisko, dane.wiersze);
+        var stB = wyznaczStopienMinistranta(b.nazwisko, dane.wiersze);
+        if (stB.ranga !== stA.ranga) return stB.ranga - stA.ranga;
+        return a.nazwisko.localeCompare(b.nazwisko, 'pl');
       });
 
       if (przefiltrowane.length === 0) {
@@ -10114,6 +11429,18 @@ function czyMaDostepDoZakrystii(nazwisko) {
             cellStyle += ' background:rgba(39,39,42,0.45);';
           }
 
+          var tooltipLit = '';
+          if (k.liturgie && typeof k.liturgie === 'object') {
+            var lKeys = Object.keys(k.liturgie);
+            if (lKeys.length > 0) {
+              tooltipLit = lKeys.map(function(gk) {
+                var pv = k.liturgie[gk];
+                var npv = (typeof pv === 'number') ? pv : (pv && pv.punkty !== undefined ? pv.punkty : pv);
+                return gk + ': ' + (npv > 0 ? '+' : '') + npv + ' pkt';
+              }).join(' | ');
+            }
+          }
+
           var content = '';
           var numWartosc = parseFloat(k.wartosc);
           if (k.wartosc === 5 || k.wartosc === '5') {
@@ -10127,7 +11454,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
           } else if (k.wartosc === 1 || k.wartosc === '1') {
             content = '<span class="tabela-badge b-oddany">1</span>';
           } else if (k.wartosc !== null && k.wartosc !== '') {
-            content = '<b>' + k.wartosc + '</b>';
+            content = '<span class="tabela-badge" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(74,222,128,0.4); font-weight:800;">' + k.wartosc + '</span>';
           } else if (k.maDyzur) {
             // Jeśli to weekend (sobota/niedziela) i ministrant był obecny dzień wcześniej w sobotę, nie pokazuj kropki w niedzielę!
             var isWeekendServed = false;
@@ -10151,7 +11478,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
           }
 
-          html += '<td style="' + cellStyle + '">' + content + '</td>';
+          var titleAttr = tooltipLit ? (' title="' + tooltipLit + '"') : (k.wartosc !== null && k.wartosc !== undefined ? (' title="' + k.wartosc + ' pkt"') : '');
+          html += '<td style="' + cellStyle + '"' + titleAttr + '>' + content + '</td>';
         }
 
         html += '<td style="font-weight:700; font-size:13px; color:#60a5fa; background:#27272a;">' + row.suma + '</td>';
@@ -10877,7 +12205,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
-      var godzinyDni = ['', 'godz. 18:00', 'godz. 18:00', 'godz. 18:00', 'godz. 17:00 - msza szkolna', 'godz. 18:00'];
+      var godzinyDni = wyznaczGodzinyDniTygodnia(tabelaMiesiacaDane);
       var obecnyEl = document.getElementById('modal-zmien-dzien-obecny');
       if (obecnyEl) {
         var godzTekst = (curDow >= 1 && curDow <= 5) ? (' (' + godzinyDni[curDow] + ')') : '';
@@ -11000,7 +12328,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       var nazwyDni = ['', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'];
-      var godzinyDni = ['', 'godz. 18:00', 'godz. 18:00', 'godz. 18:00', 'godz. 17:00 - msza szkolna', 'godz. 18:00'];
+      var godzinyDni = wyznaczGodzinyDniTygodnia(tabelaMiesiacaDane);
       var staryDzien = myRow.stalyDzienTygodnia;
       var rok = tabelaMiesiacaDane.rok || (new Date()).getFullYear();
       var mIdx = (tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
@@ -11112,8 +12440,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         try {
           var promises = [];
           var curDocKey = pobierzAktywnyKluczMiesiaca();
-          promises.push(dbFirestore.collection('stan_grafiku').doc(curDocKey).set(tabelaMiesiacaDane, { merge: true }));
-
+          // Aktualizuj konfigurację stałych dni
           promises.push(dbFirestore.collection('konfiguracja').doc('stale_dni').set({
             [myName]: {
               stalyDzien: nowyDzien,
@@ -11124,10 +12451,66 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
           }, { merge: true }));
 
+          // Bezpieczna aktualizacja wierszy w transakcji Firestore:
+          // Pobieramy NAJŚWIEŻSZY stan z bazy i modyfikujemy TYLKO przyszłe komórki danego ministranta!
+          promises.push(dbFirestore.runTransaction(async function(transaction) {
+            var curDocRef = dbFirestore.collection('stan_grafiku').doc(curDocKey);
+            var sfDoc = await transaction.get(curDocRef);
+            if (!sfDoc.exists) return;
+            var sfData = sfDoc.data();
+            var sfWiersze = sfData.wiersze || [];
+            var sfRow = sfWiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
+            if (sfRow) {
+              sfRow.stalyDzienTygodnia = nowyDzien;
+              sfRow.ostatniaZmianaDnia = nowIso;
+              if (sfRow.komorki) {
+                for (var cd = 1; cd <= sfRow.komorki.length; cd++) {
+                  if (cd >= todayD) {
+                    var dtCell = new Date(rok, mIdx, cd);
+                    var dowCell = dtCell.getDay();
+                    var cell = sfRow.komorki[cd - 1];
+                    if (cell && (cell.wartosc === null || cell.wartosc === undefined || cell.wartosc === '')) {
+                      if (dowCell === staryDzien) cell.maDyzur = false;
+                      else if (dowCell === nowyDzien) cell.maDyzur = true;
+                    }
+                  }
+                }
+              }
+              transaction.update(curDocRef, { wiersze: sfWiersze });
+              tabelaMiesiacaDane.wiersze = sfWiersze;
+            }
+          }));
+
           if (daneKolejnegoMiesiaca) {
             var nextDocKey = wyznaczKluczMiesiaca(new Date(daneKolejnegoMiesiaca.rok || (new Date()).getFullYear(), (daneKolejnegoMiesiaca.miesiacIdx !== undefined ? daneKolejnegoMiesiaca.miesiacIdx : ((mIdx + 1) % 12)), 1));
             if (nextDocKey !== curDocKey) {
-              promises.push(dbFirestore.collection('stan_grafiku').doc(nextDocKey).set(daneKolejnegoMiesiaca, { merge: true }));
+              promises.push(dbFirestore.runTransaction(async function(transaction) {
+                var nextDocRef = dbFirestore.collection('stan_grafiku').doc(nextDocKey);
+                var sfNextDoc = await transaction.get(nextDocRef);
+                if (!sfNextDoc.exists) return;
+                var sfNextData = sfNextDoc.data();
+                var sfNextWiersze = sfNextData.wiersze || [];
+                var sfNextRow = sfNextWiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
+                if (sfNextRow) {
+                  sfNextRow.stalyDzienTygodnia = nowyDzien;
+                  sfNextRow.ostatniaZmianaDnia = nowIso;
+                  var nextR = sfNextData.rok || (new Date()).getFullYear();
+                  var nextM = (sfNextData.miesiacIdx !== undefined) ? sfNextData.miesiacIdx : ((mIdx + 1) % 12);
+                  if (sfNextRow.komorki) {
+                    for (var nd = 1; nd <= sfNextRow.komorki.length; nd++) {
+                      var dtN = new Date(nextR, nextM, nd);
+                      var dowN = dtN.getDay();
+                      var nCell = sfNextRow.komorki[nd - 1];
+                      if (nCell && (nCell.wartosc === null || nCell.wartosc === undefined || nCell.wartosc === '')) {
+                        if (dowN === staryDzien) nCell.maDyzur = false;
+                        else if (dowN === nowyDzien) nCell.maDyzur = true;
+                      }
+                    }
+                  }
+                  transaction.update(nextDocRef, { wiersze: sfNextWiersze });
+                  daneKolejnegoMiesiaca.wiersze = sfNextWiersze;
+                }
+              }));
             }
           }
           await Promise.all(promises);
@@ -11441,6 +12824,79 @@ function czyMaDostepDoZakrystii(nazwisko) {
         alert(err.message || 'Wystąpił błąd podczas wycofywania oferty.');
       }
     }
+
+    // Wycofanie się z PRZYJĘTEGO zastępstwa (dyżur wraca na giełdę jako wolny)
+    async function wycofajPrzyjeteZastepstwo(ofertaId, dzienParam, optDocKey) {
+      if (!confirm('Czy na pewno chcesz zrezygnować z przyjętego zastępstwa? Dyżur wróci na giełdę jako wolny.')) return;
+      if (!dbFirestore) return;
+      var myName = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : (localStorage.getItem('min_name') || '');
+      var dzien = dzienParam ? parseInt(dzienParam, 10) : null;
+      var docKey = optDocKey || pobierzAktywnyKluczMiesiaca();
+      var keys = [docKey];
+      var alt = wyznaczWariantKluczaMiesiaca(docKey);
+      if (alt && alt !== docKey) keys.push(alt);
+
+      function pasuje(z) {
+        if (!z) return false;
+        if (ofertaId && z.id === ofertaId) return true;
+        return !ofertaId && dzien && parseInt(z.dzien, 10) === dzien && czyToSamoNazwisko(z.przejmujacy, myName);
+      }
+
+      try {
+        var zmieniono = false;
+        for (var ki = 0; ki < keys.length; ki++) {
+          var docRef = dbFirestore.collection('stan_grafiku').doc(keys[ki]);
+          await dbFirestore.runTransaction(async function(transaction) {
+            var sfDoc = await transaction.get(docRef);
+            if (!sfDoc.exists) return;
+            var data = sfDoc.data();
+            var wolne = data.wolneZastepstwa || [];
+            var zam = data.zamianyZastepstwa || [];
+            var found = null;
+            wolne.concat(zam).forEach(function(z) { if (pasuje(z) && !found) found = z; });
+            if (!found) return;
+            if (!czyToSamoNazwisko(found.przejmujacy, myName)) {
+              throw new Error('To zastępstwo nie jest przypisane do Ciebie.');
+            }
+            if (found.status !== 'PRZEJETE') {
+              throw new Error('Tego zastępstwa nie można już wycofać.');
+            }
+            var curY = data.rok || (new Date()).getFullYear();
+            var curM = (data.miesiacIdx !== undefined) ? data.miesiacIdx : (new Date()).getMonth();
+            if (czyMszaJuzSieRozpoczela(parseInt(found.dzien, 10), cleanTime(found.godzina) || '18:00', curY, curM)) {
+              throw new Error('Msza już się rozpoczęła - nie można zrezygnować z zastępstwa.');
+            }
+            [wolne, zam].forEach(function(lista) {
+              lista.forEach(function(z) {
+                if (pasuje(z)) {
+                  z.status = 'OCZEKUJE';
+                  z.przejmujacy = '';
+                  delete z.czasPrzejecia;
+                }
+              });
+            });
+            // Jeśli oferta była tylko w zamianach, przywróć ją na giełdę wolnych
+            if (!wolne.some(pasuje)) {
+              var kopia = Object.assign({}, found, { status: 'OCZEKUJE', przejmujacy: '' });
+              delete kopia.czasPrzejecia;
+              wolne.push(kopia);
+            }
+            zmieniono = true;
+            transaction.update(docRef, {
+              wolneZastepstwa: wolne,
+              zamianyZastepstwa: zam,
+              zaktualizowano: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          });
+        }
+        pokazToast(zmieniono ? 'Zrezygnowano z zastępstwa - dyżur wrócił na giełdę' : 'Nie znaleziono zastępstwa');
+        odswiezDane();
+      } catch(err) {
+        alert(err.message || 'Wystąpił błąd podczas rezygnacji z zastępstwa.');
+        odswiezDane();
+      }
+    }
+    window.wycofajPrzyjeteZastepstwo = wycofajPrzyjeteZastepstwo;
 
     function otworzModalWezDyzur(ofertaId, dzien, oddajacy, optRok, optMiesiacIdx, optDocKey) {
       try {

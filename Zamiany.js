@@ -98,6 +98,14 @@ function obsluzZapytanieAPI(e) {
       wynik = naprawBledneStatusyZastepstw();
     } else if (funkcja === "naprawPunktyDnia11") {
       wynik = naprawPunktyDnia11();
+    } else if (funkcja === "naprawPunktyDnia9") {
+      wynik = naprawPunktyDnia9();
+    } else if (funkcja === "naprawWszystkiePunktyTygodnia") {
+      wynik = naprawWszystkiePunktyTygodnia();
+    } else if (funkcja === "naprawUkladPazdziernikWSkoroszycie") {
+      wynik = naprawUkladPazdziernikWSkoroszycie();
+    } else if (funkcja === "naprawKoloryDyzurPazdziernik") {
+      wynik = naprawKoloryDyzurPazdziernik();
     } else if (funkcja === "korektaPunktowNiedzielaITydzien") {
       wynik = korektaPunktowNiedzielaITydzien();
     } else if (funkcja === "sprawdzINaprawLosoweWpisy") {
@@ -2323,12 +2331,6 @@ function wyczyscStareZamiany(optionalSs) {
     }
   }
 
-  try {
-    synchronizujDoFirestore(ss);
-  } catch (eSync) {
-    Logger.log("Błąd sync do Firestore w wyczyscStareZamiany: " + eSync.message);
-  }
-
   return { sukces: true, wiadomosc: "Pomyślnie wyczyszczono stare i zdezaktualizowane zamiany." };
 }
 
@@ -2832,29 +2834,45 @@ function oczyscNazwiskoMinistranta(raw) {
 function czyJestCzytajacym(nazwisko) {
   if (!nazwisko) return false;
   var n = nazwisko.toLowerCase().trim();
-  return n.indexOf('maciej erich') !== -1 ||
-         n.indexOf('maks erich') !== -1 ||
+  return n.indexOf('maciej erich') !== -1 || n.indexOf('maciej erlich') !== -1 ||
+         n.indexOf('maks erich') !== -1 || n.indexOf('maks erlich') !== -1 ||
+         n.indexOf('maksymilian erich') !== -1 || n.indexOf('maksymilian erlich') !== -1 ||
          n.indexOf('michał kupiec') !== -1 || n.indexOf('michal kupiec') !== -1 ||
-         n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 ||
+         n.indexOf('michał danielczok') !== -1 || n.indexOf('michal danielczok') !== -1 ||
+         n.indexOf('mikołaj erich') !== -1 || n.indexOf('mikolaj erich') !== -1 || n.indexOf('mikołaj erlich') !== -1 || n.indexOf('mikolaj erlich') !== -1 ||
          n.indexOf('emil czech') !== -1;
 }
 var czyJestLektorem = czyJestCzytajacym;
+
+var PROFIL_MINISTRANTOW_BAZA = {
+  "maks erich": { stopien: "Animator", ranga: 5 },
+  "mateusz pierścieński": { stopien: "Starszy ministrant", ranga: 3 },
+  "wiktor kowalski": { stopien: "Starszy ministrant", ranga: 3 },
+  "jan radliński": { stopien: "Młodszy ministrant", ranga: 2 },
+  "maciej erich": { stopien: "Animator", ranga: 5 },
+  "mikołaj erich": { stopien: "Lektor", ranga: 4 },
+  "ksawery skrzypek": { stopien: "Starszy ministrant", ranga: 3 },
+  "rafał danielczok": { stopien: "Młodszy ministrant", ranga: 2 },
+  "michał kupiec": { stopien: "Animator", ranga: 5 },
+  "paweł głaz": { stopien: "Starszy ministrant", ranga: 3 },
+  "jakub brytner": { stopien: "Młodszy ministrant", ranga: 2 },
+  "franek kik": { stopien: "Kandydat", ranga: 1 },
+  "michał danielczok": { stopien: "Animator", ranga: 5 },
+  "emil czech": { stopien: "Lektor", ranga: 4 },
+  "bartosz rozik": { stopien: "Młodszy ministrant", ranga: 2 },
+  "marcel mazurkiewicz": { stopien: "Młodszy ministrant", ranga: 2 },
+  "mateusz pokojski": { stopien: "Starszy ministrant", ranga: 3 }
+};
 
 function wyciagnijStopienMinistranta(raw) {
   if (!raw) return { stopien: "Młodszy ministrant", ranga: 2 };
   var s = raw.toString().trim();
   var sLower = s.toLowerCase();
 
-  // Animatorzy w parafii (czytający):
-  if (sLower.indexOf('maciej erich') !== -1 ||
-      sLower.indexOf('maks erich') !== -1 ||
-      sLower.indexOf('michał kupiec') !== -1 || sLower.indexOf('michal kupiec') !== -1) {
-    return { stopien: "Animator", ranga: 5 };
-  }
-  // Lektorzy w parafii (czytający):
-  if (sLower.indexOf('mikołaj erich') !== -1 || sLower.indexOf('mikolaj erich') !== -1 ||
-      sLower.indexOf('emil czech') !== -1) {
-    return { stopien: "Lektor", ranga: 4 };
+  for (var pKey in PROFIL_MINISTRANTOW_BAZA) {
+    if (sLower.indexOf(pKey) !== -1 || pKey.indexOf(sLower) !== -1) {
+      return { stopien: PROFIL_MINISTRANTOW_BAZA[pKey].stopien, ranga: PROFIL_MINISTRANTOW_BAZA[pKey].ranga };
+    }
   }
 
   // Hierarchia:
@@ -3020,6 +3038,18 @@ function obliczRankingiIPunkty(ss, nazwisko, currentYear, currentMonthIdx) {
       // Punkty z kolumny SUMA
       var rawSuma = dataRange[r][sumaColIdx - 2];
       var pts = parseFloat(rawSuma);
+      if (isNaN(pts) || pts === 0) {
+        var sumDni = 0;
+        for (var cd = 2; cd < sumaColIdx - 2; cd++) {
+          var celVal = dataRange[r][cd];
+          if (typeof celVal === "number") sumDni += celVal;
+          else if (typeof celVal === "string") {
+            var parsed = parseFloat(celVal.replace(",", "."));
+            if (!isNaN(parsed)) sumDni += parsed;
+          }
+        }
+        if (sumDni !== 0) pts = sumDni;
+      }
       if (isNaN(pts)) pts = 0;
 
       ministranciMap[matchedKey].punktyRok += pts;
@@ -3166,7 +3196,7 @@ function obliczRankingiIPunkty(ss, nazwisko, currentYear, currentMonthIdx) {
   var rankingMiesiac = lista
     .filter(function(it) {
       var n = (it.normName || it.nazwisko || "").toLowerCase();
-      return it.czyAktywny && n !== "kościelny" && n !== "koscielny";
+      return it.czyAktywny && n !== "kościelny" && n !== "koscielny" && n.indexOf("pokojsk") === -1;
     })
     .map(function(it) {
       return { nazwisko: it.nazwisko, normName: it.normName, punkty: it.punktyMiesiac, pozycja: 1 };
@@ -3282,7 +3312,7 @@ function pobierzGodzineMszyWTygodniu(rok, miesiacIdx, dzien) {
   var dayOfWeek = dt.getDay(); // 0: Nd, 1: Pn, 2: Wt, 3: Śr, 4: Cz, 5: Pt, 6: Sb
   if (dayOfWeek === 1) return "18:00"; // Poniedziałek
   if (dayOfWeek === 2) return "18:00"; // Wtorek
-  if (dayOfWeek === 3) return "08:00"; // Środa rano
+  if (dayOfWeek === 3) return (miesiacIdx === 9) ? "18:00" : "08:00"; // Środa (18:00 w październiku, 08:00 w pozostałych)
   if (dayOfWeek === 4) return "17:00"; // Czwartek msza szkolna
   if (dayOfWeek === 5) return "18:00"; // Piątek
   return "18:00";
@@ -3293,7 +3323,7 @@ function pobierzPelnaNazweMszyWTygodniu(rok, miesiacIdx, dzien) {
   var dayOfWeek = dt.getDay();
   if (dayOfWeek === 1) return "Poniedziałek 18:00";
   if (dayOfWeek === 2) return "Wtorek 18:00";
-  if (dayOfWeek === 3) return "Środa 08:00 (Rano)";
+  if (dayOfWeek === 3) return (miesiacIdx === 9) ? "Środa 18:00" : "Środa 08:00 (Rano)";
   if (dayOfWeek === 4) return "Czwartek 17:00 (Szkolna)";
   if (dayOfWeek === 5) return "Piątek 18:00";
   return "18:00";
@@ -3303,6 +3333,10 @@ function obliczCutoffDlaDnia(rok, miesiacIdx, dzien) {
   var dt = new Date(rok, miesiacIdx, dzien);
   var dayOfWeek = dt.getDay();
   if (dayOfWeek === 3) {
+    if (miesiacIdx === 9) {
+      // W październiku msza o 18:00 -> cutoff o 14:00 (4h przed mszą)
+      return new Date(rok, miesiacIdx, dzien, 14, 0, 0);
+    }
     // Środa 08:00 rano -> cutoff to wtorek 20:00 (poprzedni wieczór)
     return new Date(rok, miesiacIdx, dzien - 1, 20, 0, 0);
   } else if (dayOfWeek === 4) {
@@ -3318,6 +3352,9 @@ function obliczCutoffPrzedWlasnaMsza(rok, miesiacIdx, dzien) {
   var dt = new Date(rok, miesiacIdx, dzien);
   var dayOfWeek = dt.getDay();
   if (dayOfWeek === 3) {
+    if (miesiacIdx === 9) {
+      return new Date(rok, miesiacIdx, dzien - 1, 18, 0, 0); // 24h przed 18:00
+    }
     // Środa 08:00 rano -> 24h przed to wtorek 08:00 rano
     return new Date(rok, miesiacIdx, dzien - 1, 8, 0, 0);
   } else if (dayOfWeek === 4) {
@@ -4667,6 +4704,8 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
   var usunArray = usunieciList || [];
   for (var ui = 0; ui < usunArray.length; ui++) {
     var uItem = usunArray[ui];
+    var prevFromThis = (typeof uItem.poprzedniePunktyZTejMszy === 'number') ? uItem.poprzedniePunktyZTejMszy : 0;
+    if (prevFromThis <= 0) continue; // Nigdy nie cofaj punktów osobom, które nie miały punktów z TEJ konkretnej liturgii!
     var uName = oczyscNazwiskoMinistranta(uItem.nazwisko).toLowerCase();
     for (var rU = 2; rU < maxRows; rU++) {
       var rawCellU = colBValues[rU][0] ? colBValues[rU][0].toString().trim() : "";
@@ -4678,9 +4717,9 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
         var cellU = mSheet.getRange(rU + 1, targetCol);
         var curValU = cellU.getValue();
         if (curValU !== "" && curValU !== null && curValU !== undefined) {
-          var ptsToSub = domPunkty || 3;
+          var ptsToSub = prevFromThis;
           var nextValU = parseFloat(curValU) - ptsToSub;
-          if (nextValU <= 0) {
+          if (nextValU === 0) {
             cellU.clearContent();
             cellU.clearNote();
           } else {
@@ -4692,7 +4731,7 @@ function zapiszObecnoscZZakrystii(rok, miesiacIdx, dzien, godzina, obecnosciList
           try {
             var polishMonthsGen = ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"];
             var mNameLog = polishMonthsGen[(miesiacIdx !== undefined) ? miesiacIdx : (new Date()).getMonth()] || polishMonthsGen[(new Date()).getMonth()];
-            logSheet.appendRow([timeStamp, dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()), godzina, litNazwa, uItem.nazwisko, "USUNIĘTO", "DODATKOWY", -(domPunkty || 3), "-", autorStr]);
+            logSheet.appendRow([timeStamp, dNum + " " + mNameLog + " " + (rok || (new Date()).getFullYear()), godzina, litNazwa, uItem.nazwisko, "USUNIĘTO", "DODATKOWY", -ptsToSub, "-", autorStr]);
           } catch(e) {}
         }
         break;
@@ -5124,6 +5163,23 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
   var mSheet = null;
   if (nazwaMiesiaca && typeof nazwaMiesiaca === "string") {
     mSheet = ss.getSheetByName(nazwaMiesiaca);
+    if (!mSheet) {
+      var polishM = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+      var polishAlt = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+      var partsN = nazwaMiesiaca.split('_');
+      var mPart = partsN[0];
+      var yPart = partsN[1] || '';
+      for (var i = 0; i < 12; i++) {
+        if (polishM[i] === mPart) {
+          mSheet = ss.getSheetByName(polishAlt[i] + (yPart ? '_' + yPart : ''));
+          break;
+        }
+        if (polishAlt[i] === mPart) {
+          mSheet = ss.getSheetByName(polishM[i] + (yPart ? '_' + yPart : ''));
+          break;
+        }
+      }
+    }
   }
   if (!mSheet) {
     mSheet = pobierzBiezacyArkuszMiesiaca(ss);
@@ -5166,6 +5222,7 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
 
   var maxRows = Math.min(mSheet.getLastRow(), 35);
   var colB = mSheet.getRange(1, 2, maxRows, 1).getValues();
+  var colC = mSheet.getRange(1, 3, maxRows, 1).getValues();
 
   var row1 = mSheet.getRange(1, 1, 1, Math.min(mSheet.getLastColumn(), 45)).getValues()[0];
   var sumaColIdx = -1;
@@ -5247,7 +5304,7 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
 
     var cleanName = oczyscNazwiskoMinistranta(rawName);
     var stopienInfo = wyciagnijStopienMinistranta(rawName);
-    if (!cleanName || cleanName.length < 4 || cleanName.toLowerCase() === "kościelny" || cleanName.indexOf("#") !== -1 || cleanName.toUpperCase() === "MINISTRANT") {
+    if (!cleanName || cleanName.length < 4 || cleanName.toLowerCase() === "kościelny" || cleanName.indexOf("#") !== -1 || cleanName.toUpperCase() === "MINISTRANT" || (currentMonthIdx >= 9 && currentYear >= 2026 && cleanName.toLowerCase().indexOf("pokojsk") !== -1)) {
       continue;
     }
 
@@ -5257,8 +5314,8 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
       continue;
     }
 
-    // Przypisz grupę: z mapy wierszy lub bieżącej wykrytej grupy
-    var userGroup = groupsByRow[rowNum] || currentGroup;
+    // Przypisz grupę: z bieżącej wykrytej grupy w arkuszu lub mapy wierszy
+    var userGroup = currentGroup || groupsByRow[rowNum] || wyznaczGrupeParafialna(cleanName, "");
 
     var komorki = [];
     var normClean = cleanName.toLowerCase().trim();
@@ -5290,17 +5347,53 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
 
     var rawSuma = sumaValues[r][0];
     var pts = parseFloat(rawSuma);
-    if (isNaN(pts)) pts = 0;
+    var computedFromKomorki = komorki.reduce(function(acc, c) {
+      var v = c.wartosc;
+      if (typeof v === "number") return acc + v;
+      if (typeof v === "string") {
+        var p = parseFloat(v.replace(",", "."));
+        if (!isNaN(p)) return acc + p;
+      }
+      return acc;
+    }, 0);
+    if (isNaN(pts) || pts === 0) {
+      pts = computedFromKomorki;
+    }
+
+    var rawStalyDzien = (colC[r + 2] && colC[r + 2][0]) ? colC[r + 2][0].toString().trim().toUpperCase() : "";
+    var stalyDzienNum = -1;
+    if (rawStalyDzien.indexOf("PN") !== -1) stalyDzienNum = 1;
+    else if (rawStalyDzien.indexOf("WT") !== -1) stalyDzienNum = 2;
+    else if (rawStalyDzien.indexOf("ŚR") !== -1 || rawStalyDzien.indexOf("SR") !== -1) stalyDzienNum = 3;
+    else if (rawStalyDzien.indexOf("CZW") !== -1) stalyDzienNum = 4;
+    else if (rawStalyDzien.indexOf("PT") !== -1) stalyDzienNum = 5;
+    else if (rawStalyDzien.indexOf("SB") !== -1) stalyDzienNum = 6;
+    else if (rawStalyDzien.indexOf("ND") !== -1) stalyDzienNum = 0;
 
     wiersze.push({
       nazwisko: cleanName,
       grupa: userGroup,
       stopien: stopienInfo.stopien,
       stopienRanga: stopienInfo.ranga,
+      stalyDzien: rawStalyDzien,
+      stalyDzienTygodnia: stalyDzienNum,
       komorki: komorki,
       suma: Math.round(pts * 10) / 10
     });
   }
+
+  // Uporządkuj wiersze wg stałej kolejności grup (I, II, III, IV)
+  var kolejnośćGrupWiersze = {
+    "I GRUPA (CZERWONA)": 1,
+    "II GRUPA (POMARAŃCZOWA)": 2,
+    "III GRUPA (ZIELONA)": 3,
+    "IV GRUPA (ŻÓŁTA)": 4
+  };
+  wiersze.sort(function(a, b) {
+    var ga = kolejnośćGrupWiersze[a.grupa] || 99;
+    var gb = kolejnośćGrupWiersze[b.grupa] || 99;
+    return ga - gb;
+  });
 
   var rankingiInfo = null;
   try {
@@ -5409,6 +5502,30 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
     godzinyGrup = rotowaneGodziny;
   }
 
+  var rMiesiac = (rankingiInfo && rankingiInfo.rankingMiesiac) || [];
+  rMiesiac = rMiesiac.filter(function(r) {
+    var n = (r.nazwisko || "").toLowerCase().trim();
+    return n && n !== "kościelny" && n !== "koscielny" && n.indexOf("pokojsk") === -1;
+  });
+  var czyWszystkieZera = rMiesiac.length === 0 || rMiesiac.every(function(x) { return !x.punkty; });
+  if (czyWszystkieZera && wiersze.length > 0) {
+    rMiesiac = wiersze.filter(function(w) {
+      var n = (w.nazwisko || "").toLowerCase().trim();
+      return n && n !== "kościelny" && n !== "koscielny" && n.indexOf("pokojsk") === -1;
+    }).map(function(w) {
+      return {
+        nazwisko: w.nazwisko,
+        punkty: w.suma || 0,
+        grupa: w.grupa
+      };
+    }).sort(function(a, b) { return b.punkty - a.punkty; });
+    var pPoz = 1;
+    rMiesiac.forEach(function(r, idx) {
+      if (idx > 0 && r.punkty < rMiesiac[idx - 1].punkty) pPoz = idx + 1;
+      r.pozycja = pPoz;
+    });
+  }
+
   var wynik = {
     sukces: true,
     sheetName: sheetName,
@@ -5421,8 +5538,8 @@ function pobierzPelnaTabeleMiesiaca(nazwaMiesiaca, optionalSs) {
     grupy: unikalneGrupy,
     godzinyGrup: godzinyGrup,
     wiersze: wiersze,
-    ranking: (rankingiInfo && rankingiInfo.rankingMiesiac) || [],
-    rankingMiesiac: (rankingiInfo && rankingiInfo.rankingMiesiac) || [],
+    ranking: rMiesiac,
+    rankingMiesiac: rMiesiac,
     rankingRok: (rankingiInfo && rankingiInfo.rankingRok) || (fsExisting && fsExisting.rankingRok) || [],
     rankingMinusy: (fsExisting && fsExisting.rankingMinusy) || (rankingiInfo && rankingiInfo.rankingMinusy) || [],
     rankingMinusyRok: (fsExisting && fsExisting.rankingMinusyRok) || (fsExisting && fsExisting.rankingMinusy) || (rankingiInfo && rankingiInfo.rankingMinusy) || [],
@@ -6001,14 +6118,21 @@ function naprawJakubBrytnerIPogrzeb() {
 }
 
 function wyznaczGrupeParafialna(nazwisko, grupa) {
-  if (grupa && (grupa.indexOf('CZERWON') !== -1 || grupa.indexOf('POMARAŃCZ') !== -1 || grupa.indexOf('POMARANCZ') !== -1 || grupa.indexOf('ZIELON') !== -1 || grupa.indexOf('ŻÓŁT') !== -1 || grupa.indexOf('ZOLT') !== -1)) {
-    return grupa;
+  if (grupa && typeof grupa === 'string') {
+    var gUp = grupa.toUpperCase().trim();
+    if (gUp.indexOf('POMARAŃCZ') !== -1 || gUp.indexOf('POMARANCZ') !== -1 || /\bII\b|\bII GRUPA\b|^II\s/.test(gUp)) return 'II GRUPA (POMARAŃCZOWA)';
+    if (gUp.indexOf('ZIELON') !== -1 || /\bIII\b|\bIII GRUPA\b|^III\s/.test(gUp)) return 'III GRUPA (ZIELONA)';
+    if (gUp.indexOf('ŻÓŁT') !== -1 || gUp.indexOf('ZOLT') !== -1 || /\bIV\b|\bIV GRUPA\b|^IV\s/.test(gUp)) return 'IV GRUPA (ŻÓŁTA)';
+    if (gUp.indexOf('CZERWON') !== -1 || /\bI\b|\bI GRUPA\b|^I\s/.test(gUp)) return 'I GRUPA (CZERWONA)';
   }
-  var n = (nazwisko || '').toLowerCase();
-  if (/maks|pier[sś]|radli|wiktor/.test(n)) return 'I GRUPA (CZERWONA)';
-  if (/maciej|pokojsk|skrzypek|rafał|rafal/.test(n)) return 'II GRUPA (POMARAŃCZOWA)';
-  if (/kupiec|g[łl]az|miko[łl]|brytner|kik/.test(n)) return 'III GRUPA (ZIELONA)';
-  if (/micha[łl]s*danielczok|mazurkiewicz|czech|rozik/.test(n)) return 'IV GRUPA (ŻÓŁTA)';
+  var n = (nazwisko || '').toLowerCase().trim();
+  if (!n) return 'I GRUPA (CZERWONA)';
+  if (/maks|pier[sś]|radli|pszcz/.test(n)) return 'I GRUPA (CZERWONA)';
+  if (/maciej|skrzypek|rafa[łl]|pokojsk/.test(n)) return 'II GRUPA (POMARAŃCZOWA)';
+  if (/kupiec|g[łl]az|brytner|kik/.test(n)) return 'III GRUPA (ZIELONA)';
+  if (/danielczok|mazurkiewicz|czech|rozik|matuszczyk/.test(n)) return 'IV GRUPA (ŻÓŁTA)';
+  if (/wiktor/.test(n)) return 'I GRUPA (CZERWONA)';
+  if (/miko[łl]/.test(n)) return 'II GRUPA (POMARAŃCZOWA)';
   return 'I GRUPA (CZERWONA)';
 }
 
@@ -6206,6 +6330,111 @@ function naprawPunktyDnia11() {
   SpreadsheetApp.flush();
   var syncRes = synchronizujDoFirestore(ss);
   return { sukces: true, zmieniono: cellsChanged, sync: syncRes };
+}
+
+function naprawPunktyDnia9() {
+  var ss = pobierzAktywnyArkusz();
+  var sheet = ss.getSheetByName("Październik_2026") || ss.getSheetByName("Pazdziernik_2026") || ss.getSheetByName("Październik");
+  if (!sheet) return { sukces: false, wiadomosc: "Brak arkusza Październik_2026" };
+
+  var maxRows = Math.min(sheet.getLastRow(), 45);
+  var colB = sheet.getRange(1, 2, maxRows, 1).getValues();
+  var col9 = 9 + 3; // Kolumna L (Dzień 9)
+  var cellsChanged = [];
+
+  for (var r = 0; r < maxRows; r++) {
+    var rawName = (colB[r][0] || "").toString().trim();
+    if (!rawName) continue;
+    var rowIdx = r + 1;
+
+    // Maciej Erich: 7 pkt (5 pkt msza + 2 pkt nabożeństwo)
+    if (czyToTenSamMinistrant(rawName, "Maciej Erich")) {
+      var cellM = sheet.getRange(rowIdx, col9);
+      var oldValM = cellM.getValue();
+      cellM.setValue(7);
+      cellM.setNote("Msza św. (18:00) + Nabożeństwo różańcowe (17:15) (+7 pkt)");
+      cellsChanged.push({ nazwisko: "Maciej Erich", przed: oldValM, po: 7 });
+    }
+
+    // Emil Czech: 7 pkt (5 pkt msza + 2 pkt nabożeństwo)
+    if (czyToTenSamMinistrant(rawName, "Emil Czech")) {
+      var cellE = sheet.getRange(rowIdx, col9);
+      var oldValE = cellE.getValue();
+      cellE.setValue(7);
+      cellE.setNote("Msza św. (18:00) + Nabożeństwo różańcowe (17:15) (+7 pkt)");
+      cellsChanged.push({ nazwisko: "Emil Czech", przed: oldValE, po: 7 });
+    }
+
+    // Mateusz Pierścieński: -5 pkt (nieobecny na mszy)
+    if (czyToTenSamMinistrant(rawName, "Mateusz Pierścieński") || czyToTenSamMinistrant(rawName, "Mateusz Pierscienski")) {
+      var cellP = sheet.getRange(rowIdx, col9);
+      var oldValP = cellP.getValue();
+      cellP.setValue(-5);
+      cellP.setNote("Msza św. (18:00) Nieobecny (-5 pkt)");
+      cellsChanged.push({ nazwisko: "Mateusz Pierścieński", przed: oldValP, po: -5 });
+    }
+
+    // Jakub Brytner: 4 pkt (2 pkt msza dodatkowa + 2 pkt nabożeństwo)
+    if (czyToTenSamMinistrant(rawName, "Jakub Brytner")) {
+      var cellJ = sheet.getRange(rowIdx, col9);
+      var oldValJ = cellJ.getValue();
+      cellJ.setValue(4);
+      cellJ.setNote("Służył dodatkowo (18:00) + Nabożeństwo różańcowe (17:15) (+4 pkt)");
+      cellsChanged.push({ nazwisko: "Jakub Brytner", przed: oldValJ, po: 4 });
+    }
+  }
+
+  SpreadsheetApp.flush();
+  var syncRes = synchronizujDoFirestore(ss);
+  return { sukces: true, zmieniono: cellsChanged, sync: syncRes };
+}
+
+function naprawWszystkiePunktyTygodnia() {
+  var ss = pobierzAktywnyArkusz();
+  var sheet = ss.getSheetByName("Październik_2026") || ss.getSheetByName("Pazdziernik_2026") || ss.getSheetByName("Październik");
+  if (!sheet) return { sukces: false, wiadomosc: "Brak arkusza Październik_2026" };
+
+  var maxRows = Math.min(sheet.getLastRow(), 45);
+  var colB = sheet.getRange(1, 2, maxRows, 1).getValues();
+
+  var punktyDni = {
+    1: { "Jan Radliński": 7, "Rafał Danielczok": 7, "Marcel Mazurkiewicz": -5, "Bartosz Rozik": 7, "Jakub Brytner": 4, "Franek Kik": 4 },
+    2: { "Maciej Erich": 7, "Emil Czech": 7, "Mateusz Pierścieński": -5 },
+    3: { "Maciej Erich": 4, "Ksawery Skrzypek": 3, "Rafał Danielczok": 1 },
+    4: { "Maks Erich": 0, "Mateusz Pierścieński": 3, "Jan Radliński": 3, "Wiktor Kowalski": 1, "Maciej Erich": 3, "Michał Kupiec": 3, "Paweł Głaz": -5, "Mikołaj Erich": 3, "Jakub Brytner": 3, "Franek Kik": 6, "Michał Danielczok": 3, "Marcel Mazurkiewicz": -5, "Emil Czech": 6, "Bartosz Rozik": 0 },
+    5: { "Jakub Brytner": 5 },
+    6: { "Ksawery Skrzypek": 7, "Maciej Erich": 6, "Franek Kik": 7, "Maks Erich": 5, "Michał Kupiec": -5, "Mikołaj Erich": 1 },
+    8: { "Jan Radliński": 7, "Rafał Danielczok": 7, "Bartosz Rozik": 7, "Marcel Mazurkiewicz": -5 },
+    9: { "Maciej Erich": 7, "Emil Czech": 7, "Jakub Brytner": 4, "Mateusz Pierścieński": -5 },
+    10: { "Maciej Erich": 5, "Ksawery Skrzypek": 5, "Rafał Danielczok": 5 }
+  };
+
+  var zmieniono = [];
+
+  for (var r = 0; r < maxRows; r++) {
+    var rawName = (colB[r][0] || "").toString().trim();
+    if (!rawName) continue;
+    var rowIdx = r + 1;
+
+    for (var day = 1; day <= 10; day++) {
+      var mapaDnia = punktyDni[day];
+      if (!mapaDnia) continue;
+
+      for (var targetName in mapaDnia) {
+        if (czyToTenSamMinistrant(rawName, targetName)) {
+          var targetCol = day + 3; // Kolumna D to dzień 1
+          var cell = sheet.getRange(rowIdx, targetCol);
+          var val = mapaDnia[targetName];
+          cell.setValue(val);
+          zmieniono.push({ dzien: day, nazwisko: targetName, punkty: val });
+        }
+      }
+    }
+  }
+
+  SpreadsheetApp.flush();
+  var syncRes = synchronizujDoFirestore(ss);
+  return { sukces: true, zmienionoCount: zmieniono.length, zmieniono: zmieniono, sync: syncRes };
 }
 
 function korektaPunktowNiedzielaITydzien() {
@@ -6439,5 +6668,145 @@ function poprawGodzinyLiturgii() {
   };
 }
 
+function naprawUkladPazdziernikWSkoroszycie() {
+  var ss = pobierzAktywnyArkusz();
+  var sheet = ss.getSheetByName("Październik_2026") || ss.getSheetByName("Pazdziernik_2026") || ss.getSheetByName("Październik");
+  if (!sheet) return { sukces: false, wiadomosc: "Brak arkusza Październik_2026" };
 
+  var maxCols = Math.min(sheet.getLastColumn(), 45);
 
+  // Zabezpieczenie danych
+  // Wiersz 17: Mikołaj Erich
+  // Wiersz 18: Jakub Brytner
+  // Wiersz 19: Franek Kik
+  var mikolajValues = sheet.getRange(17, 1, 1, maxCols).getValues()[0];
+  var mikolajFormulas = sheet.getRange(17, 1, 1, maxCols).getFormulas()[0];
+  var mikolajBgs = sheet.getRange(17, 1, 1, maxCols).getBackgrounds()[0];
+  var mikolajNotes = sheet.getRange(17, 1, 1, maxCols).getNotes()[0];
+
+  var brytnerValues = sheet.getRange(18, 1, 1, maxCols).getValues()[0];
+  var brytnerFormulas = sheet.getRange(18, 1, 1, maxCols).getFormulas()[0];
+  var brytnerBgs = sheet.getRange(18, 1, 1, maxCols).getBackgrounds()[0];
+  var brytnerNotes = sheet.getRange(18, 1, 1, maxCols).getNotes()[0];
+
+  var kikValues = sheet.getRange(19, 1, 1, maxCols).getValues()[0];
+  var kikFormulas = sheet.getRange(19, 1, 1, maxCols).getFormulas()[0];
+  var kikBgs = sheet.getRange(19, 1, 1, maxCols).getBackgrounds()[0];
+  var kikNotes = sheet.getRange(19, 1, 1, maxCols).getNotes()[0];
+
+  // 1. Wpisz Mikołaja Ericha do Wiersza 10 (II Grupa, Lp. 2 - po Macieju Erichu)
+  mikolajValues[0] = 2; // Lp. 2
+  mikolajValues[1] = "Mikołaj Erich - Lektor";
+  mikolajValues[2] = "WT";
+  for (var c = 0; c < maxCols; c++) {
+    var cell10 = sheet.getRange(10, c + 1);
+    if (mikolajFormulas[c]) {
+      var f10 = mikolajFormulas[c].replace(/17/g, "10");
+      cell10.setFormula(f10);
+    } else {
+      cell10.setValue(mikolajValues[c]);
+    }
+    if (mikolajBgs[c]) cell10.setBackground(mikolajBgs[c]);
+    if (mikolajNotes[c]) cell10.setNote(mikolajNotes[c]);
+  }
+
+  // 2. Wpisz Jakuba Brytnera do Wiersza 17 (III Grupa, Lp. 3)
+  brytnerValues[0] = 3; // Lp. 3
+  for (var c = 0; c < maxCols; c++) {
+    var cell17 = sheet.getRange(17, c + 1);
+    if (brytnerFormulas[c]) {
+      var f17 = brytnerFormulas[c].replace(/18/g, "17");
+      cell17.setFormula(f17);
+    } else {
+      cell17.setValue(brytnerValues[c]);
+    }
+    if (brytnerBgs[c]) cell17.setBackground(brytnerBgs[c]);
+    if (brytnerNotes[c]) cell17.setNote(brytnerNotes[c]);
+  }
+
+  // 3. Wpisz Franka Kika do Wiersza 18 (III Grupa, Lp. 4)
+  kikValues[0] = 4; // Lp. 4
+  for (var c = 0; c < maxCols; c++) {
+    var cell18 = sheet.getRange(18, c + 1);
+    if (kikFormulas[c]) {
+      var f18 = kikFormulas[c].replace(/19/g, "18");
+      cell18.setFormula(f18);
+    } else {
+      cell18.setValue(kikValues[c]);
+    }
+    if (kikBgs[c]) cell18.setBackground(kikBgs[c]);
+    if (kikNotes[c]) cell18.setNote(kikNotes[c]);
+  }
+
+  // 4. Wyczyść Wiersz 19 (po przeniesieniu Franka Kika na wiersz 18)
+  sheet.getRange(19, 1, 1, maxCols).clearContent().clearNote().setBackground("#ffffff");
+
+  // 5. Usuń Mateusza Pokojskiego z arkusza Uzytkownicy
+  var uSheet = ss.getSheetByName("Uzytkownicy");
+  if (uSheet) {
+    var uLast = uSheet.getLastRow();
+    if (uLast >= 2) {
+      var uNames = uSheet.getRange(2, 1, uLast - 1, 1).getValues();
+      for (var ur = uNames.length - 1; ur >= 0; ur--) {
+        var un = (uNames[ur][0] || "").toString().toLowerCase().trim();
+        if (un.indexOf("pokojsk") !== -1) {
+          uSheet.deleteRow(ur + 2);
+        }
+      }
+    }
+  }
+
+  SpreadsheetApp.flush();
+  var syncRes = synchronizujDoFirestore(ss);
+  return { sukces: true, wiadomosc: "Pomyślnie zaktualizowano układ wierszy w arkuszu i zsynchronizowano z Firestore!", sync: syncRes };
+}
+
+function naprawKoloryDyzurPazdziernik() {
+  var ss = pobierzAktywnyArkusz();
+  var sheet = ss.getSheetByName("Październik_2026") || ss.getSheetByName("Pazdziernik_2026") || ss.getSheetByName("Październik");
+  if (!sheet) return { sukces: false, wiadomosc: "Brak arkusza Październik_2026" };
+
+  var dyzuryMap = {
+    "Maks Erich": [4, 6, 11, 13, 18, 20, 25, 27],
+    "Mateusz Pierścieński": [2, 4, 9, 11, 16, 18, 23, 25, 30],
+    "Jan Radliński": [1, 4, 8, 11, 15, 18, 22, 25, 29],
+    "Wiktor Kowalski": [4, 11, 18, 25],
+    "Maciej Erich": [2, 3, 9, 10, 16, 17, 23, 24, 30, 31],
+    "Mikołaj Erich": [3, 6, 10, 13, 17, 20, 24, 27, 31],
+    "Ksawery Skrzypek": [3, 6, 10, 13, 17, 20, 24, 27, 31],
+    "Rafał Danielczok": [1, 3, 8, 10, 15, 17, 22, 24, 29, 31],
+    "Michał Kupiec": [4, 6, 11, 13, 18, 20, 25, 27],
+    "Paweł Głaz": [4, 11, 18, 25],
+    "Jakub Brytner": [4, 5, 11, 12, 18, 19, 25, 26],
+    "Franek Kik": [4, 6, 11, 13, 18, 20, 25, 27],
+    "Michał Danielczok": [4, 11, 18, 25],
+    "Marcel Mazurkiewicz": [1, 4, 8, 11, 15, 18, 22, 25, 29],
+    "Emil Czech": [2, 4, 9, 11, 16, 18, 23, 25, 30],
+    "Bartosz Rozik": [1, 4, 8, 11, 15, 18, 22, 25, 29]
+  };
+
+  var maxRows = Math.min(sheet.getLastRow(), 35);
+  var colB = sheet.getRange(1, 2, maxRows, 1).getValues();
+
+  for (var r = 0; r < maxRows; r++) {
+    var rawName = (colB[r][0] || "").toString().trim();
+    if (!rawName) continue;
+    var rowIdx = r + 1;
+
+    for (var targetName in dyzuryMap) {
+      if (czyToTenSamMinistrant(rawName, targetName)) {
+        var dyzuryArr = dyzuryMap[targetName];
+        var rowBgs = [];
+        for (var d = 1; d <= 31; d++) {
+          rowBgs.push(dyzuryArr.indexOf(d) !== -1 ? "#c6efce" : "#ffffff");
+        }
+        sheet.getRange(rowIdx, 4, 1, 31).setBackgrounds([rowBgs]);
+        break;
+      }
+    }
+  }
+
+  SpreadsheetApp.flush();
+  var syncRes = synchronizujDoFirestore(ss);
+  return { sukces: true, wiadomosc: "Pomyślnie zaktualizowano kolory tła dyżurów w arkuszu Październik_2026 i zsynchronizowano z Firestore!", sync: syncRes };
+}
