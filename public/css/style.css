@@ -1,0 +1,1360 @@
+:root {
+      --background: #09090b;
+      --foreground: #fafafa;
+      --card: #18181b;
+      --card-foreground: #fafafa;
+      --popover: #18181b;
+      --popover-foreground: #fafafa;
+      --primary: #fafafa;
+      --primary-foreground: #09090b;
+      --secondary: #27272a;
+      --secondary-foreground: #fafafa;
+      --muted: #27272a;
+      --muted-foreground: #a1a1aa;
+      --accent: #27272a;
+      --accent-foreground: #fafafa;
+      --destructive: #7f1d1d;
+      --destructive-foreground: #fca5a5;
+      --border: #27272a;
+      --input: #27272a;
+      --ring: #3f3f46;
+      --radius: 8px;
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --text-main: #fafafa;
+      --text-muted: #a1a1aa;
+      --text-sub: #71717a;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #09090b;
+      color: #fafafa;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 12px 24px 12px;
+    }
+
+    /* Pasek górny aplikacji */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #09090b;
+      border-bottom: 1px solid #27272a;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .app-header img {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid #27272a;
+    }
+    .app-header-text h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fafafa;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .app-header-text p {
+      margin: 2px 0 0 0;
+      font-size: 12px;
+      color: #71717a;
+    }
+
+    /* Karty aplikacji (bg-zinc-900 border border-zinc-800 rounded-lg) */
+    .card {
+      background: #121215;
+      border: 1px solid rgba(39, 39, 42, 0.8);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      color: #fafafa;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Hero - Najbliższa służba */
+    .card-hero {
+      background: #121215;
+      color: #fafafa;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-left: 3px solid #10b981;
+      box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.12);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .hero-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #34d399;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+    .hero-subtitle {
+      font-size: 13px;
+      color: #a1a1aa;
+      font-weight: 400;
+    }
+
+    /* Kafelki punktów (shadcn Dark Metric Cards) */
+    .points-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .point-tile {
+      background: rgba(9, 9, 11, 0.65);
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 12px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+      color: #fafafa;
+    }
+    .point-tile:hover {
+      border-color: #3f3f46;
+      background: #18181b;
+    }
+    .tile-current, .tile-year, .tile-minus {
+      background: rgba(9, 9, 11, 0.65);
+      border: 1px solid #27272a;
+    }
+    .point-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .point-val {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: #ffffff;
+    }
+    .tile-minus .point-val {
+      color: #fb7185;
+    }
+    .point-unit {
+      font-size: 11px;
+      font-weight: 400;
+      color: #71717a;
+      margin-top: 2px;
+    }
+
+    /* Formularze i inputy (shadcn Input) */
+    h1, h2, h3, h4 {
+      margin-top: 0;
+      color: #fafafa;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    h2 { font-size: 16px; margin-bottom: 12px; }
+    h3 { font-size: 14px; margin-bottom: 8px; }
+
+    .section-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: #a1a1aa;
+      margin-bottom: 6px;
+    }
+
+    select, input[type="text"], input[type="password"], input[type="date"], input[type="time"] {
+      width: 100%;
+      padding: 9px 12px;
+      margin: 6px 0 12px 0;
+      border: 1px solid #27272a;
+      background: #18181b;
+      color: #fafafa;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    select:focus, input:focus {
+      border-color: #52525b;
+      box-shadow: 0 0 0 1px #52525b;
+    }
+    select option {
+      background: #18181b;
+      color: #fafafa;
+    }
+
+    /* Przyciski w stylu shadcn/ui */
+    button {
+      font-family: inherit;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      box-sizing: border-box;
+      user-select: none;
+      font-weight: 500;
+    }
+
+    /* Główny przycisk akcji: odwrócony kontrast (bg-zinc-100 text-zinc-900) */
+    .btn-primary, .btn-action {
+      background: #fafafa;
+      color: #09090b;
+      border: 1px solid #fafafa;
+      font-weight: 600;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    button:not([class]):not(.close-btn):not(.tabela-badge) {
+      background: #27272a;
+      color: #fafafa;
+      border: 1px solid #3f3f46;
+      font-weight: 500;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .btn-primary:hover, .btn-push-enable {
+      background: #27272a;
+      color: #fafafa !important;
+      border: 1px solid #52525b;
+      border-radius: 6px;
+      font-weight: 600;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-push-enable:hover {
+      background: #3f3f46;
+      border-color: #71717a;
+      color: #ffffff !important;
+    }
+
+    .btn-gielda-cta {
+      background: #27272a;
+      color: #e4e4e7;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-gielda-cta:hover {
+      background: #3f3f46;
+      color: #ffffff;
+      border-color: #52525b;
+    }
+    .btn-action:hover, button:not([class]):not(.close-btn):not(.tabela-badge):hover {
+      background: #3f3f46;
+      border-color: #52525b;
+      color: #ffffff;
+    }
+
+    /* Przycisk drugorzędny: ciemny z subtelnym obramowaniem */
+    .tab-bar {
+      display: flex;
+      background: #18181b;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #27272a;
+      gap: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #d4d4d8 !important;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .tab-btn:hover {
+      color: #ffffff !important;
+      background: rgba(39, 39, 42, 0.6);
+    }
+    .tab-btn.active {
+      background: #27272a !important;
+      color: #ffffff !important;
+      border-color: #6366f1 !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: #18181b;
+      color: #fafafa;
+      border: 1px solid #27272a;
+      font-weight: 500;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .btn-secondary:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+
+    /* Ghost/outline nav buttons (HUD) */
+    .btn-ghost {
+      background: #18181b;
+      color: #d4d4d8;
+      border: 1px solid #27272a;
+      font-weight: 500;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-ghost:hover {
+      background: #27272a;
+      color: #ffffff;
+      border-color: #3f3f46;
+    }
+    .btn-ghost.active {
+      background: #27272a;
+      color: #fafafa;
+      border-color: #52525b;
+    }
+
+    /* Przycisk anulowania / usunięcia */
+    .btn-cancel {
+      background: rgba(127, 29, 29, 0.35);
+      color: #fca5a5;
+      border: 1px solid rgba(185, 28, 28, 0.5);
+      font-weight: 500;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .btn-cancel:hover {
+      background: rgba(127, 29, 29, 0.55);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed !important;
+    }
+
+    /* PWA Banery */
+    #install-banner {
+      display: none;
+      background: #18181b;
+      color: #fafafa;
+      border: 1px solid #27272a;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #install-banner span { font-size: 13px; font-weight: 500; }
+    #install-banner button {
+      width: auto;
+      background: #18181b;
+      color: #09090b;
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Przycisk Różaniec / Nabożeństwo w Zakrystii */
+    .btn-rozaniec-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #27272a;
+      color: #d8b4fe;
+      border: 1px solid #3f3f46;
+      transition: all 0.15s ease;
+    }
+    .btn-rozaniec-toggle:hover {
+      background: #3f3f46;
+      color: #fafafa;
+    }
+    .btn-rozaniec-toggle.active {
+      background: rgba(168, 85, 247, 0.25);
+      color: #f3e8ff;
+      border: 1px solid #c084fc;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.35);
+    }
+    .zakrystia-card.is-rozaniec {
+      border-left: 4px solid #c084fc;
+      background: rgba(168, 85, 247, 0.04);
+    }
+
+    #ios-install-banner {
+      display: none;
+      background: #18181b;
+      border: 1px solid #27272a;
+      color: #fafafa;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      line-height: 1.4;
+      position: relative;
+    }
+    #ios-install-banner .close-btn {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #71717a;
+    }
+
+    /* Giełda i Oferty */
+    .card-action {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: #fafafa;
+    }
+    .card-action:hover {
+      border-color: #3f3f46;
+      background: #27272a;
+    }
+    .label-text { display: flex; flex-direction: column; line-height: 1.25; white-space: nowrap; }
+    .label-date { font-weight: 500; }
+    .label-day { font-size: 12px; color: #a1a1aa; }
+
+    .oferta-box {
+      border: 1px solid #27272a;
+      border-left: 3px solid #3f3f46;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background: #18181b;
+      color: #fafafa;
+      transition: border-color 0.15s ease;
+    }
+    .oferta-box:hover {
+      border-color: #3f3f46;
+    }
+    .oferta-box.oferta-tydzien {
+      border-left-color: #3b82f6;
+    }
+    .oferta-box.oferta-weekend {
+      border-left-color: #a855f7;
+    }
+    .badge-count {
+      background: #27272a;
+      color: #d4d4d8;
+      border: 1px solid #3f3f46;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
+    }
+    .badge-gielda {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-gielda-tydzien {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .badge-gielda-weekend {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .gielda-filter-bar {
+      display: flex;
+      gap: 6px;
+      margin: 10px 0 14px 0;
+      flex-wrap: wrap;
+    }
+    .gielda-filter-btn {
+      background: #18181b;
+      border: 1px solid #27272a;
+      color: #a1a1aa;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .gielda-filter-btn:hover {
+      background: #27272a;
+      color: #fafafa;
+    }
+    .gielda-filter-btn.active {
+      background: #27272a !important;
+      border-color: #6366f1 !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+    .gielda-filter-btn .count-pill {
+      background: #27272a;
+      color: #d4d4d8;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .gielda-filter-btn.active .count-pill {
+      background: #4f46e5 !important;
+      color: #ffffff !important;
+    }
+
+    /* Karta wolnych zastępstw (+4 pkt) */
+    .zastepstwo-box {
+      border: 1px solid #27272a;
+      border-left: 3px solid #22c55e;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background: #18181b;
+      color: #fafafa;
+      position: relative;
+    }
+    .badge-plus4 {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.02em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .btn-wez-dyzur {
+      background: #18181b;
+      color: #fafafa;
+      font-weight: 500;
+      font-size: 13px;
+      border: 1px solid #fafafa;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-wez-dyzur:hover {
+      background: #e4e4e7;
+    }
+    .btn-oddaj-dyzur {
+      background: rgba(76, 5, 25, 0.4);
+      color: #fb7185;
+      border: 1px solid rgba(159, 18, 57, 0.5);
+      font-weight: 500;
+      font-size: 12px;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin: 0;
+      width: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .btn-oddaj-dyzur:hover {
+      background: rgba(76, 5, 25, 0.65);
+    }
+
+    .dyzur-pulpit-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid #27272a;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: #18181b;
+      gap: 10px;
+      color: #fafafa;
+    }
+    .dyzur-pulpit-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .dyzur-pulpit-data {
+      font-weight: 500;
+      font-size: 13px;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+    .dyzur-pulpit-opis {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-top: 1px;
+    }
+
+    /* Karta powiadomień Push */
+    .push-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: #fafafa;
+    }
+    .push-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .push-title {
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #fafafa;
+    }
+    .push-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .push-badge.active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .push-badge.warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .push-badge.inactive { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .push-desc { font-size: 12px; color: #a1a1aa; line-height: 1.4; margin: 0; }
+
+    /* Modale */
+    body.modal-open {
+      overflow: hidden !important;
+      touch-action: none;
+    }
+    .modal-overlay, .shadcn-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      box-sizing: border-box;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-content, .shadcn-modal-card {
+      background: #18181b !important;
+      border: 1px solid #27272a !important;
+      border-radius: 8px !important;
+      padding: 20px !important;
+      max-width: 460px;
+      width: 100%;
+      text-align: left;
+      color: #fafafa !important;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+      box-sizing: border-box;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #71717a;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+    .close-btn:hover {
+      color: #fafafa;
+    }
+
+    /* Toast */
+    #toast {
+      visibility: hidden;
+      opacity: 0;
+      min-width: 260px;
+      max-width: 90vw;
+      background-color: #18181b;
+      color: #fafafa;
+      border: 1px solid #3f3f46;
+      border-left: 4px solid #10b981;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px 20px;
+      position: fixed;
+      z-index: 100000;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.7);
+      transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+      pointer-events: none;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Odznaki na kafelkach */
+    .point-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 1px 7px;
+      border-radius: 4px;
+      margin-top: 6px;
+      display: inline-block;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    .badge-rank-gold { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+    .badge-rank-silver { background: #27272a; color: #fafafa; border: 1px solid #3f3f46; }
+    .badge-rank-bronze { background: rgba(251, 146, 60, 0.15); color: #fb923c; border: 1px solid rgba(251, 146, 60, 0.3); }
+    .badge-rank-normal { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
+    .badge-clean { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .badge-minus-warn { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* Ranking */
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      color: #fafafa;
+    }
+    .ranking-table th {
+      background: #18181b;
+      padding: 8px 10px;
+      text-align: left;
+      font-weight: 600;
+      color: #a1a1aa;
+      border-bottom: 1px solid #27272a;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .ranking-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #27272a;
+      vertical-align: middle;
+    }
+    .ranking-table tr:hover {
+      background: #27272a;
+    }
+    .ranking-row-user {
+      background: rgba(250, 250, 250, 0.05) !important;
+      font-weight: 600;
+    }
+    .ranking-row-user td:first-child {
+      border-left: 3px solid #fafafa;
+    }
+    .ranking-podium-1 { background: rgba(234, 179, 8, 0.08); }
+    .ranking-podium-2 { background: rgba(244, 244, 245, 0.04); }
+    .ranking-podium-3 { background: rgba(251, 146, 60, 0.08); }
+    .tag-you {
+      font-size: 10px;
+      background: #18181b;
+      color: #09090b;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      font-weight: 600;
+    }
+
+    /* Odznaki profilu */
+    .badge-showcase-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #3f3f46;
+      background: rgba(39, 39, 42, 0.6);
+      color: #e4e4e7;
+      transition: all 0.15s ease;
+    }
+    .badge-showcase-item:hover {
+      border-color: #52525b;
+      background: #27272a;
+    }
+    .badge-showcase-item.in-progress {
+      background: rgba(6, 182, 212, 0.05) !important;
+      border-color: rgba(6, 182, 212, 0.28) !important;
+    }
+    .badge-showcase-item.in-progress .badge-icon {
+      color: #38bdf8 !important;
+    }
+    .badge-showcase-item.in-progress .badge-icon-box {
+      background: rgba(6, 182, 212, 0.12) !important;
+      border-color: rgba(6, 182, 212, 0.3) !important;
+    }
+    .badge-showcase-item.in-progress .badge-status-pill {
+      background: rgba(6, 182, 212, 0.12) !important;
+      color: #38bdf8 !important;
+      border: 1px solid rgba(6, 182, 212, 0.35) !important;
+    }
+    .badge-showcase-item.unlocked {
+      background: rgba(16, 185, 129, 0.12) !important;
+      border-color: rgba(16, 185, 129, 0.35) !important;
+      color: #d1fae5 !important;
+    }
+    .badge-showcase-item.unlocked .badge-icon {
+      color: #34d399 !important;
+    }
+    .badge-showcase-item.failed .badge-icon {
+      color: #f87171 !important;
+    }
+    .badge-showcase-item.unlocked .badge-icon-box {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+    }
+    .badge-showcase-item.unlocked .badge-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+      gap: 8px !important;
+    }
+    .link-ranking-subtle {
+      font-size: 11px;
+      color: #a1a1aa;
+      background: transparent;
+      border: 0;
+      padding: 0 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+    .link-ranking-subtle:hover {
+      color: #ffffff;
+    }
+
+    .badge-status-pill {
+      flex-shrink: 0 !important;
+      font-size: 11px !important;
+      padding: 3px 10px !important;
+      border-radius: 6px !important;
+      background: rgba(39, 39, 42, 0.8) !important;
+      color: #a1a1aa !important;
+      border: 1px solid #3f3f46 !important;
+      white-space: nowrap !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: auto !important;
+      max-width: none !important;
+      position: static !important;
+      box-sizing: border-box !important;
+      line-height: 1.2 !important;
+    }
+    .badge-showcase-item.failed {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+      color: #fecaca !important;
+    }
+    .badge-showcase-item.failed .badge-icon-box {
+      background: rgba(239, 68, 68, 0.15) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    .badge-showcase-item.failed .badge-status-pill {
+      background: rgba(239, 68, 68, 0.15) !important;
+      color: #f87171 !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    .clickable-row {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+    .clickable-row:hover {
+      background-color: #27272a !important;
+    }
+
+    /* Globalny spinner */
+    #global-spinner {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 999999;
+      display: none;
+      opacity: 0;
+      pointer-events: none;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.25s ease;
+    }
+    #global-spinner.widoczny {
+      display: flex !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    .spinner-box {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 24px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-width: 180px;
+      text-align: center;
+      color: #fafafa;
+    }
+    .spinner-ring {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #27272a;
+      border-top-color: #fafafa;
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .spinner-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid #27272a;
+    }
+    .spinner-text {
+      font-size: 13px;
+      color: #a1a1aa;
+      font-weight: 500;
+    }
+    .refresh-icon {
+      display: inline-block;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    /* Style dla Trybu Zakrystia */
+    .zakrystia-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      color: #fafafa;
+      transition: border-color 0.15s ease;
+    }
+    .zakrystia-card.is-present {
+      border-left: 3px solid #10b981;
+    }
+    .zakrystia-card.is-absent {
+      border-left: 3px solid #ef4444;
+    }
+    .zakrystia-card.is-excused {
+      border-left: 3px solid #f59e0b;
+    }
+    .zakrystia-btn-group {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .btn-status-toggle, .btn-present, .btn-absent, .btn-excused {
+      flex: 1;
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid #27272a;
+      background: #18181b;
+      color: #a1a1aa;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-status-toggle:hover {
+      background: #27272a;
+      color: #fafafa;
+    }
+    .btn-status-toggle.active.status-obecny, .btn-present.active {
+      background: rgba(6, 78, 59, 0.4) !important;
+      color: #34d399 !important;
+      border: 1px solid rgba(6, 95, 70, 0.6) !important;
+    }
+    .btn-status-toggle.active.status-nieobecny, .btn-absent.active {
+      background: rgba(76, 5, 25, 0.4) !important;
+      color: #fb7185 !important;
+      border: 1px solid rgba(159, 18, 57, 0.6) !important;
+    }
+    .btn-status-toggle.active.status-uspraw, .btn-excused.active {
+      background: rgba(120, 53, 15, 0.4) !important;
+      color: #fbbf24 !important;
+      border: 1px solid rgba(180, 83, 9, 0.6) !important;
+    }
+
+    /* Style dla Tabeli Miesiąca */
+    .tbl-grid {
+      border-collapse: collapse;
+      width: max-content;
+      min-width: 100%;
+      font-size: 12px;
+      text-align: center;
+      background: #09090b;
+      color: #fafafa;
+    }
+    .tbl-grid th, .tbl-grid td {
+      border: 1px solid rgba(39, 39, 42, 0.6);
+      padding: 4px 2px;
+      height: 32px;
+      box-sizing: border-box;
+      background: rgba(24, 24, 27, 0.4);
+      text-align: center;
+      vertical-align: middle;
+    }
+    .tbl-sticky-col {
+      position: sticky;
+      left: 0;
+      background: #18181b !important;
+      z-index: 3;
+      text-align: left;
+      padding: 6px 10px !important;
+      font-weight: 500;
+      white-space: nowrap;
+      border-right: 1px solid #27272a;
+      color: #fafafa;
+    }
+    .tbl-header-sticky {
+      position: sticky;
+      top: 0;
+      background: #18181b;
+      z-index: 4;
+      color: #a1a1aa;
+    }
+    .tbl-header-sticky.tbl-sticky-col {
+      z-index: 5;
+      background: #18181b !important;
+    }
+    .tbl-day-sun {
+      background: rgba(69, 10, 10, 0.2) !important;
+      color: #f87171 !important;
+      font-weight: 600;
+    }
+    .tbl-day-sat {
+      background: rgba(255, 255, 255, 0.02) !important;
+      color: #a1a1aa;
+      font-weight: 500;
+    }
+    .tbl-group-header-row td {
+      background: #27272a !important;
+      font-weight: 600;
+      text-align: left;
+      padding: 5px 10px;
+      font-size: 11px;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid #27272a !important;
+    }
+    .tbl-group-czerwona td, .tbl-group-pomaranczowa td, .tbl-group-zielona td, .tbl-group-zolta td {
+      background: #18181b !important;
+      border: 1px solid #27272a !important;
+    }
+    .tabela-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+      line-height: 1;
+      margin: 0 auto;
+    }
+    .b-obecny { background: rgba(6, 78, 59, 0.5) !important; color: #34d399 !important; border: 1px solid rgba(16, 185, 129, 0.35) !important; }
+    .b-nieobecny { background: rgba(76, 5, 25, 0.5) !important; color: #fb7185 !important; border: 1px solid rgba(239, 68, 68, 0.35) !important; }
+    .b-uspraw { background: rgba(120, 53, 15, 0.5) !important; color: #fbbf24 !important; border: 1px solid rgba(245, 158, 11, 0.35) !important; }
+    .b-zastepca { background: rgba(30, 58, 138, 0.5) !important; color: #60a5fa !important; border: 1px solid rgba(59, 130, 246, 0.35) !important; }
+    .b-oddany { background: rgba(88, 28, 135, 0.5) !important; color: #c084fc !important; border: 1px solid rgba(168, 85, 247, 0.35) !important; }
+
+    .filter-pill {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 6px;
+      border: 1px solid #27272a;
+      background: #18181b;
+      color: #a1a1aa;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-pill.active {
+      background: #27272a;
+      color: #fafafa;
+      border-color: #52525b;
+      font-weight: 600;
+    }
+
+    .liturgia-pill {
+      padding: 8px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      border: 1px solid #27272a;
+      background: #18181b;
+      color: #a1a1aa;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .liturgia-pill b {
+      color: #71717a;
+    }
+    .liturgia-pill.active {
+      border-color: #fafafa !important;
+      background: #fafafa !important;
+      color: #09090b !important;
+      font-weight: 600 !important;
+    }
+    .liturgia-pill.active b {
+      color: #09090b !important;
+    }
+
+    /* Kafelki wyboru służby do oddania (Wystawianie na giełdę) */
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 10px 0 16px 0;
+    }
+    .tile-choice {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 14px 16px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+      position: relative;
+    }
+    .tile-choice:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+      transform: translateY(-1px);
+    }
+    .tile-choice.selected {
+      background: rgba(99, 102, 241, 0.15) !important;
+      border-color: #818cf8 !important;
+      box-shadow: 0 0 0 1px #818cf8, 0 4px 14px rgba(99, 102, 241, 0.25);
+    }
+    .tile-choice.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.2);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tile-choice .tile-main {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      display: block;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .tile-choice.selected .tile-main {
+      color: #ffffff;
+    }
+    .tile-choice .tile-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: #a1a1aa;
+      display: block;
+      line-height: 1.3;
+    }
+    .tile-choice.selected .tile-sub {
+      color: #c7d2fe;
+    }
+
+    /* Kafelki wyboru dni i godzin w zamian */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      margin: 10px 0 16px 0;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      color: #fafafa;
+    }
+    .checkbox-item:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+    .checkbox-item:has(input:checked) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: #6366f1;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: #6366f1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .checkbox-item .label-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .checkbox-item .label-date {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    .checkbox-item .label-day {
+      font-size: 11px;
+      font-weight: 500;
+      color: #a1a1aa;
+      line-height: 1.3;
+    }
+    .checkbox-item-weekend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      color: #fafafa;
+      box-sizing: border-box;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .checkbox-item-weekend:hover {
+      background: #27272a;
+      border-color: #3f3f46;
+    }
+    .checkbox-item-weekend:has(input:checked) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: #6366f1;
+    }
+    .checkbox-item-weekend input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: #6366f1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    @media print {
+      body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; font-size: 10px !important; }
+      .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+      #app-panel > *:not(#widok-tabela-miesiaca) { display: none !important; }
+      .no-print, #install-banner, #ios-install-banner, #global-spinner, #toast { display: none !important; }
+      .print-only { display: block !important; }
+      #widok-tabela-miesiaca { display: block !important; padding: 0 !important; margin: 0 !important; }
+      #tabela-miesiaca-scroll { max-height: none !important; overflow: visible !important; }
+      .card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; }
+      .tbl-grid { width: 100% !important; font-size: 9px !important; }
+      .tbl-grid th, .tbl-grid td { height: 20px !important; padding: 2px !important; }
+      .tbl-sticky-col { position: static !important; box-shadow: none !important; }
+      .tabela-badge { width: 16px !important; height: 16px !important; font-size: 9px !important; }
+      @page { size: landscape; margin: 6mm; }
+    }
