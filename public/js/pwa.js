@@ -4,30 +4,20 @@
     var GAS_URL = 'https://script.google.com/macros/s/AKfycbw4inpFTSAMv22GQpz_AYOytBx04CcEuCgwhHCAU0qwVFZ5H2BdjyA1PrnhxtP6KtCazg/exec';
 
     function callBackend(fnName, args, successCb, errorCb) {
-      var pushFunctions = ['zapiszTokenFCM', 'testFCM', 'symulujPorannePrzypomnienie', 'testujPorannePrzypomnienia', 'przypomnijOGieldzie'];
-      if (pushFunctions.indexOf(fnName) !== -1) {
-        try {
-          var payload = encodeURIComponent(JSON.stringify({ funkcja: fnName, args: args || [] }));
-          fetch(GAS_URL + '?payload=' + payload, { redirect: 'follow' })
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-              if (typeof successCb === 'function') successCb(data);
-            })
-            .catch(function(err) {
-              console.warn('callBackend push error:', err);
-              if (typeof errorCb === 'function') errorCb(err);
-              else if (typeof successCb === 'function') successCb({ sukces: false, wiadomosc: err.message });
-            });
-          return;
-        } catch(e) {
-          if (typeof errorCb === 'function') errorCb(e);
-          return;
-        }
-      }
-
-      // Pozostałe operacje wykonują się bezpośrednio w Firestore
-      if (typeof successCb === 'function') {
-        successCb({ sukces: true });
+      try {
+        var payload = encodeURIComponent(JSON.stringify({ funkcja: fnName, args: args || [] }));
+        fetch(GAS_URL + '?payload=' + payload, { redirect: 'follow' })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            if (typeof successCb === 'function') successCb(data);
+          })
+          .catch(function(err) {
+            console.warn('callBackend push error:', err);
+            if (typeof errorCb === 'function') errorCb(err);
+            else if (typeof successCb === 'function') successCb({ sukces: false, wiadomosc: err.message });
+          });
+      } catch(e) {
+        if (typeof errorCb === 'function') errorCb(e);
       }
     }
 
@@ -361,7 +351,7 @@
               }
             } else {
               if (wyswietlKomunikat) {
-                alert("Token urządzenia został wygenerowany, ale wystąpił problem z zapisem w arkuszu: " + (res ? res.wiadomosc : 'Nieznany błąd'));
+                alert("Token urządzenia został wygenerowany, ale wystąpił problem z jego rejestracją: " + (res ? res.wiadomosc : 'Nieznany błąd'));
               }
             }
             sprawdzStanPowiadomien();

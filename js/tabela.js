@@ -140,73 +140,38 @@
       // 2. ZAWSZE pobierz najnowsze dane z bazy Firestore w tle (Stale-While-Revalidate - gwarancja aktualności!)
       if (dbFirestore) {
         var altDocId = wyznaczWariantKluczaMiesiaca(docId);
-        dbFirestore.collection('stan_grafiku').doc(docId).get().then(function(doc) {
-          if (doc.exists && doc.data() && doc.data().wiersze && doc.data().wiersze.length) {
-            zastosujDaneDoc(doc.data());
-            return;
-          }
+        function sprawdzDoc(id, fallbackFn) {
+          return dbFirestore.collection('stan_grafiku').doc(id).get().then(function(doc) {
+            if (doc.exists && doc.data() && doc.data().wiersze && doc.data().wiersze.length) {
+              zastosujDaneDoc(doc.data());
+              return true;
+            }
+            if (fallbackFn) return fallbackFn();
+            return false;
+          });
+        }
+
+        sprawdzDoc(docId, function() {
           if (altDocId && altDocId !== docId) {
-            dbFirestore.collection('stan_grafiku').doc(altDocId).get().then(function(altDoc) {
-              if (altDoc.exists && altDoc.data() && altDoc.data().wiersze && altDoc.data().wiersze.length) {
-                zastosujDaneDoc(altDoc.data());
-                return;
-              }
-              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
-            }).catch(function() {
-              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
-            });
-            return;
+            return sprawdzDoc(altDocId);
           }
-          if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+          return false;
+        }).then(function(znaleziono) {
+          if (!znaleziono && !hasRenderedFromCache) pokazBrakGrafiku(docId);
         }).catch(function(e) {
-          console.warn('Firestore tabela fallback:', e);
-          if (altDocId && altDocId !== docId) {
-            dbFirestore.collection('stan_grafiku').doc(altDocId).get().then(function(altDoc) {
-              if (altDoc.exists && altDoc.data() && altDoc.data().wiersze && altDoc.data().wiersze.length) {
-                zastosujDaneDoc(altDoc.data());
-                return;
-              }
-              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
-            }).catch(function() {
-              if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
-            });
-            return;
-          }
-          if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+          console.warn('Firestore tabela błąd:', e);
+          if (!hasRenderedFromCache) pokazBrakGrafiku(docId);
         });
-      } else {
-        if (!hasRenderedFromCache) pobierzTabeleZBackendu(docId);
+      } else if (!hasRenderedFromCache) {
+        pokazBrakGrafiku(docId);
       }
     }
 
-    function pobierzTabeleZBackendu(docId) {
+    function pokazBrakGrafiku(docId) {
       var kontener = document.getElementById('tabela-miesiaca-scroll');
-      docId = docId || wybranyMiesiacTabeli || pobierzAktywnyKluczMiesiaca();
-      callBackend('pobierzPelnaTabeleMiesiaca', [docId], function(res) {
-        if (!res || !res.sukces || !res.wiersze) {
-          if (!tabelaPrzegladanyMiesiacDane) {
-            kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#a1a1aa;">Brak zapisanego grafiku dla ' + docId.replace('_', ' ') + '.</div>';
-          }
-          return;
-        }
-
-        tabelaPrzegladanyMiesiacDane = Object.assign({}, tabelaPrzegladanyMiesiacDane || {}, res);
-        try { localStorage.setItem('min_cached_tabela_' + docId, JSON.stringify(tabelaPrzegladanyMiesiacDane)); } catch(e) {}
-        if (docId === pobierzAktywnyKluczMiesiaca()) {
-          tabelaMiesiacaDane = Object.assign({}, tabelaMiesiacaDane || {}, res);
-          try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
-          if (globalUser && globalUser.nazwisko) {
-            var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
-            if (stan) renderujDane(stan);
-          }
-        }
-        renderujFiltryTabeli();
-        renderujTabeleMiesiaca();
-      }, function(err) {
-        if (!tabelaPrzegladanyMiesiacDane) {
-          kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Błąd połączenia z serwerem.</div>';
-        }
-      });
+      if (kontener && !tabelaPrzegladanyMiesiacDane) {
+        kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#a1a1aa;">Brak zapisanego grafiku dla ' + (docId || '').replace('_', ' ') + '.</div>';
+      }
     }
 
     function renderujFiltryTabeli() {

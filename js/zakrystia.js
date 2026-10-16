@@ -1768,19 +1768,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
             budujZakrystie(docData);
           } else {
-            callBackend('pobierzDaneDlaZakrystii', [wybranyDzien || null, wybranaGodzina || null], function(res) {
-              if (res && res.sukces) { zakrystiaStan = res; renderujTrybZakrystia(); }
-            });
+            console.warn('Zakrystia: brak dokumentu w Firestore');
           }
         }).catch(function(err) {
-          console.warn('Firestore zakrystia:', err);
-          callBackend('pobierzDaneDlaZakrystii', [wybranyDzien || null, wybranaGodzina || null], function(res) {
-            if (res && res.sukces) { zakrystiaStan = res; renderujTrybZakrystia(); }
-          });
-        });
-      } else {
-        callBackend('pobierzDaneDlaZakrystii', [wybranyDzien || null, wybranaGodzina || null], function(res) {
-          if (res && res.sukces) { zakrystiaStan = res; renderujTrybZakrystia(); }
+          console.warn('Firestore zakrystia error:', err);
         });
       }
     }
@@ -1948,15 +1939,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
         pokazToast('✅ Ogłoszono ' + rodzaj + ' na ' + liturgia.dataTekst + ' godz. ' + gStr + '! Zapisano w grafiku.', 6000);
 
-        // 2. Wysłanie powiadomień PUSH w tle przez Apps Script
-        callBackend('oglosDodatkowaLiturgie', [liturgia], function(res) {
-          if (res && res.sukces) {
-            pokazToast('✅ PUSH wysłany do ' + (res.powiadomionoLiczba || 'wszystkich') + ' ministrantów!', 4000);
-          }
-        }, function(err) {
-          console.warn('Backend push notification warning:', err);
-        });
-
         // Odśwież UI natychmiast na pulpicie i w zakrystii
         if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
           wczytajDaneDlaZakrystii(zakrystiaStan.dzien, zakrystiaStan.godzina, true);
@@ -2014,12 +1996,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
         }
       }
-
-      callBackend('usunDodatkowaLiturgie', [litId], function(res) {
-        if (res && res.sukces) {
-          console.log('Liturgia usunięta z arkusza.');
-        }
-      });
 
       pokazToast('Liturgia została usunięta.');
       if (zakrystiaStan && zakrystiaStan.dzien && zakrystiaStan.godzina) {
@@ -2093,9 +2069,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
       var stan = generujStanZFirestore(globalUser.nazwisko, tabelaMiesiacaDane);
       if (stan) renderujDane(stan);
-
-      // 3. Zapis do Google Sheets w tle
-      callBackend('przelaczZgloszenieLiturgia', [litId, myName]);
     }
 
     function przelaczOpcjeZaawansowaneZakrystii() {
@@ -3399,34 +3372,4 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       // Wielkie, nie do przeoczenia potwierdzenie sukcesu
       pokazModalSukcesuZakrystii(zakrystiaStan.nazwaLiturgii + ' (' + zakrystiaStan.godzina + ')', zakrystiaStan.ministranci.length);
-
-      // 3. W tle aktualizacja arkusza Google Sheets przez Apps Script
-      var listaDoZapisu = zakrystiaStan.ministranci.map(function(m) {
-        return {
-          nazwisko: m.nazwisko,
-          status: m.tylkoRozaniec ? 'ROZANIEC' : m.status,
-          typ: m.typ,
-          zastepuje: m.zastepuje,
-          bylNaRozancu: !!m.bylNaRozancu,
-          tylkoRozaniec: !!m.tylkoRozaniec,
-          karaPunkty: m.karaPunkty || 0,
-          punkty: wyliczPunktyMinistranta(m)
-        };
-      });
-
-      callBackend('zapiszObecnoscZZakrystii', [
-        zakrystiaStan.rok,
-        zakrystiaStan.miesiacIdx,
-        zakrystiaStan.dzien,
-        zakrystiaStan.godzina,
-        listaDoZapisu,
-        (globalUser && globalUser.nazwisko) || 'Kościelny',
-        zakrystiaStan.punktyLiturgii,
-        zakrystiaStan.nazwaLiturgii,
-        zakrystiaStan.usunieci || []
-      ], function(res) {
-        if (res && res.sukces) {
-          console.log('Synchronizacja arkusza Google Sheets zakończona sukcesem.');
-        }
-      });
     }
