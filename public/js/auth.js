@@ -292,25 +292,7 @@
       }
     }
 
-function logujJakoKoscielny() {
-      var pin = prompt('Podaj PIN dla Kościelnego:');
-      if (pin === null) return; // anulowano
-      if ((pin || '').trim() !== '0000') {
-        alert('Nieprawidłowy PIN.');
-        return;
-      }
-      localStorage.setItem('min_name', 'Kościelny');
-      localStorage.setItem('min_pin', '0000');
-      globalUser.nazwisko = 'Kościelny';
-      globalUser.pin = '0000';
-      globalUser.stan = null; // wyczyść stary stan
-      document.getElementById('auth-panel').style.display = 'none';
-      document.getElementById('app-panel').style.display = 'block';
-      document.getElementById('user-display').innerText = 'Kościelny';
-      sprawdzUprawnieniaZakrystii();
-      otworzTrybZakrystia();
-      pokazToast('Zalogowano jako Kościelny');
-    }
+
 
     function wypelnijSelectUzytkownikow(wybraneNazwisko) {
       var sel = document.getElementById('auth-select-user');

@@ -178,6 +178,15 @@
 // =============================================================
     // AKCJE ZAMIAN
     // =============================================================
+    function ustalKluczGrafikuOferty(id, kategoria, optDocKey) {
+      if (optDocKey) return optDocKey;
+      if (daneKolejnegoMiesiaca && ((kategoria && daneKolejnegoMiesiaca[kategoria]) || []).some(function(o) { return o.id === id; })) {
+        var now = new Date();
+        return wyznaczKluczMiesiaca(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+      }
+      return pobierzAktywnyKluczMiesiaca();
+    }
+
     function wystawTydzien() {
       var btn = document.getElementById('btn-wystaw-tydzien');
       if (!wybranyDzienTydzien) { alert('Wybierz najpierw służbę, którą chcesz oddać'); return; }
@@ -274,16 +283,7 @@
     async function anulujTydzien(id, optDocKey) {
       if (!confirm('Czy na pewno chcesz anulować tę ofertę?')) return;
       if (!dbFirestore) return;
-      var docKey = optDocKey;
-      if (!docKey) {
-        if (daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.gieldaTydzien || []).some(function(o) { return o.id === id; })) {
-          var now = new Date();
-          var nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          docKey = wyznaczKluczMiesiaca(nextMonthDate);
-        } else {
-          docKey = pobierzAktywnyKluczMiesiaca();
-        }
-      }
+      var docKey = ustalKluczGrafikuOferty(id, 'gieldaTydzien', optDocKey);
       var docRef = dbFirestore.collection('stan_grafiku').doc(docKey);
 
       try {
@@ -342,16 +342,7 @@
       if (!confirm('Czy zatwierdzasz zamianę służb?')) return;
       if (!dbFirestore) return;
       var myName = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : (localStorage.getItem('min_name') || '');
-      var docKey = optDocKey;
-      if (!docKey) {
-        if (daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.gieldaTydzien || []).some(function(o) { return o.id === id; })) {
-          var now = new Date();
-          var nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          docKey = wyznaczKluczMiesiaca(nextMonthDate);
-        } else {
-          docKey = pobierzAktywnyKluczMiesiaca();
-        }
-      }
+      var docKey = ustalKluczGrafikuOferty(id, 'gieldaTydzien', optDocKey);
       var docRef = dbFirestore.collection('stan_grafiku').doc(docKey);
 
       try {
@@ -509,16 +500,7 @@
     async function anulujNiedziele(id, optDocKey) {
       if (!confirm('Czy na pewno chcesz anulować tę ofertę?')) return;
       if (!dbFirestore) return;
-      var docKey = optDocKey;
-      if (!docKey) {
-        if (daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.gieldaNiedziele || []).some(function(o) { return o.id === id; })) {
-          var now = new Date();
-          var nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          docKey = wyznaczKluczMiesiaca(nextMonthDate);
-        } else {
-          docKey = pobierzAktywnyKluczMiesiaca();
-        }
-      }
+      var docKey = ustalKluczGrafikuOferty(id, 'gieldaNiedziele', optDocKey);
       var docRef = dbFirestore.collection('stan_grafiku').doc(docKey);
 
       try {
@@ -543,16 +525,7 @@
       if (!confirm('Czy zatwierdzasz zamianę godzin na weekend?')) return;
       if (!dbFirestore) return;
       var myName = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : (localStorage.getItem('min_name') || '');
-      var docKey = optDocKey;
-      if (!docKey) {
-        if (daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.gieldaNiedziele || []).some(function(o) { return o.id === id; })) {
-          var now = new Date();
-          var nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          docKey = wyznaczKluczMiesiaca(nextMonthDate);
-        } else {
-          docKey = pobierzAktywnyKluczMiesiaca();
-        }
-      }
+      var docKey = ustalKluczGrafikuOferty(id, 'gieldaNiedziele', optDocKey);
       var docRef = dbFirestore.collection('stan_grafiku').doc(docKey);
 
       try {

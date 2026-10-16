@@ -687,7 +687,3 @@
         if (btnW) btnW.className = 'tab-btn active';
       }
     }
-
-    function zmienZakladke(t) {
-      zmienFormularzGieldy(t);
-    }

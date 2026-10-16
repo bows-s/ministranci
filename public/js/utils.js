@@ -287,10 +287,3 @@
       }
       return false;
     }
-
-    function pobierzAdresAplikacji() {
-      if (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin.indexOf("http") === 0) {
-        return window.location.origin;
-      }
-      return "https://ministranci.web.app";
-    }
