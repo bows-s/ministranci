@@ -1139,7 +1139,11 @@
           return true;
         });
         var nextW = [];
-        if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wolneZastepstwa) {
+        var isSameMNext = daneKolejnegoMiesiaca && (
+          (typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(daneKolejnegoMiesiaca.docId, pobierzAktywnyKluczMiesiaca())) ||
+          (daneKolejnegoMiesiaca.miesiacIdx === res.miesiacIdx && daneKolejnegoMiesiaca.rok === res.rok)
+        );
+        if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wolneZastepstwa && !isSameMNext) {
           var nM = (daneKolejnegoMiesiaca.miesiacIdx !== undefined) ? daneKolejnegoMiesiaca.miesiacIdx : (res.miesiacIdx + 1) % 12;
           var nY = daneKolejnegoMiesiaca.rok || res.rok;
           var nextKeyWz = wyznaczKluczMiesiaca(new Date(nY, nM, 1));

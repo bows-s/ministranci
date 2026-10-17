@@ -287,3 +287,16 @@
       }
       return false;
     }
+
+    function czyToTenSamKluczMiesiaca(k1, k2) {
+      if (!k1 || !k2) return false;
+      if (k1 === k2) return true;
+      var clean = function(s) {
+        return String(s || '').toLowerCase()
+          .replace(/ą/g, 'a').replace(/ć/g, 'c').replace(/ę/g, 'e').replace(/ł/g, 'l')
+          .replace(/ń/g, 'n').replace(/ó/g, 'o').replace(/ś/g, 's').replace(/ź/g, 'z').replace(/ż/g, 'z')
+          .trim();
+      };
+      return clean(k1) === clean(k2);
+    }
+    window.czyToTenSamKluczMiesiaca = czyToTenSamKluczMiesiaca;

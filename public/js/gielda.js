@@ -78,7 +78,11 @@
       if (!data || !dbFirestore) return;
       var curY = data.rok || (new Date()).getFullYear();
       var curM = (data.miesiacIdx !== undefined) ? data.miesiacIdx : (new Date()).getMonth();
-      var dirty = false;
+      var dirtyGn = false;
+      var dirtyGt = false;
+      var dirtyWolne = false;
+      var dirtyZamiany = false;
+      var dirtyWiersze = false;
       var wiersze = data.wiersze || [];
       var gn = data.gieldaNiedziele || [];
       var gt = data.gieldaTydzien || [];
@@ -95,16 +99,18 @@
 
         if (wlasnaMszaCutoff || aktywneAlternatywy.length === 0) {
           o.status = 'WYGASLA_USPRAWIEDLIWIONA';
-          dirty = true;
+          dirtyGn = true;
           // Automatycznie usprawiedliwiamy ministranta (0 pkt zamiast -5 pkt)
           var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, o.wystawiajacy); });
           if (row && row.komorki) {
             var realDay = (gO === '17:00') ? (o.dzien - 1) : o.dzien;
             if (row.komorki[realDay - 1] && (row.komorki[realDay - 1].wartosc === null || row.komorki[realDay - 1].wartosc === undefined || row.komorki[realDay - 1].wartosc === '')) {
               row.komorki[realDay - 1].wartosc = 0;
+              dirtyWiersze = true;
             }
             if (realDay !== o.dzien && row.komorki[o.dzien - 1] && (row.komorki[o.dzien - 1].wartosc === null || row.komorki[o.dzien - 1].wartosc === undefined || row.komorki[o.dzien - 1].wartosc === '')) {
               row.komorki[o.dzien - 1].wartosc = 0;
+              dirtyWiersze = true;
             }
           }
         }
@@ -116,11 +122,12 @@
         var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
         var gO = cleanTime(o.godzina) || '18:00';
         if (czyTydzienMszaPrzeterminowana(dO, gO, curY, curM)) {
-          dirty = true;
+          dirtyGt = true;
           var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, o.wystawiajacy); });
           if (row && row.komorki && row.komorki[dO - 1]) {
             if (row.komorki[dO - 1].wartosc === null || row.komorki[dO - 1].wartosc === undefined || row.komorki[dO - 1].wartosc === '') {
               row.komorki[dO - 1].wartosc = 0;
+              dirtyWiersze = true;
             }
           }
           if (o.autoOddaj && !czyLiturgiaJuzMinela(dO, gO, null, curY, curM)) {
@@ -141,6 +148,8 @@
             zam.push(nowaWolna);
             data.wolneZastepstwa = wolne;
             data.zamianyZastepstwa = zam;
+            dirtyWolne = true;
+            dirtyZamiany = true;
           } else {
             o.status = 'WYGASLA_USPRAWIEDLIWIONA';
           }
@@ -150,7 +159,7 @@
       // 3. Wyczyść wygasłe wolne zastępstwa z giełdy (jeśli termin mszy już minął)
       if (data.wolneZastepstwa && data.wolneZastepstwa.length > 0) {
         var preLenW = data.wolneZastepstwa.length;
-        data.wolneZastepstwa = data.wolneZastepstwa.filter(function(z) {
+        var filteredWolne = data.wolneZastepstwa.filter(function(z) {
           if (!z || !z.dzien) return false;
           if (z.status !== 'OCZEKUJE' && z.status) return true; // Zachowaj przejęte/historyczne
           var zD = parseInt(z.dzien, 10);
@@ -158,19 +167,30 @@
           if (czyLiturgiaJuzMinela(zD, zG, null, curY, curM)) return false;
           return true;
         });
-        if (data.wolneZastepstwa.length !== preLenW) dirty = true;
+        if (filteredWolne.length !== preLenW) {
+          data.wolneZastepstwa = filteredWolne;
+          dirtyWolne = true;
+        }
       }
 
-      if (dirty) {
+      var payload = {};
+      if (dirtyGn) payload.gieldaNiedziele = gn;
+      if (dirtyGt) payload.gieldaTydzien = gt;
+      if (dirtyWolne) payload.wolneZastepstwa = data.wolneZastepstwa || [];
+      if (dirtyZamiany) payload.zamianyZastepstwa = data.zamianyZastepstwa || [];
+      if (dirtyWiersze) payload.wiersze = wiersze;
+
+      if (Object.keys(payload).length > 0) {
+        payload.zaktualizowano = firebase.firestore.FieldValue.serverTimestamp();
         var docKey = data.nazwaMiesiaca ? (data.nazwaMiesiaca + '_' + curY) : pobierzAktywnyKluczMiesiaca();
-        dbFirestore.collection('stan_grafiku').doc(docKey).update({
-          gieldaNiedziele: gn,
-          gieldaTydzien: gt,
-          wolneZastepstwa: data.wolneZastepstwa || [],
-          zamianyZastepstwa: data.zamianyZastepstwa || [],
-          zaktualizowano: firebase.firestore.FieldValue.serverTimestamp()
-        }).catch(function(e) {
-          console.warn('Auto-rozliczenie wygasłych ofert sync błąd:', e);
+        var keysToUpdate = [docKey];
+        var altKey = (typeof wyznaczWariantKluczaMiesiaca === 'function') ? wyznaczWariantKluczaMiesiaca(docKey) : null;
+        if (altKey && altKey !== docKey) keysToUpdate.push(altKey);
+
+        keysToUpdate.forEach(function(k) {
+          dbFirestore.collection('stan_grafiku').doc(k).update(payload).catch(function(e) {
+            console.warn('Auto-rozliczenie wygasłych ofert sync błąd dla ' + k + ':', e);
+          });
         });
       }
     }
@@ -984,7 +1004,9 @@
       var targetRok = (optRok !== undefined && optRok !== null) ? optRok : (stanOdd.rok || (new Date()).getFullYear());
       var targetMiesiacIdx = (optMiesiacIdx !== undefined && optMiesiacIdx !== null) ? optMiesiacIdx : ((stanOdd.miesiacIdx !== undefined) ? stanOdd.miesiacIdx : (new Date()).getMonth());
       var targetDocKey = wyznaczKluczMiesiaca(new Date(targetRok, targetMiesiacIdx, 1));
-      var isNextMonth = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
+      var isNextMonth = (typeof czyToTenSamKluczMiesiaca === 'function') 
+        ? !czyToTenSamKluczMiesiaca(targetDocKey, pobierzAktywnyKluczMiesiaca()) 
+        : (targetDocKey !== pobierzAktywnyKluczMiesiaca());
       var targetData = isNextMonth ? (daneKolejnegoMiesiaca || {}) : (tabelaMiesiacaDane || stanOdd || {});
       var isWeekend = (typ === 'Weekend' || typ === 'Niedziela' || typ === 'Msza niedzielna');
 

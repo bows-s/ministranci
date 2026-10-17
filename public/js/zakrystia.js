@@ -350,7 +350,11 @@
 
       // 5b. Dyżury w kolejnym miesiącu (gdy zbliża się przełom miesięcy lub brak dalszych służb)
       var dyzuryKolejnegoMiesiaca = [];
-      if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wiersze) {
+      var isSameMonthAsCurrent = daneKolejnegoMiesiaca && (
+        (typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(daneKolejnegoMiesiaca.docId, pobierzAktywnyKluczMiesiaca())) ||
+        (daneKolejnegoMiesiaca.miesiacIdx === currentMonthIdx && daneKolejnegoMiesiaca.rok === currentYear)
+      );
+      if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wiersze && !isSameMonthAsCurrent) {
         var nextRows = daneKolejnegoMiesiaca.wiersze || [];
         var nextUserRow = nextRows.find(function(w) {
           var nw = (w.nazwisko || "").trim().toLowerCase();
@@ -1026,7 +1030,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
           targetDocKey = pobierzAktywnyKluczMiesiaca();
         }
       }
-      var isNextMonthZak = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
+      var isNextMonthZak = (typeof czyToTenSamKluczMiesiaca === 'function') 
+        ? !czyToTenSamKluczMiesiaca(targetDocKey, pobierzAktywnyKluczMiesiaca()) 
+        : (targetDocKey !== pobierzAktywnyKluczMiesiaca());
 
       async function budujZakrystie(daneTabeli) {
         var now = new Date();
@@ -2941,7 +2947,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var gKey = (zakrystiaStan.godzina || 'msza').trim();
 
       var targetDocKey = (zakrystiaStan && zakrystiaStan.docKey) || pobierzAktywnyKluczMiesiaca();
-      var isNextMonthZapis = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
+      var isNextMonthZapis = (typeof czyToTenSamKluczMiesiaca === 'function') 
+        ? !czyToTenSamKluczMiesiaca(targetDocKey, pobierzAktywnyKluczMiesiaca()) 
+        : (targetDocKey !== pobierzAktywnyKluczMiesiaca());
       var tabelaDoModyfikacji = isNextMonthZapis ? (daneKolejnegoMiesiaca || tabelaMiesiacaDane) : tabelaMiesiacaDane;
 
       if (tabelaDoModyfikacji && tabelaDoModyfikacji.wiersze) {
@@ -3302,7 +3310,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       // 2. Pewny zapis do Firestore z await (gwarancja że dane dotarły na serwer!)
       var targetDocKey = (zakrystiaStan && zakrystiaStan.docKey) || pobierzAktywnyKluczMiesiaca();
-      var isNextMonthZapis = (targetDocKey !== pobierzAktywnyKluczMiesiaca());
+      var isNextMonthZapis = (typeof czyToTenSamKluczMiesiaca === 'function') 
+        ? !czyToTenSamKluczMiesiaca(targetDocKey, pobierzAktywnyKluczMiesiaca()) 
+        : (targetDocKey !== pobierzAktywnyKluczMiesiaca());
       var tabelaDoZapisu = isNextMonthZapis ? (daneKolejnegoMiesiaca || tabelaMiesiacaDane) : tabelaMiesiacaDane;
       var curMValZ = (zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth();
       var curRY = (zakrystiaStan && zakrystiaStan.rok) || (new Date()).getFullYear();
