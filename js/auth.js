@@ -250,7 +250,16 @@
         var nDt = new Date(nowD.getFullYear(), nowD.getMonth() + 1, 1);
         var nDocId = wyznaczKluczMiesiaca(nDt);
         var cNext = localStorage.getItem('min_cached_tabela_' + nDocId);
-        if (cNext) return JSON.parse(cNext);
+        if (cNext) {
+          var parsed = JSON.parse(cNext);
+          var curKey = pobierzAktywnyKluczMiesiaca();
+          var isSame = (typeof czyToTenSamKluczMiesiaca === 'function') 
+            ? czyToTenSamKluczMiesiaca(parsed.docId, curKey)
+            : (parsed.docId === curKey);
+          if (parsed && !isSame && (parsed.miesiacIdx !== nowD.getMonth() || parsed.rok !== nowD.getFullYear())) {
+            return parsed;
+          }
+        }
       } catch(e) {}
       return null;
     })();

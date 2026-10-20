@@ -188,7 +188,7 @@
       // 4b. Zaakceptowane zamiany weekendowe (wymiany 1:1)
       var zamianyWknd = docData.zamianyNiedziele || (tabelaMiesiacaDane && tabelaMiesiacaDane.zamianyNiedziele) || [];
       zamianyWknd.forEach(function(zn) {
-        if (!zn || zn.status === 'ANULOWANA') return;
+        if (!zn || zn.status === 'ANULOWANA' || zn.typ === 'RECZNA') return;
         var zDzien = zn.dzien;
         var zWyst = zn.wystawiajacy;
         var zPrzej = zn.przejmujacy;
@@ -207,6 +207,17 @@
             czyUsprawiedliwiony: false
           };
         }
+      });
+      // Ręczne przeniesienia ustawione przez zakrystię — nadpisują zamiany 1:1
+      zamianyWknd.forEach(function(zr) {
+        if (!zr || zr.typ !== 'RECZNA' || zr.status === 'ANULOWANA') return;
+        if (!czyToSamoNazwisko(zr.ministrant, nazwisko)) return;
+        godzinyWeekendy[zr.dzien] = {
+          godzina: cleanTime(zr.godzina),
+          czyZamienione: true,
+          szczegoly: "przeniesione przez zakrystię",
+          czyUsprawiedliwiony: false
+        };
       });
 
       // 4c. Automatyczne rozliczenie wygasłych ofert weekendowych na 0 pkt (usprawiedliwienie)
@@ -287,11 +298,11 @@
           var nextSunD = d + 1;
           var kNextSun = (nextSunD <= daysInMonth && userRow && userRow.komorki) ? userRow.komorki[nextSunD - 1] : null;
           var godzinaWknd = (godzinyWeekendy[nextSunD] && godzinyWeekendy[nextSunD].godzina) || mojaGodzinaNiedziela;
-          if (cleanTime(godzinaWknd) === '17:00' && kNextSun && kNextSun.maDyzur) {
+          if (cleanTime(godzinaWknd) === '17:00' && ((kNextSun && kNextSun.maDyzur) || (k && k.maDyzur))) {
             var oddaneSat = mojeOddaneZastepstwa[d] || mojeOddaneZastepstwa[nextSunD];
             if (!oddaneSat || (oddaneSat.status !== "OCZEKUJE" && oddaneSat.status !== "PRZEJETE" && oddaneSat.status !== "ZREALIZOWANE")) {
               var czySat17JuzByla = (d === currentDay && czyMszaJuzMinaDzisLocal('17:00'));
-              var czyNiedzielnaJuzWpisana = (kNextSun && kNextSun.wartosc !== null && kNextSun.wartosc !== undefined && kNextSun.wartosc !== "");
+              var czyNiedzielnaJuzWpisana = (k && k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== "") || (kNextSun && kNextSun.wartosc !== null && kNextSun.wartosc !== undefined && kNextSun.wartosc !== "");
               if (!czySat17JuzByla && !czyNiedzielnaJuzWpisana) {
                 kandydaciDnia.push({
                   jest: true,
@@ -321,7 +332,7 @@
         }
 
         // 3. Czy ma własny dyżur i czy nie jest oddany na giełdę
-        if (k && k.maDyzur) {
+        if (k && k.maDyzur && !isSaturday) {
           var oddane = mojeOddaneZastepstwa[d];
           if (!oddane || (oddane.status !== "OCZEKUJE" && oddane.status !== "PRZEJETE" && oddane.status !== "ZREALIZOWANE")) {
             var godzinaSluzby = isSunday ? ((godzinyWeekendy[d] && godzinyWeekendy[d].godzina) || mojaGodzinaNiedziela) : '18:00';
@@ -963,9 +974,26 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var zamianyWknd = dData.zamianyNiedziele || (tabelaMiesiacaDane && tabelaMiesiacaDane.zamianyNiedziele) || [];
       var weekendSunDay = (dow === 6 ? dNum + 1 : dNum);
 
+      // 1. Ręczne przeniesienie ustawione przez zakrystię (typ: 'RECZNA') — ma pierwszeństwo, najnowsze wygrywa
+      for (var ri = zamianyWknd.length - 1; ri >= 0; ri--) {
+        var zr = zamianyWknd[ri];
+        if (!zr || zr.typ !== 'RECZNA' || zr.status === 'ANULOWANA') continue;
+        if (zr.dzien !== weekendSunDay) continue;
+        if (!czyToSamoNazwisko(zr.ministrant, nazwisko)) continue;
+        return {
+          godzina: cleanTime(zr.godzina),
+          zamiana: true,
+          reczna: true,
+          partner: 'Zakrystia',
+          opis: 'Przeniesiony przez zakrystię (z ' + cleanTime(zr.godzinaPoprzednia || bazaGodz) + ')',
+          oryginalnaGodzina: cleanTime(zr.godzinaPoprzednia || bazaGodz)
+        };
+      }
+
+      // 2. Zamiany 1:1 z giełdy
       for (var zi = 0; zi < zamianyWknd.length; zi++) {
         var zn = zamianyWknd[zi];
-        if (!zn || zn.status === 'ANULOWANA') continue;
+        if (!zn || zn.status === 'ANULOWANA' || zn.typ === 'RECZNA') continue;
         var matchDay = (zn.dzien === weekendSunDay || zn.dzien === dNum);
         if (!matchDay) continue;
 
@@ -974,6 +1002,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             godzina: cleanTime(zn.godzinaPrzejmujacego),
             zamiana: true,
             partner: zn.przejmujacy,
+            opis: 'Zamiana z: ' + zn.przejmujacy,
             oryginalnaGodzina: cleanTime(zn.godzinaWystawiajacego || bazaGodz)
           };
         } else if (czyToSamoNazwisko(zn.przejmujacy, nazwisko)) {
@@ -981,6 +1010,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             godzina: cleanTime(zn.godzinaWystawiajacego),
             zamiana: true,
             partner: zn.wystawiajacy,
+            opis: 'Zamiana z: ' + zn.wystawiajacy,
             oryginalnaGodzina: cleanTime(zn.godzinaPrzejmujacego || bazaGodz)
           };
         }
@@ -1590,7 +1620,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                   maDyzur = (userGodz === gStr || userGodz === cleanG);
                 }
                 if (maDyzur) {
-                  zamianaInfoText = 'Zamiana z: ' + efInfo.partner;
+                  zamianaInfoText = efInfo.opis || ('Zamiana z: ' + efInfo.partner);
                 }
               } else {
                 if (dow === 6 && cleanG === "17:00") {
@@ -2687,6 +2717,183 @@ function czyMaDostepDoZakrystii(nazwisko) {
       zamknijModalZmienMsze();
       otworzTrybZakrystia(d, g, docKey, optRodzaj, optPunkty, optNazwa);
     }
+
+    // =============================================================
+    // RĘCZNE PRZENIESIENIE DYŻURU WEEKENDOWEGO (ZAKRYSTIA)
+    // Np. kościelny umawia się z ministrantem, że zamiast 11:30 służy o 10:00.
+    // Zapis: zamianyNiedziele[] z typ:'RECZNA' — nadpisuje grupę i zamiany 1:1 na dany weekend.
+    // =============================================================
+    var przeniesienieDocData = null;
+    var przeniesienieDocKey = null;
+
+    function przeniesienieKlucze() {
+      var st = zakrystiaStan || {};
+      var r = st.rok || (new Date()).getFullYear();
+      var m = (st.miesiacIdx !== undefined) ? st.miesiacIdx : (new Date()).getMonth();
+      var key = wyznaczKluczMiesiaca(new Date(r, m, 1));
+      var keys = [key];
+      var alt = (typeof wyznaczWariantKluczaMiesiaca === 'function') ? wyznaczWariantKluczaMiesiaca(key) : null;
+      if (alt && alt !== key) keys.push(alt);
+      return { key: key, keys: keys, rok: r, miesiacIdx: m };
+    }
+
+    async function otworzModalPrzeniesDyzur() {
+      var modal = document.getElementById('modal-przenies-dyzur');
+      if (!modal || !dbFirestore) return;
+      var k = przeniesienieKlucze();
+      przeniesienieDocKey = k.key;
+      modal.style.display = 'flex';
+      document.getElementById('przenies-lista').innerHTML = '<div style="color:#a1a1aa; font-size:12px;">Ładowanie...</div>';
+      try {
+        var snap = await dbFirestore.collection('stan_grafiku').doc(k.key).get();
+        if (!snap.exists && k.keys[1]) snap = await dbFirestore.collection('stan_grafiku').doc(k.keys[1]).get();
+        przeniesienieDocData = snap.exists ? snap.data() : (tabelaMiesiacaDane || {});
+      } catch (e) {
+        przeniesienieDocData = tabelaMiesiacaDane || {};
+      }
+      var data = przeniesienieDocData;
+      var rok = data.rok || k.rok;
+      var mIdx = (data.miesiacIdx !== undefined) ? data.miesiacIdx : k.miesiacIdx;
+
+      // Ministranci
+      var selM = document.getElementById('przenies-ministrant');
+      var nazwiska = (data.wiersze || []).map(function(w) { return w && w.nazwisko; }).filter(function(n) {
+        if (!n) return false;
+        var l = n.toLowerCase();
+        return l.indexOf('kościelny') === -1 && l.indexOf('koscielny') === -1;
+      }).sort(function(a, b) { return a.localeCompare(b, 'pl'); });
+      selM.innerHTML = nazwiska.map(function(n) { return '<option value="' + n + '">' + n + '</option>'; }).join('');
+
+      // Weekendy (niedziele miesiąca) — domyślnie najbliższy
+      var selW = document.getElementById('przenies-weekend');
+      var dni = new Date(rok, mIdx + 1, 0).getDate();
+      var dzis = new Date();
+      var html = '', domyslny = null;
+      for (var d = 1; d <= dni; d++) {
+        if (new Date(rok, mIdx, d).getDay() !== 0) continue;
+        var sobLabel = d > 1 ? ('sob. ' + (d - 1) + ' / ') : '';
+        html += '<option value="' + d + '">' + sobLabel + 'ndz. ' + d + ' ' + (polishMonthsGenitive[mIdx] || '') + '</option>';
+        if (domyslny === null && new Date(rok, mIdx, d, 23, 59) >= dzis) domyslny = d;
+      }
+      selW.innerHTML = html;
+      if (domyslny !== null) selW.value = String(domyslny);
+
+      selM.onchange = przeniesieniePokazObecna;
+      selW.onchange = przeniesieniePokazObecna;
+      przeniesieniePokazObecna();
+      przeniesienieRenderujListe();
+    }
+
+    function przeniesieniePokazObecna() {
+      var info = document.getElementById('przenies-obecna');
+      var data = przeniesienieDocData || {};
+      var nazw = document.getElementById('przenies-ministrant').value;
+      var dSun = parseInt(document.getElementById('przenies-weekend').value, 10);
+      var w = (data.wiersze || []).find(function(x) { return czyToSamoNazwisko(x.nazwisko, nazw); });
+      if (!w || !dSun) { info.innerText = ''; return; }
+      var ef = wyznaczEfektywnaGodzineWeekendowaDlaMinistranta(w, dSun, 0, data);
+      var g = ef.godzina === '17:00' ? 'sobota 17:00' : ('niedziela ' + ef.godzina);
+      info.innerHTML = 'Obecnie w ten weekend: <b style="color:#fafafa;">' + g + '</b>' + (ef.zamiana ? ' <span style="color:#a1a1aa;">(' + (ef.opis || ('zamiana z ' + ef.partner)) + ')</span>' : '');
+    }
+
+    function przeniesienieRenderujListe() {
+      var box = document.getElementById('przenies-lista');
+      var lista = ((przeniesienieDocData || {}).zamianyNiedziele || []).filter(function(z) {
+        return z && z.typ === 'RECZNA' && z.status !== 'ANULOWANA';
+      });
+      if (!lista.length) {
+        box.innerHTML = '<div style="color:#71717a; font-size:12px;">Brak ręcznych przeniesień w tym miesiącu.</div>';
+        return;
+      }
+      box.innerHTML = lista.map(function(z) {
+        var g = z.godzina === '17:00' ? 'sob. ' + (z.dzien - 1) + ' 17:00' : 'ndz. ' + z.dzien + ' ' + z.godzina;
+        return '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid #27272a; font-size:12px; color:#e4e4e7;">' +
+                 '<span><b>' + z.ministrant + '</b> → ' + g + (z.godzinaPoprzednia ? ' <span style="color:#71717a;">(zamiast ' + z.godzinaPoprzednia + ')</span>' : '') + '</span>' +
+                 '<button type="button" onclick="usunPrzeniesienieDyzuru(\'' + z.id + '\')" class="btn-secondary" style="width:auto; padding:3px 8px; margin:0; font-size:11px;">Usuń</button>' +
+               '</div>';
+      }).join('');
+    }
+
+    function zamknijModalPrzeniesDyzur() {
+      var m = document.getElementById('modal-przenies-dyzur');
+      if (m) m.style.display = 'none';
+    }
+
+    async function zapiszPrzeniesienieWszedzie(modyfikuj) {
+      var k = przeniesienieKlucze();
+      for (var i = 0; i < k.keys.length; i++) {
+        var ref = dbFirestore.collection('stan_grafiku').doc(k.keys[i]);
+        await dbFirestore.runTransaction(async function(tx) {
+          var s = await tx.get(ref);
+          if (!s.exists) return;
+          var lista = modyfikuj((s.data().zamianyNiedziele || []).slice());
+          tx.update(ref, { zamianyNiedziele: lista, zaktualizowano: firebase.firestore.FieldValue.serverTimestamp() });
+        });
+      }
+    }
+
+    async function zatwierdzPrzeniesienieDyzuru() {
+      var data = przeniesienieDocData || {};
+      var nazw = document.getElementById('przenies-ministrant').value;
+      var dSun = parseInt(document.getElementById('przenies-weekend').value, 10);
+      var nowaG = document.getElementById('przenies-godzina').value;
+      var w = (data.wiersze || []).find(function(x) { return czyToSamoNazwisko(x.nazwisko, nazw); });
+      if (!w || !dSun || !nowaG) { alert('Wybierz ministranta, weekend i godzinę.'); return; }
+      var ef = wyznaczEfektywnaGodzineWeekendowaDlaMinistranta(w, dSun, 0, data);
+      if (ef.godzina === nowaG) { alert(nazw + ' już ma dyżur o tej godzinie.'); return; }
+
+      var wpis = {
+        id: 'zr_' + dSun + '_' + Date.now(),
+        typ: 'RECZNA',
+        dzien: dSun,
+        ministrant: w.nazwisko,
+        godzinaPoprzednia: ef.godzina,
+        godzina: nowaG,
+        status: 'ZAAKCEPTOWANA',
+        utworzonoPrzez: (globalUser && globalUser.nazwisko) || 'Zakrystia',
+        utworzono: Date.now()
+      };
+      var btn = document.getElementById('btn-przenies-zapisz');
+      btn.disabled = true;
+      try {
+        await zapiszPrzeniesienieWszedzie(function(lista) {
+          // jedno aktywne przeniesienie na osobę i weekend
+          lista = lista.filter(function(z) { return !(z && z.typ === 'RECZNA' && z.dzien === dSun && czyToSamoNazwisko(z.ministrant, w.nazwisko)); });
+          lista.push(wpis);
+          return lista;
+        });
+        data.zamianyNiedziele = ((data.zamianyNiedziele || []).filter(function(z) {
+          return !(z && z.typ === 'RECZNA' && z.dzien === dSun && czyToSamoNazwisko(z.ministrant, w.nazwisko));
+        })).concat([wpis]);
+        if (tabelaMiesiacaDane && (tabelaMiesiacaDane.miesiacIdx === data.miesiacIdx)) tabelaMiesiacaDane.zamianyNiedziele = data.zamianyNiedziele;
+        pokazToast('Przeniesiono: ' + w.nazwisko + ' → ' + (nowaG === '17:00' ? 'sobota 17:00' : 'niedziela ' + nowaG));
+        przeniesieniePokazObecna();
+        przeniesienieRenderujListe();
+        if (typeof odswiezZakrystie === 'function') odswiezZakrystie();
+      } catch (e) {
+        alert('Błąd zapisu: ' + (e.message || e));
+      }
+      btn.disabled = false;
+    }
+
+    async function usunPrzeniesienieDyzuru(id) {
+      if (!confirm('Usunąć to przeniesienie? Ministrant wróci do swojej poprzedniej godziny.')) return;
+      try {
+        await zapiszPrzeniesienieWszedzie(function(lista) { return lista.filter(function(z) { return !(z && z.id === id); }); });
+        var data = przeniesienieDocData || {};
+        data.zamianyNiedziele = (data.zamianyNiedziele || []).filter(function(z) { return !(z && z.id === id); });
+        if (tabelaMiesiacaDane && (tabelaMiesiacaDane.miesiacIdx === data.miesiacIdx)) tabelaMiesiacaDane.zamianyNiedziele = data.zamianyNiedziele;
+        przeniesieniePokazObecna();
+        przeniesienieRenderujListe();
+        if (typeof odswiezZakrystie === 'function') odswiezZakrystie();
+      } catch (e) {
+        alert('Błąd: ' + (e.message || e));
+      }
+    }
+    window.otworzModalPrzeniesDyzur = otworzModalPrzeniesDyzur;
+    window.zamknijModalPrzeniesDyzur = zamknijModalPrzeniesDyzur;
+    window.zatwierdzPrzeniesienieDyzuru = zatwierdzPrzeniesienieDyzuru;
+    window.usunPrzeniesienieDyzuru = usunPrzeniesienieDyzuru;
 
     function otworzModalDodajMinistranta() {
       var kontenerListy = document.getElementById('lista-dodatkowy-ministranci');

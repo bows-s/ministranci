@@ -362,13 +362,24 @@
 
         for (var c = 0; c < row.komorki.length; c++) {
           var k = row.komorki[c];
+          var dNum = c + 1;
           var isSun = (naglowek[c] && naglowek[c].czyNiedziela);
           var isSat = (naglowek[c] && naglowek[c].czySobota);
+
+          var czyMaDyzurKomorki = !!k.maDyzur;
+          if ((isSat || isSun) && typeof wyznaczEfektywnaGodzineWeekendowaDlaMinistranta === 'function') {
+            var sunDayNum = isSat ? (dNum + 1) : dNum;
+            var efWknd = wyznaczEfektywnaGodzineWeekendowaDlaMinistranta(row, sunDayNum, 0, dane);
+            if (efWknd && efWknd.godzina) {
+              czyMaDyzurKomorki = isSat ? (efWknd.godzina === '17:00') : (efWknd.godzina !== '17:00');
+            }
+          }
+
           var cellStyle = isSun ? 'background:rgba(69,10,10,0.18);' : (isSat ? 'background:rgba(255,255,255,0.02);' : '');
           if (isMe) {
             cellStyle += ' background-color:rgba(8,51,68,0.22);';
           }
-          if (k.maDyzur && (!k.wartosc || k.wartosc === '')) {
+          if (czyMaDyzurKomorki && (k.wartosc === null || k.wartosc === undefined || k.wartosc === '')) {
             cellStyle += ' background:rgba(39,39,42,0.45);';
           }
 
@@ -396,29 +407,10 @@
             content = '<span class="tabela-badge b-zastepca">4</span>';
           } else if (k.wartosc === 1 || k.wartosc === '1') {
             content = '<span class="tabela-badge b-oddany">1</span>';
-          } else if (k.wartosc !== null && k.wartosc !== '') {
+          } else if (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== '') {
             content = '<span class="tabela-badge" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(74,222,128,0.4); font-weight:800;">' + k.wartosc + '</span>';
-          } else if (k.maDyzur) {
-            // Jeśli to weekend (sobota/niedziela) i ministrant był obecny dzień wcześniej w sobotę, nie pokazuj kropki w niedzielę!
-            var isWeekendServed = false;
-            var isSun = (naglowek[c] && naglowek[c].czyNiedziela);
-            var isSat = (naglowek[c] && naglowek[c].czySobota);
-
-            if (isSun && c > 0) {
-              var satCell = row.komorki[c - 1];
-              if (satCell && parseFloat(satCell.wartosc) > 0) {
-                isWeekendServed = true; // Służył w sobotę, niedziela wolna
-              }
-            } else if (isSat && c < row.komorki.length - 1) {
-              var sunCell = row.komorki[c + 1];
-              if (sunCell && parseFloat(sunCell.wartosc) > 0) {
-                isWeekendServed = true; // Służy w niedzielę, sobota wolna
-              }
-            }
-
-            if (!isWeekendServed) {
-              content = '<span style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
-            }
+          } else if (czyMaDyzurKomorki) {
+            content = '<span style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
           }
 
           var titleAttr = tooltipLit ? (' title="' + tooltipLit + '"') : (k.wartosc !== null && k.wartosc !== undefined ? (' title="' + k.wartosc + ' pkt"') : '');

@@ -1,0 +1,140 @@
+const fs = require('fs');
+const vm = require('vm');
+
+// Mock browser window and document environment
+const mockWindow = {
+  location: { pathname: '/', search: '', hash: '' },
+  localStorage: {
+    data: {},
+    getItem(k) { return this.data[k] || null; },
+    setItem(k, v) { this.data[k] = String(v); },
+    removeItem(k) { delete this.data[k]; },
+    key(i) { return Object.keys(this.data)[i]; },
+    get length() { return Object.keys(this.data).length; }
+  },
+  addEventListener() {},
+  scrollTo() {},
+  matchMedia() { return { matches: false }; },
+  navigator: { userAgent: 'Chrome', serviceWorker: { register: async () => ({}), addEventListener() {} }, standalone: false }
+};
+
+const mockDocument = {
+  title: '',
+  getElementById(id) {
+    return {
+      style: {},
+      innerText: '',
+      innerHTML: '',
+      value: '',
+      classList: { add() {}, remove() {}, contains() { return false; } },
+      appendChild() {},
+      querySelectorAll() { return []; }
+    };
+  },
+  write() {},
+  createElement() {
+    return {
+      style: {},
+      innerText: '',
+      innerHTML: '',
+      value: '',
+      appendChild() {}
+    };
+  },
+  querySelectorAll() { return []; },
+  addEventListener() {}
+};
+
+const sandbox = {
+  window: mockWindow,
+  document: mockDocument,
+  localStorage: mockWindow.localStorage,
+  location: mockWindow.location,
+  navigator: { userAgent: 'Chrome', serviceWorker: { register: async () => ({}), addEventListener() {} } },
+  console: console,
+  setTimeout: setTimeout,
+  clearTimeout: clearTimeout,
+  setInterval: setInterval,
+  clearInterval: clearInterval,
+  Date: Date,
+  Math: Math,
+  JSON: JSON,
+  encodeURIComponent: encodeURIComponent,
+  decodeURIComponent: decodeURIComponent,
+  parseInt: parseInt,
+  parseFloat: parseFloat,
+  String: String,
+  Array: Array,
+  Object: Object,
+  RegExp: RegExp,
+  fetch: () => Promise.resolve({ json: () => Promise.resolve({}) }),
+  firebase: {
+    apps: [],
+    initializeApp: () => ({}),
+    firestore: () => ({
+      settings: () => {},
+      enablePersistence: () => Promise.resolve(),
+      collection: () => ({ doc: () => ({ get: () => Promise.resolve({ exists: false }), onSnapshot: () => () => {} }) })
+    }),
+    messaging: () => ({ isSupported: () => Promise.resolve(false) })
+  }
+};
+
+vm.createContext(sandbox);
+
+const scriptOrder = [
+  'firebase-config.js',
+  'utils.js',
+  'auth.js',
+  'pwa.js',
+  'liturgia.js',
+  'gamification.js',
+  'ranking.js',
+  'gielda.js',
+  'zakrystia.js',
+  'tabela.js',
+  'app.js'
+];
+
+console.log('Testing modules execution in sandbox...');
+scriptOrder.forEach(f => {
+  const code = fs.readFileSync('public/js/' + f, 'utf8');
+  vm.runInContext(code, sandbox, { filename: f });
+  console.log(`[PASS] Executed public/js/${f}`);
+});
+
+// Test key functions across modules
+console.log('\nTesting cross-module function calls:');
+
+// 1. Version check
+console.log('APP_VERSION:', sandbox.APP_VERSION);
+if (sandbox.APP_VERSION !== '1.6.5') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
+
+// 2. Liturgy check
+const litDzis = sandbox.wyznaczDaneLiturgiczne(new Date());
+console.log('Liturgy today:', litDzis.kolor, '-', litDzis.nazwa);
+if (!litDzis.kolor) throw new Error('Liturgy failed');
+
+// 3. Name normalization & row matching (the bug that affected Maks Erich)
+const testRows = [
+  { nazwisko: 'Maks Erich' },
+  { nazwisko: 'Mateusz Pierścieński' },
+  { nazwisko: 'Franek Kik' }
+];
+const idxMaks = sandbox.znajdzWierszMinistranta(testRows, 'Maks Erich');
+const idxMateusz = sandbox.znajdzWierszMinistranta(testRows, 'Mateusz Pierścieński');
+const idxFranek = sandbox.znajdzWierszMinistranta(testRows, 'Franek Kik');
+console.log('Matched indices:', { Maks: idxMaks, Mateusz: idxMateusz, Franek: idxFranek });
+if (!idxMaks || idxMaks.nazwisko !== 'Maks Erich' ||
+    !idxMateusz || idxMateusz.nazwisko !== 'Mateusz Pierścieński' ||
+    !idxFranek || idxFranek.nazwisko !== 'Franek Kik') {
+  throw new Error('Name matching logic failed!');
+}
+
+// 4. wycofajPrzyjeteZastepstwo exists
+if (typeof sandbox.wycofajPrzyjeteZastepstwo !== 'function') {
+  throw new Error('wycofajPrzyjeteZastepstwo function missing!');
+}
+console.log('wycofajPrzyjeteZastepstwo function: OK');
+
+console.log('\nAll integration tests passed successfully!');

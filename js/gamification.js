@@ -127,7 +127,7 @@
           var d = k.dzien;
           var dt = new Date(currentYear, currentMonthIdx, d);
           var isPast = (d <= currentDay);
-          var isSunday = (dt.getDay() === 0);
+          var isSunday = (dt.getDay() === 0) || (dt.getDay() === 6 && k.maDyzur);
 
           var wVal = k.wartosc;
           var isPresent = (typeof wVal === "number" && wVal > 0);

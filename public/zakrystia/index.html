@@ -41,7 +41,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging-compat.js"></script>
-  <link rel="stylesheet" href="/css/style.css?v=1.6.1">
+  <link rel="stylesheet" href="/css/style.css?v=1.6.3">
 </head>
 <body>
 
@@ -478,6 +478,9 @@
             <button id="btn-oglos-liturgie-zakrystia" onclick="otworzModalOglosLiturgie()" style="width:auto; padding:7px 11px; font-size:12px; font-weight:600; color:#d8b4fe; background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:6px; cursor:pointer;" title="Ogłoś pogrzeb lub inne nabożeństwo">
               ✝ Ogłoś pogrzeb
             </button>
+            <button id="btn-przenies-dyzur-zakrystia" onclick="otworzModalPrzeniesDyzur()" style="width:auto; padding:7px 11px; font-size:12px; font-weight:600; color:#38bdf8; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.3); border-radius:6px; cursor:pointer;" title="Przenieś dyżur ministranta na inną godzinę">
+              🔄 Przenieś dyżur
+            </button>
             <button id="btn-zakrystia-install" onclick="zainstalujAplikacjeZakrystia()" style="width:auto; padding:7px 11px; font-size:12px; font-weight:500; color:#fafafa; background:#27272a; border:1px solid #3f3f46; border-radius:6px; display:inline-flex; align-items:center; gap:5px; cursor:pointer;" title="Zainstaluj osobną aplikację Zakrystia">
               📲 Pobierz aplikację
             </button>
@@ -517,13 +520,18 @@
 
           <!-- Opcje zaawansowane: ręczna zmiana punktów mszy (+2, +3, +4, +5) oraz inny dzień/godzina -->
           <div id="zakrystia-opcje-zaawansowane" style="display:none; margin-top:12px; padding-top:10px; border-top:1px solid #27272a;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
               <span style="font-size:11px; font-weight:600; color:#a1a1aa; text-transform:uppercase; letter-spacing:0.05em;">
                 Punkty za tę służbę (dla wszystkich obecnych):
               </span>
-              <button onclick="otworzModalZmienMsze()" class="btn-secondary" style="width:auto; padding:4px 8px; font-size:11px;">
-                Inny dzień / godzina
-              </button>
+              <div style="display:flex; gap:6px;">
+                <button type="button" onclick="otworzModalPrzeniesDyzur()" class="btn-secondary" style="width:auto; padding:4px 8px; font-size:11px; color:#38bdf8; border-color:rgba(56,189,248,0.4);" title="Przenieś dyżur ministranta na inną godzinę (np. zastępstwo umówione w zakrystii)">
+                  🔄 Przenieś dyżur
+                </button>
+                <button type="button" onclick="otworzModalZmienMsze()" class="btn-secondary" style="width:auto; padding:4px 8px; font-size:11px;">
+                  Inny dzień / godzina
+                </button>
+              </div>
             </div>
             <div id="zakrystia-liturgia-pills" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
               <button type="button" id="pill-punkty-2" onclick="zakrystiaUstawPunktyLiturgii(2)" class="liturgia-pill">
@@ -1329,19 +1337,69 @@
     </div>
   </div>
 
+  <!-- Modal Ręcznego Przeniesienia Dyżuru Weekendowego (np. umówienie z kościelnym) -->
+  <div id="modal-przenies-dyzur" class="modal-overlay" onclick="if(event.target === this) zamknijModalPrzeniesDyzur()">
+    <div class="modal-content" style="max-width:440px; width:100%; text-align:left; padding:22px; box-sizing:border-box;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:16px; color:#38bdf8; display:flex; align-items:center; gap:8px;">
+          <span>🔄 Przenieś dyżur weekendowy</span>
+        </h3>
+        <button type="button" onclick="zamknijModalPrzeniesDyzur()" style="background:transparent; border:none; color:#a1a1aa; font-size:22px; cursor:pointer; padding:0 4px; line-height:1;">&times;</button>
+      </div>
+
+      <p style="font-size:12px; color:#a1a1aa; margin:0 0 14px 0; line-height:1.4;">
+        Użyj tego, gdy ministrant umówił się z kościelnym na inną godzinę w ten sam weekend. Dzięki temu otrzyma normalne 3 pkt za nową godzinę i nie dostanie -5 pkt za pierwotną.
+      </p>
+
+      <div style="margin-bottom:12px;">
+        <label class="section-label" style="display:block; margin-bottom:6px; font-size:12px; font-weight:600; color:#a1a1aa; text-transform:uppercase;">Ministrant:</label>
+        <select id="przenies-ministrant" style="width:100%; padding:9px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; box-sizing:border-box;"></select>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="section-label" style="display:block; margin-bottom:6px; font-size:12px; font-weight:600; color:#a1a1aa; text-transform:uppercase;">Który weekend:</label>
+        <select id="przenies-weekend" style="width:100%; padding:9px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; box-sizing:border-box;"></select>
+      </div>
+
+      <div id="przenies-obecna" style="font-size:12px; color:#93c5fd; margin-bottom:12px; padding:8px 12px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); border-radius:6px;"></div>
+
+      <div style="margin-bottom:16px;">
+        <label class="section-label" style="display:block; margin-bottom:6px; font-size:12px; font-weight:600; color:#a1a1aa; text-transform:uppercase;">Nowa wyznaczona godzina dyżuru:</label>
+        <select id="przenies-godzina" style="width:100%; padding:9px 12px; font-size:14px; border-radius:8px; border:1px solid #3f3f46; background:#18181b; color:#fafafa; box-sizing:border-box;">
+          <option value="17:00">Sobota 17:00</option>
+          <option value="08:30">Niedziela 08:30</option>
+          <option value="10:00">Niedziela 10:00</option>
+          <option value="11:30">Niedziela 11:30</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-bottom:18px;">
+        <button type="button" onclick="zamknijModalPrzeniesDyzur()" class="btn-secondary" style="width:auto; padding:8px 14px; margin:0; font-size:13px;">Anuluj</button>
+        <button type="button" id="btn-przenies-zapisz" onclick="zatwierdzPrzeniesienieDyzuru()" style="width:auto; padding:8px 16px; margin:0; font-size:13px; font-weight:600; background:#38bdf8; color:#09090b; border:none; border-radius:6px; cursor:pointer;">Zapisz przeniesienie</button>
+      </div>
+
+      <div style="border-top:1px solid #27272a; padding-top:12px;">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase; color:#a1a1aa; margin-bottom:8px; letter-spacing:0.05em;">
+          Ręczne przeniesienia w tym miesiącu:
+        </div>
+        <div id="przenies-lista" style="max-height:160px; overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast">Komunikat</div>
   <!-- Moduły aplikacji PWA Ministranci -->
-  <script src="/js/firebase-config.js?v=1.6.1"></script>
-  <script src="/js/utils.js?v=1.6.1"></script>
-  <script src="/js/auth.js?v=1.6.1"></script>
-  <script src="/js/pwa.js?v=1.6.1"></script>
-  <script src="/js/liturgia.js?v=1.6.1"></script>
-  <script src="/js/gamification.js?v=1.6.1"></script>
-  <script src="/js/ranking.js?v=1.6.1"></script>
-  <script src="/js/gielda.js?v=1.6.1"></script>
-  <script src="/js/zakrystia.js?v=1.6.1"></script>
-  <script src="/js/tabela.js?v=1.6.1"></script>
-  <script src="/js/app.js?v=1.6.1"></script>
+  <script src="/js/firebase-config.js?v=1.6.5"></script>
+  <script src="/js/utils.js?v=1.6.5"></script>
+  <script src="/js/auth.js?v=1.6.5"></script>
+  <script src="/js/pwa.js?v=1.6.5"></script>
+  <script src="/js/liturgia.js?v=1.6.5"></script>
+  <script src="/js/gamification.js?v=1.6.5"></script>
+  <script src="/js/ranking.js?v=1.6.5"></script>
+  <script src="/js/gielda.js?v=1.6.5"></script>
+  <script src="/js/zakrystia.js?v=1.6.5"></script>
+  <script src="/js/tabela.js?v=1.6.5"></script>
+  <script src="/js/app.js?v=1.6.5"></script>
 </body>
 </html>

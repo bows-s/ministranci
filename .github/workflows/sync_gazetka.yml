@@ -1,0 +1,31 @@
+name: Synchronizacja Gazetki Parafialnej
+
+on:
+  schedule:
+    # Niedziela o 06:00 UTC (08:00 czasu polskiego w lecie / 07:00 w zimie)
+    - cron: '0 6 * * 0'
+    # Niedziela o 16:00 UTC (18:00 czasu polskiego) - zapasowe sprawdzenie
+    - cron: '0 16 * * 0'
+    # Poniedziałek rano o 06:00 UTC (08:00 czasu polskiego)
+    - cron: '0 6 * * 1'
+  workflow_dispatch: # Uruchamianie ręczne jednym kliknięciem z GitHuba
+
+jobs:
+  sync:
+    name: Pobierz i przetwórz gazetkę
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja środowiska Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalacja zależności
+        run: npm install
+
+      - name: Uruchomienie synchronizatora gazetki
+        run: node scripts/sync_gazetka.js

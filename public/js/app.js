@@ -3,7 +3,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.6.1';
+    var APP_VERSION = '1.6.5';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -422,11 +422,32 @@
         document.getElementById('sluzba-detale').innerText = (ns && ns.tekst) ? ns.tekst : 'Nie masz zaplanowanych dyżurów w tym miesiącu.';
       }
 
-      // 3. Liczba ofert na giełdzie
-      var wolneDlaMnie = (res.wolneZastepstwa || []).filter(function(z) { return !z.czyMoje; });
-      var totalOferty = (res.gieldaTydzien ? res.gieldaTydzien.length : 0) +
-                        (res.gieldaNiedziele ? res.gieldaNiedziele.length : 0) +
-                        wolneDlaMnie.length;
+      // 3. Liczba ofert na giełdzie (te same filtry co w listach giełdy — liczymy tylko to, co faktycznie widać)
+      var myNameCnt = (globalUser && globalUser.nazwisko) ? globalUser.nazwisko.trim() : '';
+      function czyOfertaAktywna(o) {
+        return o && o.status !== 'ANULOWANA' && o.status !== 'ZAAKCEPTOWANA' && o.status !== 'PRZEKSZTALCONA_NA_WOLNY' && (!o.status || o.status.indexOf('WYGASLA') === -1);
+      }
+      var cntGt = (res.gieldaTydzien || []).filter(function(o) {
+        if (!czyOfertaAktywna(o)) return false;
+        var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
+        if (dO < res.dzisDzien) return false;
+        var gO = o.godzina || pobierzGodzineDlaDniaTygodnia(res.rok, res.miesiacIdx, dO);
+        return !czyTydzienMszaPrzeterminowana(dO, gO, res.rok, res.miesiacIdx);
+      }).length;
+      var cntGn = (res.gieldaNiedziele || []).filter(function(o) {
+        if (!czyOfertaAktywna(o)) return false;
+        if (o.dzien < res.dzisDzien) return false;
+        return !czyWeekendMszaPrzeterminowana(o.dzien, o.godzinaOddawana || o.godzina || '10:00', res.rok, res.miesiacIdx);
+      }).length;
+      var wolneDlaMnie = (res.wolneZastepstwa || []).filter(function(z) {
+        if (!z || !z.dzien || z.czyMoje) return false;
+        if (myNameCnt && czyToSamoNazwisko(z.oddajacy, myNameCnt)) return false;
+        if (z.typ && z.typ !== 'Tydzień') return false;
+        if (z.status && z.status !== 'OCZEKUJE') return false;
+        if (z.dzien < res.dzisDzien) return false;
+        return !czyLiturgiaJuzMinela(z.dzien, cleanTime(z.godzina) || '18:00', null, res.rok, res.miesiacIdx);
+      });
+      var totalOferty = cntGt + cntGn + wolneDlaMnie.length;
       var bOferty = document.getElementById('badge-oferty');
       if (bOferty) {
         if (totalOferty > 0) {
@@ -678,7 +699,7 @@
               } else if (item.oddane) {
                 htmlDyzury += renderOddanyDyzurStatus(pelnaData, item.oddane, null, item.dzien);
               } else {
-                var isPastTydz = czyTydzienZgloszeniePrzeterminowane(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
+                var isPastTydz = czyTydzienMszaPrzeterminowana(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
                 htmlDyzury += renderKafalekDyzuru(pelnaData, 'Godz. ' + godzWTyg + ' • 5 pkt', {
                   actionBtn: !isPastTydz ? '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + item.dzien + ', \'Tydzień\', \'' + godzWTyg + '\', ' + res.rok + ', ' + res.miesiacIdx + ')">Nie mogę przyjść</button>' : ''
                 });
@@ -707,7 +728,7 @@
                   actionBtn: '<button class="btn-cancel" style="width:auto; padding:6px 12px; margin:0; font-size:12px;" onclick="anulujUsprawiedliwienieNiedziela(' + (item.dzienNiedzieli || item.dzien) + ')">Wycofaj zgłoszenie</button>'
                 });
               } else {
-                var isPastWknd = czyWeekendZgloszeniePrzeterminowane(item.dzien, item.godzina || '', res.rok, res.miesiacIdx);
+                var isPastWknd = czyWeekendMszaPrzeterminowana(item.dzien, item.godzina || '', res.rok, res.miesiacIdx);
                 htmlDyzury += renderKafalekDyzuru(pelnaData, godzinaTekst + subTekst + ' • 3 pkt', {
                   actionBtn: !isPastWknd ? '<button class="btn-oddaj-dyzur" onclick="otworzModalOddajDyzur(' + (item.dzienNiedzieli || item.dzien) + ', \'Weekend\', \'' + (item.godzina || '') + '\', ' + res.rok + ', ' + res.miesiacIdx + ')">Nie mogę przyjść</button>' : ''
                 });
@@ -1228,14 +1249,12 @@
               var ptsSub = (zo.typ === 'Niedziela' || zo.typ === 'Weekend') ? 3 : 4;
               if (zo.punkty !== undefined && zo.punkty !== null) ptsSub = zo.punkty;
 
-              var czyMineloWolne = (zo.typ === 'Niedziela' || zo.typ === 'Weekend')
-                ? czyWeekendMszaPrzeterminowana(zo.dzien, zo.godzina, zRok, zMies)
-                : czyTydzienMszaPrzeterminowana(zo.dzien, zo.godzina, zRok, zMies);
+              var czyMineloWolne = czyMszaJuzSieRozpoczela(zo.dzien, zo.godzina, zRok, zMies);
 
               var przyciskHtml = '';
               if (czyMineloWolne) {
                 przyciskHtml = '<div style="color:#a1a1aa; font-size:12px; font-weight:500; padding:8px 12px; background:rgba(161,161,170,0.1); border-radius:6px; border:1px solid rgba(161,161,170,0.2);">' +
-                                 '<span>Czas na przejęcie minął (< 2h do mszy)</span>' +
+                                 '<span>Czas na przejęcie minął (msza święta już się rozpoczęła)</span>' +
                                '</div>';
               } else if (mamDyzurWTymDniu) {
                 przyciskHtml = '<div style="color:#fbbf24; font-size:12px; font-weight:500; padding:8px 12px; background:rgba(251,191,36,0.1); border-radius:6px; border:1px solid rgba(251,191,36,0.3);">' +
