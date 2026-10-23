@@ -13,6 +13,41 @@
       wszyscyMinistranciParafii: []
     };
 
+    function czyToDzienSwiateczny5Pkt(dNum, curMIdx, curYear, daneTabeli) {
+      if (dNum === 1 && curMIdx === 10) return true; // 1 listopada - Wszystkich Świętych
+      var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? (daneTabeli.dniNaglowek[dNum - 1] || daneTabeli.dniNaglowek['' + (dNum - 1)]) : null;
+      if (dNaglowek && (dNaglowek.czySwieto || dNaglowek.punktyZaObecnosc === 5)) return true;
+      if (typeof wyznaczDaneLiturgiczne === 'function') {
+        var lit = wyznaczDaneLiturgiczne(new Date(curYear || 2026, curMIdx !== undefined ? curMIdx : 9, dNum));
+        if (lit && (lit.ranga === 'Uroczystość' || (lit.nazwa && lit.nazwa.indexOf('Wszystkich Świętych') !== -1))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function czyMinistrantBylJuzNaInnejMszyWSwieto(wiersz, colIdx, curGKey) {
+      if (!wiersz || !wiersz.komorki || !wiersz.komorki[colIdx]) return false;
+      var cell = wiersz.komorki[colIdx];
+      var normCurG = (typeof cleanTime === 'function' && curGKey) ? cleanTime(curGKey) : (curGKey || '').trim();
+      if (!cell.liturgie || typeof cell.liturgie !== 'object') {
+        return (typeof cell.wartosc === 'number' && cell.wartosc >= 5);
+      }
+      var keys = Object.keys(cell.liturgie);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var normK = (typeof cleanTime === 'function') ? cleanTime(k) : k.trim();
+        if (normK !== normCurG) {
+          var val = cell.liturgie[k];
+          var numVal = (typeof val === 'number') ? val : (val && typeof val.punkty === 'number' ? val.punkty : parseFloat(val));
+          if (!isNaN(numVal) && numVal > 0) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
         function generujStanZFirestore(nazwisko, docData) {
       if (!docData) return null;
       var now = new Date();
@@ -1656,6 +1691,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
               var zastepuje = null;
               var opisGieldy = zamianaInfoText || '';
 
+              if (isHoliday5Pkt) {
+                var juzBylSwieto = czyMinistrantBylJuzNaInnejMszyWSwieto(w, colIdx, gStr);
+                if (juzBylSwieto) {
+                  pkt = 2;
+                  if (!opisGieldy) opisGieldy = 'Kolejna msza w święto (+2 pkt • służył już dzisiaj)';
+                }
+              }
+
               // Sprawdź czy ministrant oddał ten dyżur na giełdę / ma zastępcę
               var ofertaZ = znajdzOferteDlaMinistranta(w.nazwisko, dNum, gStr);
               if (!ofertaZ && isWeekendMass && dow === 6) {
@@ -2319,26 +2362,29 @@ function czyMaDostepDoZakrystii(nazwisko) {
         else if (m.status === 'NIEOBECNY') cardClass += ' is-absent';
         else if (m.status === 'USPRAWIEDLIWIONY') cardClass += ' is-excused';
 
-        var czySwieto5Pkt = (zakrystiaStan.rodzajLiturgii === 'msza_swieto' || zakrystiaStan.punktyLiturgii === 5 || (zakrystiaStan.wybranyDzien === 1 && currentMonthIdx === 10));
+        var isSwietoL = czyToDzienSwiateczny5Pkt(zakrystiaStan.dzien, currentMonthIdx, currentYear, daneTabeli);
+        var wierszM = znajdzWierszMinistranta(wiersze, m.nazwisko);
+        var juzBylSwieto = isSwietoL ? czyMinistrantBylJuzNaInnejMszyWSwieto(wierszM, colIdx, zakrystiaStan.godzina) : false;
+
         var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
         var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
-        var ptsDlaObecnego = czySwieto5Pkt ? 5 : (zakrystiaStan.punktyLiturgii || 3);
+        var ptsDlaObecnego = isSwietoL ? (juzBylSwieto ? 2 : 5) : (zakrystiaStan.punktyLiturgii || 3);
         if (m.typ === 'ZASTEPCA') {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
         } else if (m.typ === 'DODATKOWY') {
           if (zakrystiaStan.recznieUstawionePunkty) {
-            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || (czySwieto5Pkt ? 5 : 3);
+            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || (isSwietoL ? (juzBylSwieto ? 2 : 5) : 3);
+          } else if (isSwietoL) {
+            ptsDlaObecnego = juzBylSwieto ? 2 : 5;
           } else if (typeof m.obecnyPkt === 'number') {
             ptsDlaObecnego = m.obecnyPkt;
-          } else if (czySwieto5Pkt) {
-            ptsDlaObecnego = 5;
           } else if (czyDodatkowa) {
             ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
           } else {
             ptsDlaObecnego = czyNiedziela ? 1 : 2;
           }
         } else {
-          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (czySwieto5Pkt ? 5 : (zakrystiaStan.punktyLiturgii || 3));
+          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (isSwietoL ? (juzBylSwieto ? 2 : 5) : (zakrystiaStan.punktyLiturgii || 3));
         }
 
         var badgeHtml = '';
@@ -3076,11 +3122,18 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var stInfoAdd = wyznaczStopienMinistranta(name, wRows);
           var pRow = wRows.find(function(w) { return czyToSamoNazwisko(w.nazwisko, name); });
 
+          var isSwietoL = czyToDzienSwiateczny5Pkt(zakrystiaStan.dzien, zakrystiaStan.miesiacIdx, zakrystiaStan.rok, tabelaMiesiacaDane);
           var pktDlaDodatkowego = 2;
           var opisDodatkowy = '';
           if (zakrystiaStan.recznieUstawionePunkty) {
             pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 3;
             opisDodatkowy = 'Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)';
+          } else if (isSwietoL) {
+            var juzBylSwieto = czyMinistrantBylJuzNaInnejMszyWSwieto(pRow, zakrystiaStan.dzien - 1, zakrystiaStan.godzina);
+            pktDlaDodatkowego = juzBylSwieto ? 2 : 5;
+            opisDodatkowy = juzBylSwieto 
+              ? 'Dodatkowa msza w święto (+2 pkt • służył już dzisiaj)' 
+              : 'Msza w Uroczystość (+5 pkt)';
           } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || zakrystiaStan.rodzajLiturgii === 'pogrzeb') {
             pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || (zakrystiaStan.dzienTygodnia === 'niedziela' ? 3 : 2);
             opisDodatkowy = 'Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)';
@@ -3311,8 +3364,20 @@ function czyMaDostepDoZakrystii(nazwisko) {
         function wyliczPunktyMinistranta(m) {
           if (m.tylkoRozaniec) return 2;
           if (m.status === 'OBECNY') {
+            var isSwietoL = czyToDzienSwiateczny5Pkt(zakrystiaStan.dzien, zakrystiaStan.miesiacIdx, zakrystiaStan.rok, tabelaDoModyfikacji);
+            var wM = znajdzWierszMinistranta(tabelaDoModyfikacji.wiersze, m.nazwisko);
+            var juzBylSwieto = isSwietoL ? czyMinistrantBylJuzNaInnejMszyWSwieto(wM, colIdx, gKey) : false;
+
             var dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
-            if (m.typ === 'ZASTEPCA') {
+            if (isSwietoL) {
+              if (m.typ === 'ZASTEPCA') {
+                dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
+              } else if (juzBylSwieto) {
+                dodajPkt = 2; // Druga lub kolejna msza w święto: ZAWSZE +2 pkt!
+              } else {
+                dodajPkt = 5; // Pierwsza msza w święto: ZAWSZE +5 pkt!
+              }
+            } else if (m.typ === 'ZASTEPCA') {
               dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
             } else if (m.typ === 'DODATKOWY') {
               if (zakrystiaStan.recznieUstawionePunkty) {
@@ -3322,7 +3387,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
               } else if (czyDodatkowa) {
                 dodajPkt = zakrystiaStan.punktyLiturgii || 3;
               } else {
-                var wM = znajdzWierszMinistranta(tabelaDoModyfikacji.wiersze, m.nazwisko);
                 var juzBylNaDyz = czyMinistrantBylNaSwoimDyzurzeWeekendowym(wM, zakrystiaStan.dzien, dowNum, tabelaDoModyfikacji);
                 dodajPkt = czyNiedziela ? (juzBylNaDyz ? 2 : 1) : 2;
               }

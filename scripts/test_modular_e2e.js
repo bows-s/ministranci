@@ -108,7 +108,7 @@ console.log('\nTesting cross-module function calls:');
 
 // 1. Version check
 console.log('APP_VERSION:', sandbox.APP_VERSION);
-if (sandbox.APP_VERSION !== '1.6.5') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
+if (sandbox.APP_VERSION !== '1.6.6') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
 
 // 2. Liturgy check
 const litDzis = sandbox.wyznaczDaneLiturgiczne(new Date());
@@ -136,5 +136,25 @@ if (typeof sandbox.wycofajPrzyjeteZastepstwo !== 'function') {
   throw new Error('wycofajPrzyjeteZastepstwo function missing!');
 }
 console.log('wycofajPrzyjeteZastepstwo function: OK');
+
+// 5. Holiday attendance scoring tests (1 Nov: 1st mass = 5 pkt, 2nd mass = 2 pkt -> total 7 pkt)
+const isNov1Holiday = sandbox.czyToDzienSwiateczny5Pkt(1, 10, 2026, {});
+if (!isNov1Holiday) throw new Error('1 Nov must be detected as a 5-point holiday!');
+
+const dummyRow = {
+  nazwisko: 'Maciej Erich',
+  komorki: [
+    {
+      maDyzur: true,
+      wartosc: 5,
+      liturgie: { '10:00': 5 }
+    }
+  ]
+};
+const alreadyServedAt10 = sandbox.czyMinistrantBylJuzNaInnejMszyWSwieto(dummyRow, 0, '16:00');
+if (!alreadyServedAt10) throw new Error('Should detect that altar server already served at 10:00 on holiday!');
+const notServedYet = sandbox.czyMinistrantBylJuzNaInnejMszyWSwieto({ komorki: [{ liturgie: {} }] }, 0, '10:00');
+if (notServedYet) throw new Error('Should detect altar server has not served yet on holiday!');
+console.log('Holiday scoring tests (5 pkt for 1st mass, +2 for 2nd mass): OK');
 
 console.log('\nAll integration tests passed successfully!');
