@@ -1869,41 +1869,64 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
       }
 
-      // 1. Z pamięci podręcznej (0 ms!)
+      // 1. Z pamięci podręcznej i localStorage (błyskawiczny render w 0 ms!)
       var tabelaDoUzycia = isNextMonthZak ? daneKolejnegoMiesiaca : tabelaMiesiacaDane;
-      if (!force && tabelaDoUzycia && tabelaDoUzycia.wiersze && tabelaDoUzycia.wiersze.length) {
-        budujZakrystie(tabelaDoUzycia);
-        return;
-      }
-
-      // 2. Z localStorage (1 ms!)
-      if (!force) {
+      if (!tabelaDoUzycia || !tabelaDoUzycia.wiersze || !tabelaDoUzycia.wiersze.length) {
         try {
           var rawT = isNextMonthZak ? localStorage.getItem('min_cached_tabela_' + targetDocKey) : localStorage.getItem('min_cached_tabela');
           if (rawT) {
             var pT = JSON.parse(rawT);
             if (pT && pT.wiersze && pT.wiersze.length) {
+              tabelaDoUzycia = pT;
               if (isNextMonthZak) daneKolejnegoMiesiaca = pT;
               else tabelaMiesiacaDane = pT;
-              budujZakrystie(pT);
-              return;
             }
           }
         } catch(e) {}
       }
 
-      // 3. Pobierz z bazy Firestore w Warszawie (15 ms!)
+      var juzWyrenderowanoZCache = false;
+      if (tabelaDoUzycia && tabelaDoUzycia.wiersze && tabelaDoUzycia.wiersze.length) {
+        try {
+          budujZakrystie(tabelaDoUzycia);
+          juzWyrenderowanoZCache = true;
+        } catch(eCached) {
+          console.warn('Błąd szybkiego renderu z cache zakrystii:', eCached);
+        }
+      }
+
+      // 2. Pobierz z bazy Firestore w Warszawie (lub zaktualizuj w tle)
       if (dbFirestore) {
-        kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#818cf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie zaplanowanych ministrantów...</div>';
+        if (!juzWyrenderowanoZCache && kontener) {
+          kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#818cf8;"><span class="mini-spin" style="font-size:20px;">⟳</span> Ładowanie zaplanowanych ministrantów...</div>';
+        }
         var targetG = cleanTime(wybranaGodzina);
         var parsedTgt = parsujKluczMiesiaca(targetDocKey);
         var logIdPrefix = (parsedTgt.miesiacIdx !== 8 || parsedTgt.rok !== 2026) ? ('M' + parsedTgt.miesiacIdx + '_') : '';
         var lId = targetG ? (logIdPrefix + ((parseInt(wybranyDzien, 10) < 10 ? '0' : '') + parseInt(wybranyDzien, 10)) + '_' + targetG.replace(':', '')) : null;
-        var fsPromises = [
+        
+        var timeoutPromise = new Promise(function(resolve) {
+          setTimeout(function() { resolve({ isTimeout: true }); }, 3500);
+        });
+
+        var fsPromises = Promise.all([
           dbFirestore.collection('stan_grafiku').doc(targetDocKey).get(),
           lId ? dbFirestore.collection('obecnosc').doc(lId).get().catch(function() { return null; }) : Promise.resolve(null)
-        ];
-        Promise.all(fsPromises).then(function(resArray) {
+        ]);
+
+        Promise.race([fsPromises, timeoutPromise]).then(function(resArray) {
+          if (resArray && resArray.isTimeout) {
+            console.warn('Zakrystia: timeout pobierania z Firestore.');
+            if (!juzWyrenderowanoZCache) {
+              if (tabelaDoUzycia && tabelaDoUzycia.wiersze) {
+                budujZakrystie(tabelaDoUzycia);
+              } else if (kontener) {
+                kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#fca5a5;">Połączenie z bazą trwa zbyt długo.<br><button onclick="wczytajDaneDlaZakrystii(null, null, true)" class="btn-secondary" style="margin-top:12px; width:auto; padding:8px 16px;">Spróbuj ponownie</button></div>';
+              }
+            }
+            return;
+          }
+
           var doc = resArray[0];
           var docObec = resArray[1];
           if (doc && doc.exists && doc.data() && doc.data().wiersze) {
@@ -1944,7 +1967,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 juzZapisane: true,
                 czyLiturgiaDodatkowa: (dOb.rodzajLiturgii === 'pogrzeb' || dOb.rodzajLiturgii === 'nabozenstwo'),
                 maRozaniec: (dOb.maRozaniec !== undefined) ? dOb.maRozaniec : (parsedTgtZ.miesiacIdx === 9),
-                ministranci: dOb.ministranci,
+                ministranci: dOb.ministranci || [],
                 wszyscyMinistranciParafii: (listaUzytkownikow || []).map(function(u) { return u.nazwisko; }).filter(function(n) {
                   return n.toLowerCase() !== "kościelny" && n.toLowerCase() !== "koscielny";
                 }).sort(function(a, b) { return a.localeCompare(b, "pl"); })
@@ -1958,8 +1981,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var cached = isNextMonthZak ? daneKolejnegoMiesiaca : tabelaMiesiacaDane;
             if (cached && cached.wiersze) {
               budujZakrystie(cached);
-            } else {
-              kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Nie udało się załadować grafiku dla tej daty. Spróbuj odświeżyć stronę.</div>';
+            } else if (!juzWyrenderowanoZCache && kontener) {
+              kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Nie udało się załadować grafiku dla tej daty.<br><button onclick="wczytajDaneDlaZakrystii(null, null, true)" class="btn-secondary" style="margin-top:12px; width:auto; padding:8px 16px;">Spróbuj ponownie</button></div>';
             }
           }
         }).catch(function(err) {
@@ -1967,10 +1990,17 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var cached = isNextMonthZak ? daneKolejnegoMiesiaca : tabelaMiesiacaDane;
           if (cached && cached.wiersze) {
             budujZakrystie(cached);
-          } else {
-            kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Wystąpił błąd połączenia z bazą grafiku. Spróbuj odświeżyć stronę.</div>';
+          } else if (!juzWyrenderowanoZCache && kontener) {
+            kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Wystąpił błąd połączenia z bazą grafiku.<br><button onclick="wczytajDaneDlaZakrystii(null, null, true)" class="btn-secondary" style="margin-top:12px; width:auto; padding:8px 16px;">Spróbuj ponownie</button></div>';
           }
         });
+      } else if (!juzWyrenderowanoZCache && kontener) {
+        var cachedLocal = isNextMonthZak ? daneKolejnegoMiesiaca : tabelaMiesiacaDane;
+        if (cachedLocal && cachedLocal.wiersze) {
+          budujZakrystie(cachedLocal);
+        } else {
+          kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Brak połączenia z bazą danych.<br><button onclick="wczytajDaneDlaZakrystii(null, null, true)" class="btn-secondary" style="margin-top:12px; width:auto; padding:8px 16px;">Spróbuj ponownie</button></div>';
+        }
       }
     }
 
@@ -2352,7 +2382,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (podtytul) {
         var typMszy = zakrystiaStan.nazwaLiturgii || ((zakrystiaStan.dzienTygodnia === 'niedziela') ? 'Msza w niedzielę' : 'Msza w tygodniu');
         var czystyTyp = typMszy.replace(/\s*\([^)]*\)/g, '').trim();
-        podtytul.innerHTML = czystyTyp + ' • Zaplanowano: ' + zakrystiaStan.ministranci.length + ' ministrantów' + ' • <b>+' + curPts + ' pkt</b>';
+        var cntMin = (zakrystiaStan && zakrystiaStan.ministranci) ? zakrystiaStan.ministranci.length : 0;
+        podtytul.innerHTML = czystyTyp + ' • Zaplanowano: ' + cntMin + ' ministrantów' + ' • <b>+' + curPts + ' pkt</b>';
       }
 
       if (stanInfo) {
