@@ -479,6 +479,43 @@
       window.print();
     }
 
+    function wyliczObecnosciMinistranta(komorki) {
+      var total = 0;
+      (komorki || []).forEach(function(c) {
+        if (!c) return;
+        if (c.liturgie && typeof c.liturgie === 'object') {
+          var minutes = [];
+          Object.keys(c.liturgie).forEach(function(k) {
+            var val = c.liturgie[k];
+            var num = (typeof val === 'number') ? val : (val && typeof val.punkty === 'number' ? val.punkty : parseFloat(val));
+            if (!isNaN(num) && num > 0) {
+              var m = k.match(/(\d{1,2}):(\d{2})/);
+              if (m) {
+                minutes.push(parseInt(m[1], 10) * 60 + parseInt(m[2], 10));
+              } else {
+                minutes.push(9999);
+              }
+            }
+          });
+          if (minutes.length === 0) return;
+          minutes.sort(function(a, b) { return a - b; });
+          var clusters = 1;
+          for (var i = 1; i < minutes.length; i++) {
+            // Liturgie oddalone o więcej niż 75 minut (np. 08:00 rano vs 17:00 wieczór, albo 11:30 vs 15:00)
+            // to oddzielne wyjścia do kościoła (kolejne obecności).
+            // Nabożeństwa połączone z mszą (np. różaniec 17:15 i msza 18:00, różnica 45 min) to jedna obecność.
+            if (minutes[i] - minutes[i - 1] > 75) {
+              clusters++;
+            }
+          }
+          total += clusters;
+        } else if (typeof c.wartosc === 'number' && c.wartosc > 0) {
+          total++;
+        }
+      });
+      return total;
+    }
+
     function renderujPodsumowanieMiesiacaDoDruku(optDocKey) {
       var targetKey = optDocKey || wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
       var isNext = (daneKolejnegoMiesiaca && typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(targetKey, daneKolejnegoMiesiaca.docId));
@@ -502,19 +539,7 @@
         var n = w.nazwisko.toLowerCase().trim();
         return n !== 'kościelny' && n !== 'koscielny' && n.indexOf('proboszcz') === -1;
       }).map(function(w) {
-        var msze = 0;
-        (w.komorki || []).forEach(function(c) {
-          if (!c) return;
-          if (c.liturgie && typeof c.liturgie === 'object') {
-            Object.keys(c.liturgie).forEach(function(k) {
-              var val = c.liturgie[k];
-              var num = (typeof val === 'number') ? val : (val && typeof val.punkty === 'number' ? val.punkty : parseFloat(val));
-              if (!isNaN(num) && num > 0) msze++;
-            });
-          } else if (typeof c.wartosc === 'number' && c.wartosc > 0) {
-            msze++;
-          }
-        });
+        var msze = wyliczObecnosciMinistranta(w.komorki);
 
         var stInfo = (typeof wyznaczStopienMinistranta === 'function') ? wyznaczStopienMinistranta(w.nazwisko, wiersze) : { stopien: w.stopien || 'Ministrant' };
         var stopienNazwa = stInfo.stopien || w.stopien || 'Ministrant';
@@ -641,7 +666,7 @@
                 '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:70px; text-align:center;">MIEJSCE</th>' +
                 '<th style="padding:6px 10px; border:1px solid #cbd5e1;">IMIĘ I NAZWISKO</th>' +
                 '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:85px; text-align:center;">PUNKTY</th>' +
-                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:95px; text-align:center;">ILOŚĆ MSZY</th>' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:95px; text-align:center;">ILOŚĆ OBECNOŚCI</th>' +
               '</tr>' +
             '</thead>' +
             '<tbody>' +
@@ -661,7 +686,7 @@
               '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a;">' + srMsze + '</td>' +
             '</tr>' +
             '<tr style="background:#f8fafc;">' +
-              '<td style="padding:7px 12px; font-weight:700; color:#334155;">Łączna liczba odprawionych służb w miesiącu</td>' +
+              '<td style="padding:7px 12px; font-weight:700; color:#334155;">Łączna liczba obecności w miesiącu</td>' +
               '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a;">' + sumMsze + '</td>' +
             '</tr>' +
           '</table>' +
@@ -682,11 +707,6 @@
               grupyRowsHtml +
             '</tbody>' +
           '</table>' +
-        '</div>' +
-
-        '<div style="display:flex; justify-content:space-between; margin-top:30px; padding-top:10px; font-size:10.5px; color:#64748b;">' +
-          '<div style="text-align:center; width:200px; border-top:1px dashed #94a3b8; padding-top:6px;">Podpis Animatora LSO</div>' +
-          '<div style="text-align:center; width:200px; border-top:1px dashed #94a3b8; padding-top:6px;">Podpis Opiekuna / Proboszcza</div>' +
         '</div>' +
       '</div>';
 
@@ -723,6 +743,7 @@
     window.zamknijDrukPodsumowaniaMiesiaca = zamknijDrukPodsumowaniaMiesiaca;
     window.wykonajDrukPodsumowaniaMiesiaca = wykonajDrukPodsumowaniaMiesiaca;
     window.renderujPodsumowanieMiesiacaDoDruku = renderujPodsumowanieMiesiacaDoDruku;
+    window.wyliczObecnosciMinistranta = wyliczObecnosciMinistranta;
     window.drukujTabeleMiesiaca = drukujTabeleMiesiaca;
 
     function wybierzDzienTygodniaKafelek(keyOrDay) {

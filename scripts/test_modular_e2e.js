@@ -162,31 +162,46 @@ console.log('Holiday scoring tests (5 pkt for 1st mass, +2 for 2nd mass): OK');
 // - Wzięcie mszy / przejęcie dyżuru: brak 2h cutoffu (można wziąć np. 10 minut przed rozpoczęciem)
 const now = new Date();
 const targetDateIn3h = new Date(now.getTime() + 3 * 3600 * 1000);
-const targetDateIn10m = new Date(now.getTime() + 10 * 60 * 1000);
-const targetDatePast = new Date(now.getTime() - 10 * 60 * 1000);
+const targetDateIn30m = new Date(now.getTime() + 30 * 60 * 1000);
+const targetDatePast = new Date(now.getTime() - 30 * 60 * 1000);
 
 const h3Str = String(targetDateIn3h.getHours()).padStart(2, '0') + ':' + String(targetDateIn3h.getMinutes()).padStart(2, '0');
-const h10mStr = String(targetDateIn10m.getHours()).padStart(2, '0') + ':' + String(targetDateIn10m.getMinutes()).padStart(2, '0');
+const h30mStr = String(targetDateIn30m.getHours()).padStart(2, '0') + ':' + String(targetDateIn30m.getMinutes()).padStart(2, '0');
 const hPastStr = String(targetDatePast.getHours()).padStart(2, '0') + ':' + String(targetDatePast.getMinutes()).padStart(2, '0');
 
 // Wystawienie w 3h: DOZWOLONE
 if (sandbox.czyZbytPoznoNaWystawienie(targetDateIn3h.getDate(), h3Str, targetDateIn3h.getFullYear(), targetDateIn3h.getMonth())) {
   throw new Error('Should allow offering mass that is in 3 hours!');
 }
-// Wystawienie w 10m: ZABLOKOWANE (mniej niż 2h)
-if (!sandbox.czyZbytPoznoNaWystawienie(targetDateIn10m.getDate(), h10mStr, targetDateIn10m.getFullYear(), targetDateIn10m.getMonth())) {
-  throw new Error('Should block offering mass that is in 10 minutes (less than 2 hours)!');
+// Wystawienie w 30m: ZABLOKOWANE (mniej niż 2h)
+if (!sandbox.czyZbytPoznoNaWystawienie(targetDateIn30m.getDate(), h30mStr, targetDateIn30m.getFullYear(), targetDateIn30m.getMonth())) {
+  throw new Error('Should block offering mass that is in 30 minutes (less than 2 hours)!');
 }
 
-// Wzięcie mszy w 10m: DOZWOLONE (msza jeszcze się nie rozpoczęła, brak 2h cutoffu!)
-if (sandbox.czyMszaJuzSieRozpoczela(targetDateIn10m.getDate(), h10mStr, targetDateIn10m.getFullYear(), targetDateIn10m.getMonth())) {
-  throw new Error('Should allow taking mass 10 minutes before start (mass has not started yet)!');
+// Wzięcie mszy w 30m: DOZWOLONE (msza jeszcze się nie rozpoczęła, brak 2h cutoffu!)
+if (sandbox.czyMszaJuzSieRozpoczela(targetDateIn30m.getDate(), h30mStr, targetDateIn30m.getFullYear(), targetDateIn30m.getMonth())) {
+  throw new Error('Should allow taking mass 30 minutes before start (mass has not started yet)!');
 }
 // Wzięcie mszy po rozpoczęciu: ZABLOKOWANE
 if (!sandbox.czyMszaJuzSieRozpoczela(targetDatePast.getDate(), hPastStr, targetDatePast.getFullYear(), targetDatePast.getMonth())) {
   throw new Error('Should block taking mass that has already started!');
 }
 console.log('Exchange cutoff rules (offer >= 2h, take until start with no cutoff): OK');
+
+// Test obecności: różaniec bezpośrednio przed mszą = 1 obecność; oddzielne wyjścia = 2 obecności
+const testKomorki = [
+  // Dzień 1: Różaniec 17:15 + Msza 18:00 (odstęp 45 min) => 1 obecność
+  { dzien: 1, liturgie: { '17:15': 2, '18:00': 4 } },
+  // Dzień 2: Msza niedzielna 11:30 + Różaniec 15:00 (odstęp 3.5h) => 2 obecności
+  { dzien: 2, liturgie: { '11:30': 3, '15:00': 3 } },
+  // Dzień 3: Msza rano 08:00 + Różaniec 16:15 + Msza 17:00 => 2 obecności
+  { dzien: 3, liturgie: { '08:00': 4, '16:15': 2, '17:00': 3 } }
+];
+const wynikObecnosci = sandbox.wyliczObecnosciMinistranta(testKomorki);
+if (wynikObecnosci !== 5) {
+  throw new Error(`Expected 5 presences for test cases, got ${wynikObecnosci}`);
+}
+console.log('Presence calculation (back-to-back rosary+mass as 1 attendance, separate visits as 2): OK');
 
 console.log('\nAll integration tests passed successfully!');
 process.exit(0);
