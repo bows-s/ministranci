@@ -1381,30 +1381,84 @@
     @media print {
       body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; font-size: 10px !important; font-family: 'Inter', -apple-system, sans-serif !important; }
       .container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
-      .no-print, #install-banner, #ios-install-banner, #global-spinner, #toast, .modal-close-btn, .modal-footer-btns { display: none !important; }
+      .no-print, .app-header, #auth-panel, #install-banner, #ios-install-banner, #global-spinner, #toast, .modal-close-btn, .modal-footer-btns, .modal-overlay { display: none !important; }
 
       /* TRYB 1: DRUK PEŁNEGO GRAFIKU MIESIĄCA (A4 LANDSCAPE - POZIOMO) */
       @page {
         size: A4 landscape;
-        margin: 4mm 5mm;
+        margin: 4mm 5mm 3mm 5mm;
       }
 
       body.print-mode-tabela {
         background: white !important;
         color: black !important;
-        font-size: 8.5px !important;
+        font-size: 8px !important;
         padding: 0 !important;
         margin: 0 !important;
         width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
       }
       body.print-mode-tabela .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      body.print-mode-tabela .container > *:not(#app-panel),
       body.print-mode-tabela #app-panel > *:not(#widok-tabela-miesiaca),
       body.print-mode-tabela #modal-druk-podsumowania,
       body.print-mode-tabela #modal-opcje-druku-grafiku { display: none !important; }
-      body.print-mode-tabela #widok-tabela-miesiaca { display: block !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-      body.print-mode-tabela #tabela-miesiaca-scroll { max-height: none !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-      body.print-mode-tabela .card { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-      body.print-mode-tabela .print-only { display: block !important; margin-bottom: 5px !important; }
+      body.print-mode-tabela #widok-tabela-miesiaca {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+      }
+      body.print-mode-tabela #widok-tabela-miesiaca > .card {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      body.print-mode-tabela #tabela-miesiaca-scroll {
+        max-height: none !important;
+        overflow: visible !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      body.print-mode-tabela .print-only {
+        display: block !important;
+        margin: 0 0 3px 0 !important;
+        padding: 0 !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      body.print-mode-tabela .print-only h2 {
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+      }
+      body.print-mode-tabela .print-only p,
+      body.print-mode-tabela .print-only span {
+        display: none !important;
+      }
 
       /* TABELA GRAFIKU MIESIĄCA POZIOMO */
       body.print-mode-tabela .tbl-grid {
@@ -1412,23 +1466,27 @@
         width: 100% !important;
         min-width: 0 !important;
         max-width: 100% !important;
-        font-size: 8.5px !important;
+        font-size: 8px !important;
         border-collapse: collapse !important;
         border: 1.5px solid #0f172a !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+        margin: 0 !important;
       }
       body.print-mode-tabela .tbl-grid tr {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        height: 18px !important;
       }
       body.print-mode-tabela .tbl-grid col.tbl-col-ministrant {
         width: 145px !important;
         min-width: 145px !important;
       }
       body.print-mode-tabela .tbl-grid col.tbl-col-suma {
-        width: 32px !important;
-        min-width: 30px !important;
+        width: 30px !important;
+        min-width: 28px !important;
       }
       body.print-mode-tabela .tbl-grid col.tbl-col-day {
         width: auto !important;
@@ -1441,43 +1499,54 @@
         width: 145px !important;
         min-width: 145px !important;
         max-width: 145px !important;
-        padding: 2px 5px !important;
+        height: 18px !important;
+        padding: 0 4px !important;
         text-align: left !important;
         overflow: hidden !important;
+        text-overflow: clip !important;
         background: #ffffff !important;
         border-right: 1.5px solid #0f172a !important;
+        border-bottom: 1px solid #94a3b8 !important;
         box-sizing: border-box !important;
+        vertical-align: middle !important;
+      }
+      body.print-mode-tabela .tbl-grid th.tbl-header-sticky {
+        height: 20px !important;
+        padding: 1px 0 !important;
+        background: #f1f5f9 !important;
+        border-bottom: 1.5px solid #0f172a !important;
+        font-size: 8px !important;
       }
       body.print-mode-tabela .tbl-grid th:not(.tbl-sticky-col):not(:last-child),
       body.print-mode-tabela .tbl-grid td:not(.tbl-sticky-col):not(:last-child) {
-        height: 19px !important;
-        padding: 1px 0 !important;
+        height: 18px !important;
+        padding: 0 !important;
         min-width: 0 !important;
         width: auto !important;
-        font-size: 8px !important;
+        font-size: 7.5px !important;
         border: 1px solid #94a3b8 !important;
         box-sizing: border-box !important;
         text-align: center !important;
         vertical-align: middle !important;
       }
       body.print-mode-tabela .tbl-name-label {
-        font-size: 10.5px !important;
+        font-size: 10px !important;
         font-weight: 800 !important;
         color: #000000 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: clip !important;
         display: block !important;
-        line-height: 1.2 !important;
+        line-height: 18px !important;
       }
       body.print-mode-tabela .tbl-row-grupa {
         display: none !important;
       }
       body.print-mode-tabela .tabela-badge {
-        width: 15px !important;
-        height: 15px !important;
-        line-height: 15px !important;
-        font-size: 8px !important;
+        width: 14px !important;
+        height: 14px !important;
+        line-height: 14px !important;
+        font-size: 7.5px !important;
         font-weight: 800 !important;
         margin: 0 auto !important;
         border-radius: 2px !important;
@@ -1487,15 +1556,19 @@
       }
       body.print-mode-tabela .tbl-grid tr th:last-child,
       body.print-mode-tabela .tbl-grid tr td:last-child {
-        width: 32px !important;
+        width: 30px !important;
         min-width: 28px !important;
-        max-width: 36px !important;
+        max-width: 32px !important;
+        height: 18px !important;
+        padding: 0 !important;
         font-weight: 900 !important;
-        font-size: 9.5px !important;
+        font-size: 9px !important;
         text-align: center !important;
         background: #f8fafc !important;
         color: #0f172a !important;
         border-left: 2px solid #0f172a !important;
+        border-bottom: 1px solid #94a3b8 !important;
+        vertical-align: middle !important;
       }
       body.print-mode-tabela .tbl-day-holiday .tbl-holiday-badge {
         display: none !important;
@@ -1519,8 +1592,10 @@
         background: #e2e8f0 !important;
         color: #0f172a !important;
         font-weight: 800 !important;
-        font-size: 9px !important;
-        padding: 3px 6px !important;
+        font-size: 8px !important;
+        padding: 1px 4px !important;
+        height: 15px !important;
+        line-height: 15px !important;
         text-align: left !important;
         border-top: 1.5px solid #0f172a !important;
         border-bottom: 1.5px solid #0f172a !important;
@@ -1530,7 +1605,7 @@
       body.print-mode-tabela-obrocona {
         background: white !important;
         color: black !important;
-        font-size: 8.5px !important;
+        font-size: 8px !important;
         margin: 0 !important;
         padding: 0 !important;
         width: 210mm !important;
@@ -1543,6 +1618,7 @@
         margin: 0 !important;
         padding: 0 !important;
       }
+      body.print-mode-tabela-obrocona .container > *:not(#app-panel),
       body.print-mode-tabela-obrocona #app-panel > *:not(#widok-tabela-miesiaca),
       body.print-mode-tabela-obrocona #modal-druk-podsumowania,
       body.print-mode-tabela-obrocona #modal-opcje-druku-grafiku {
@@ -1562,6 +1638,13 @@
         box-sizing: border-box !important;
         overflow: hidden !important;
       }
+      body.print-mode-tabela-obrocona #widok-tabela-miesiaca > .card {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
       body.print-mode-tabela-obrocona #tabela-miesiaca-scroll {
         max-height: none !important;
         overflow: visible !important;
@@ -1569,16 +1652,22 @@
         margin: 0 !important;
         padding: 0 !important;
       }
-      body.print-mode-tabela-obrocona .card {
-        box-shadow: none !important;
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-      }
       body.print-mode-tabela-obrocona .print-only {
         display: block !important;
-        margin-bottom: 5px !important;
+        margin: 0 0 3px 0 !important;
+        padding: 0 !important;
+      }
+      body.print-mode-tabela-obrocona .print-only h2 {
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+      }
+      body.print-mode-tabela-obrocona .print-only p,
+      body.print-mode-tabela-obrocona .print-only span {
+        display: none !important;
       }
       body.print-mode-tabela-obrocona .tbl-grid {
         table-layout: fixed !important;
@@ -1587,14 +1676,18 @@
         max-width: 100% !important;
         border-collapse: collapse !important;
         border: 1.5px solid #0f172a !important;
+        margin: 0 !important;
+      }
+      body.print-mode-tabela-obrocona .tbl-grid tr {
+        height: 18px !important;
       }
       body.print-mode-tabela-obrocona .tbl-grid col.tbl-col-ministrant {
         width: 145px !important;
         min-width: 145px !important;
       }
       body.print-mode-tabela-obrocona .tbl-grid col.tbl-col-suma {
-        width: 32px !important;
-        min-width: 30px !important;
+        width: 30px !important;
+        min-width: 28px !important;
       }
       body.print-mode-tabela-obrocona .tbl-grid col.tbl-col-day {
         width: auto !important;
@@ -1607,43 +1700,54 @@
         width: 145px !important;
         min-width: 145px !important;
         max-width: 145px !important;
-        padding: 2px 5px !important;
+        height: 18px !important;
+        padding: 0 4px !important;
         text-align: left !important;
         overflow: hidden !important;
+        text-overflow: clip !important;
         background: #ffffff !important;
         border-right: 1.5px solid #0f172a !important;
+        border-bottom: 1px solid #94a3b8 !important;
         box-sizing: border-box !important;
+        vertical-align: middle !important;
+      }
+      body.print-mode-tabela-obrocona .tbl-grid th.tbl-header-sticky {
+        height: 20px !important;
+        padding: 1px 0 !important;
+        background: #f1f5f9 !important;
+        border-bottom: 1.5px solid #0f172a !important;
+        font-size: 8px !important;
       }
       body.print-mode-tabela-obrocona .tbl-grid th:not(.tbl-sticky-col):not(:last-child),
       body.print-mode-tabela-obrocona .tbl-grid td:not(.tbl-sticky-col):not(:last-child) {
-        height: 19px !important;
-        padding: 1px 0 !important;
+        height: 18px !important;
+        padding: 0 !important;
         min-width: 0 !important;
         width: auto !important;
-        font-size: 8px !important;
+        font-size: 7.5px !important;
         border: 1px solid #94a3b8 !important;
         box-sizing: border-box !important;
         text-align: center !important;
         vertical-align: middle !important;
       }
       body.print-mode-tabela-obrocona .tbl-name-label {
-        font-size: 10.5px !important;
+        font-size: 10px !important;
         font-weight: 800 !important;
         color: #000000 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: clip !important;
         display: block !important;
-        line-height: 1.2 !important;
+        line-height: 18px !important;
       }
       body.print-mode-tabela-obrocona .tbl-row-grupa {
         display: none !important;
       }
       body.print-mode-tabela-obrocona .tabela-badge {
-        width: 15px !important;
-        height: 15px !important;
-        line-height: 15px !important;
-        font-size: 8px !important;
+        width: 14px !important;
+        height: 14px !important;
+        line-height: 14px !important;
+        font-size: 7.5px !important;
         font-weight: 800 !important;
         margin: 0 auto !important;
         border-radius: 2px !important;
@@ -1653,15 +1757,19 @@
       }
       body.print-mode-tabela-obrocona .tbl-grid tr th:last-child,
       body.print-mode-tabela-obrocona .tbl-grid tr td:last-child {
-        width: 32px !important;
+        width: 30px !important;
         min-width: 28px !important;
-        max-width: 36px !important;
+        max-width: 32px !important;
+        height: 18px !important;
+        padding: 0 !important;
         font-weight: 900 !important;
-        font-size: 9.5px !important;
+        font-size: 9px !important;
         text-align: center !important;
         background: #f8fafc !important;
         color: #0f172a !important;
         border-left: 2px solid #0f172a !important;
+        border-bottom: 1px solid #94a3b8 !important;
+        vertical-align: middle !important;
       }
       body.print-mode-tabela-obrocona .tbl-day-holiday .tbl-holiday-badge {
         display: none !important;
@@ -1685,13 +1793,14 @@
         background: #e2e8f0 !important;
         color: #0f172a !important;
         font-weight: 800 !important;
-        font-size: 9px !important;
-        padding: 3px 6px !important;
+        font-size: 8px !important;
+        padding: 1px 4px !important;
+        height: 15px !important;
+        line-height: 15px !important;
         text-align: left !important;
         border-top: 1.5px solid #0f172a !important;
         border-bottom: 1.5px solid #0f172a !important;
       }
-
       /* TRYB 2: DRUK PODSUMOWANIA I STATYSTYK (A4 PORTRAIT) */
       body.print-mode-podsumowanie .container,
       body.print-mode-podsumowanie #app-panel { display: none !important; }

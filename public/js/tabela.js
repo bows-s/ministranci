@@ -483,7 +483,7 @@
     function otworzModalDrukuGrafiku() {
       var m = document.getElementById('modal-opcje-druku-grafiku');
       if (m) m.style.display = 'flex';
-      else drukujTabeleMiesiaca('obrocony');
+      else drukujTabeleMiesiaca('poziomo');
     }
 
     function zamknijModalDrukuGrafiku() {
@@ -497,7 +497,7 @@
     }
 
     function drukujTabeleMiesiaca(typ) {
-      var mode = typ || 'obrocony';
+      var mode = typ || 'poziomo';
       var dane = tabelaPrzegladanyMiesiacDane || tabelaMiesiacaDane;
       var curKey = wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
       var parsed = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(curKey) : { nazwaMiesiaca: 'Październik', rok: 2026 };
@@ -510,7 +510,7 @@
       }
       var printMiesiacEl = document.getElementById('print-tabela-miesiac');
       if (printMiesiacEl) {
-        printMiesiacEl.textContent = 'Parafia pw. św. Józefa w Zabrzegu';
+        printMiesiacEl.textContent = '';
       }
 
       document.body.classList.remove('print-mode-podsumowanie');
@@ -518,7 +518,7 @@
       document.body.classList.remove('print-mode-tabela-obrocona');
 
       if (mode === 'poziomo') {
-        ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm; }');
+        ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm 3mm 5mm; }');
         document.body.classList.add('print-mode-tabela');
       } else {
         ustawStylStronyDruku('@page { size: A4 portrait; margin: 0; }');
