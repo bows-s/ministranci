@@ -1398,8 +1398,13 @@
   <div id="modal-druk-podsumowania" class="modal-overlay" style="display:none; align-items:flex-start; padding:20px; overflow-y:auto; z-index:10000;" onclick="if(event.target === this) zamknijDrukPodsumowaniaMiesiaca()">
     <div class="modal-content modal-box-podsumowanie" style="max-width:850px; width:100%; margin:20px auto; padding:20px; background:#18181b; border:1px solid #3f3f46; border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,0.6);">
       <div class="no-print" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #27272a; padding-bottom:12px; flex-wrap:wrap; gap:10px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <h3 style="margin:0; font-size:16px; color:#fafafa; font-weight:700;">📊 Podsumowanie Miesiąca do druku</h3>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <h3 style="margin:0; font-size:16px; color:#fafafa; font-weight:700;">📊 Podsumowanie Miesiąca</h3>
+          <div style="display:inline-flex; align-items:center; gap:6px; background:#27272a; padding:3px 8px; border:1px solid #3f3f46; border-radius:6px;">
+            <span style="font-size:11px; color:#a1a1aa;">Miesiąc:</span>
+            <select id="select-podsumowanie-miesiac" onchange="renderujPodsumowanieMiesiacaDoDruku(this.value)" style="border:none; outline:none; font-size:12px; font-weight:600; color:#fafafa; background:transparent; cursor:pointer; padding:2px;">
+            </select>
+          </div>
           <span style="font-size:11px; color:#a1a1aa; background:#27272a; padding:2px 8px; border-radius:4px;">Format A4</span>
         </div>
         <div style="display:flex; gap:8px;">

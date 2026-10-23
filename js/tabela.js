@@ -127,6 +127,7 @@
 
       function zastosujDaneDoc(fData) {
         autoRozliczWygasleOfertyFirestore(fData);
+        fData.docId = docId;
         tabelaPrzegladanyMiesiacDane = Object.assign({}, tabelaPrzegladanyMiesiacDane || {}, fData);
         if (isCurrent) {
           tabelaMiesiacaDane = Object.assign({}, tabelaMiesiacaDane || {}, fData);
@@ -473,6 +474,17 @@
     }
 
     function drukujTabeleMiesiaca() {
+      var dane = tabelaPrzegladanyMiesiacDane || tabelaMiesiacaDane;
+      var curKey = wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
+      var parsed = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(curKey) : { nazwaMiesiaca: 'Październik', rok: 2026 };
+      var nazwaM = (dane && dane.nazwaMiesiaca) || parsed.nazwaMiesiaca || 'Miesiąc';
+      var r = (dane && dane.rok) || parsed.rok || (new Date()).getFullYear();
+
+      var printMiesiacEl = document.getElementById('print-tabela-miesiac');
+      if (printMiesiacEl) {
+        printMiesiacEl.textContent = 'Parafia pw. św. Józefa • ' + nazwaM + ' ' + r;
+      }
+
       ustawStylStronyDruku('@page { size: landscape; margin: 4mm; }');
       document.body.classList.remove('print-mode-podsumowanie');
       document.body.classList.add('print-mode-tabela');
@@ -517,9 +529,114 @@
     }
 
     function renderujPodsumowanieMiesiacaDoDruku(optDocKey) {
-      var targetKey = optDocKey || wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
-      var isNext = (daneKolejnegoMiesiaca && typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(targetKey, daneKolejnegoMiesiaca.docId));
-      var dane = isNext ? daneKolejnegoMiesiaca : (tabelaMiesiacaDane || {});
+      var selTbl = document.getElementById('select-miesiac-tabeli');
+      var selRank = document.getElementById('select-ranking-miesiac');
+      var modalRank = document.getElementById('modal-ranking');
+
+      var targetKey = optDocKey;
+      if (!targetKey) {
+        if (modalRank && modalRank.style.display !== 'none' && selRank && selRank.value) {
+          targetKey = selRank.value;
+        } else if (wybranyMiesiacTabeli) {
+          targetKey = wybranyMiesiacTabeli;
+        } else if (selTbl && selTbl.value) {
+          targetKey = selTbl.value;
+        } else if (typeof pobierzAktywnyKluczMiesiaca === 'function') {
+          targetKey = pobierzAktywnyKluczMiesiaca();
+        } else {
+          targetKey = 'Październik_2026';
+        }
+      }
+
+      var selPodsumowanie = document.getElementById('select-podsumowanie-miesiac');
+      if (selPodsumowanie && selPodsumowanie.value !== targetKey) {
+        selPodsumowanie.value = targetKey;
+      }
+
+      var arkuszEl = document.getElementById('arkusz-podsumowania-tresc');
+      if (!arkuszEl) return;
+
+      var curKey = (typeof pobierzAktywnyKluczMiesiaca === 'function') ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026';
+      var isCurKey = (typeof czyToTenSamKluczMiesiaca === 'function') ? czyToTenSamKluczMiesiaca(targetKey, curKey) : (targetKey === curKey);
+
+      var dane = null;
+
+      // 1. Sprawdź czy to aktualnie załadowany miesiąc w widoku tabeli (tabelaPrzegladanyMiesiacDane)
+      if (tabelaPrzegladanyMiesiacDane && tabelaPrzegladanyMiesiacDane.wiersze && tabelaPrzegladanyMiesiacDane.wiersze.length) {
+        var matchTbl = false;
+        if (tabelaPrzegladanyMiesiacDane.docId) {
+          matchTbl = (typeof czyToTenSamKluczMiesiaca === 'function') ? czyToTenSamKluczMiesiaca(tabelaPrzegladanyMiesiacDane.docId, targetKey) : (tabelaPrzegladanyMiesiacDane.docId === targetKey);
+        } else if (wybranyMiesiacTabeli) {
+          matchTbl = (typeof czyToTenSamKluczMiesiaca === 'function') ? czyToTenSamKluczMiesiaca(wybranyMiesiacTabeli, targetKey) : (wybranyMiesiacTabeli === targetKey);
+        }
+        if (matchTbl) {
+          dane = tabelaPrzegladanyMiesiacDane;
+        }
+      }
+
+      // 2. Sprawdź czy to kolejny miesiąc (daneKolejnegoMiesiaca)
+      if (!dane && daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wiersze && daneKolejnegoMiesiaca.wiersze.length) {
+        if (typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(targetKey, daneKolejnegoMiesiaca.docId)) {
+          dane = daneKolejnegoMiesiaca;
+        }
+      }
+
+      // 3. Sprawdź czy to aktywny bieżący miesiąc (tabelaMiesiacaDane)
+      if (!dane && isCurKey && tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze && tabelaMiesiacaDane.wiersze.length) {
+        dane = tabelaMiesiacaDane;
+      }
+
+      // 4. Sprawdź pamięć podręczną localStorage
+      if (!dane && typeof localStorage !== 'undefined') {
+        try {
+          var altK = (typeof wyznaczWariantKluczaMiesiaca === 'function') ? wyznaczWariantKluczaMiesiaca(targetKey) : targetKey;
+          var rawC = localStorage.getItem('min_cached_tabela_' + targetKey) || localStorage.getItem('min_cached_tabela_' + altK);
+          if (rawC) {
+            var parsedC = JSON.parse(rawC);
+            if (parsedC && parsedC.wiersze && parsedC.wiersze.length) {
+              dane = parsedC;
+            }
+          }
+        } catch(e) {}
+      }
+
+      // 5. Pobranie z Firestore jeśli brak w pamięci podręcznej
+      if (!dane || !dane.wiersze || !dane.wiersze.length) {
+        if (dbFirestore) {
+          arkuszEl.innerHTML = '<div style="text-align:center; padding:40px; color:#38bdf8;"><span class="mini-spin" style="font-size:24px;">🔄</span><br><br>Ładowanie statystyk dla miesiąca ' + targetKey.replace('_', ' ') + '...</div>';
+          var altKey = (typeof wyznaczWariantKluczaMiesiaca === 'function') ? wyznaczWariantKluczaMiesiaca(targetKey) : targetKey;
+          function pobierzDocFirestore(idK) {
+            return dbFirestore.collection('stan_grafiku').doc(idK).get().then(function(snap) {
+              if (snap.exists && snap.data() && snap.data().wiersze && snap.data().wiersze.length) {
+                var fData = snap.data();
+                fData.docId = idK;
+                try { localStorage.setItem('min_cached_tabela_' + idK, JSON.stringify(fData)); } catch(e) {}
+                renderujPodsumowanieMiesiacaDoDruku(targetKey);
+                return true;
+              }
+              return false;
+            });
+          }
+          pobierzDocFirestore(targetKey).then(function(found) {
+            if (!found && altKey !== targetKey) {
+              return pobierzDocFirestore(altKey);
+            }
+            return found;
+          }).then(function(foundFinal) {
+            if (!foundFinal) {
+              arkuszEl.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Brak danych grafiku dla miesiąca ' + targetKey.replace('_', ' ') + ' do wygenerowania podsumowania.</div>';
+            }
+          }).catch(function(err) {
+            console.error('Błąd pobierania podsumowania:', err);
+            arkuszEl.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Nie udało się pobrać danych dla miesiąca ' + targetKey.replace('_', ' ') + '.</div>';
+          });
+          return;
+        } else {
+          arkuszEl.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Brak danych grafiku dla tego miesiąca do wygenerowania podsumowania.</div>';
+          return;
+        }
+      }
+
       var wiersze = dane.wiersze || [];
       var parsed = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(targetKey) : { nazwaMiesiaca: 'Październik', rok: 2026 };
       var nazwaMiesiaca = dane.nazwaMiesiaca || parsed.nazwaMiesiaca || 'Miesiąc';
@@ -714,7 +831,34 @@
     }
 
     function otworzDrukPodsumowaniaMiesiaca(optDocKey) {
-      renderujPodsumowanieMiesiacaDoDruku(optDocKey);
+      var selTbl = document.getElementById('select-miesiac-tabeli');
+      var selRank = document.getElementById('select-ranking-miesiac');
+      var modalRank = document.getElementById('modal-ranking');
+
+      var targetKey = optDocKey;
+      if (!targetKey) {
+        if (modalRank && modalRank.style.display !== 'none' && selRank && selRank.value) {
+          targetKey = selRank.value;
+        } else if (wybranyMiesiacTabeli) {
+          targetKey = wybranyMiesiacTabeli;
+        } else if (selTbl && selTbl.value) {
+          targetKey = selTbl.value;
+        } else if (typeof pobierzAktywnyKluczMiesiaca === 'function') {
+          targetKey = pobierzAktywnyKluczMiesiaca();
+        } else {
+          targetKey = 'Październik_2026';
+        }
+      }
+
+      var selPodsumowanie = document.getElementById('select-podsumowanie-miesiac');
+      if (selPodsumowanie) {
+        if (selTbl && selTbl.options && selTbl.options.length) {
+          selPodsumowanie.innerHTML = selTbl.innerHTML;
+        }
+        selPodsumowanie.value = targetKey;
+      }
+
+      renderujPodsumowanieMiesiacaDoDruku(targetKey);
       var modal = document.getElementById('modal-druk-podsumowania');
       if (modal) modal.style.display = 'flex';
       if (typeof aktualizujBlokadeScrolla === 'function') aktualizujBlokadeScrolla();
