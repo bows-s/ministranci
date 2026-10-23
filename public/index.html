@@ -41,7 +41,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging-compat.js"></script>
-  <link rel="stylesheet" href="/css/style.css?v=1.7.1">
+  <link rel="stylesheet" href="/css/style.css?v=1.7.2">
 </head>
 <body>
 
@@ -615,7 +615,7 @@
             <button onclick="otworzDrukPodsumowaniaMiesiaca()" style="width:auto; padding:8px 14px; font-size:13px; background:#2563eb; color:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Generuj oficjalne podsumowanie ze statystykami i rankingiem grup do druku A4">
               📊 Podsumowanie (PDF)
             </button>
-            <button onclick="drukujTabeleMiesiaca()" style="width:auto; padding:8px 14px; font-size:13px; background:#0284c7; color:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Drukuj pełną siatkę grafiku na dany miesiąc">
+            <button onclick="otworzModalDrukuGrafiku()" style="width:auto; padding:8px 14px; font-size:13px; background:#0284c7; color:white; font-weight:600; display:inline-flex; align-items:center; gap:6px;" title="Drukuj pełną siatkę grafiku na dany miesiąc">
               🖨️ Drukuj grafik (A4)
             </button>
           </div>
@@ -1434,16 +1434,57 @@
   <!-- Toast -->
   <div id="toast">Komunikat</div>
   <!-- Moduły aplikacji PWA Ministranci -->
-  <script src="/js/firebase-config.js?v=1.7.1"></script>
-  <script src="/js/utils.js?v=1.7.1"></script>
-  <script src="/js/auth.js?v=1.7.1"></script>
-  <script src="/js/pwa.js?v=1.7.1"></script>
-  <script src="/js/liturgia.js?v=1.7.1"></script>
-  <script src="/js/gamification.js?v=1.7.1"></script>
-  <script src="/js/ranking.js?v=1.7.1"></script>
-  <script src="/js/gielda.js?v=1.7.1"></script>
-  <script src="/js/zakrystia.js?v=1.7.1"></script>
-  <script src="/js/tabela.js?v=1.7.1"></script>
-  <script src="/js/app.js?v=1.7.1"></script>
+  <script src="/js/firebase-config.js?v=1.7.2"></script>
+  <script src="/js/utils.js?v=1.7.2"></script>
+  <script src="/js/auth.js?v=1.7.2"></script>
+  <script src="/js/pwa.js?v=1.7.2"></script>
+  <script src="/js/liturgia.js?v=1.7.2"></script>
+  <script src="/js/gamification.js?v=1.7.2"></script>
+  <script src="/js/ranking.js?v=1.7.2"></script>
+  <script src="/js/gielda.js?v=1.7.2"></script>
+  <script src="/js/zakrystia.js?v=1.7.2"></script>
+  <script src="/js/tabela.js?v=1.7.2"></script>
+  <script src="/js/app.js?v=1.7.2"></script>
+
+  <!-- Modal Wybór Orientacji Druku Grafiku -->
+  <div id="modal-opcje-druku-grafiku" class="modal-overlay" style="display:none;" onclick="if(event.target === this) zamknijModalDrukuGrafiku()">
+    <div class="modal-content" style="max-width:440px; width:92%; background:#18181b; border:1px solid #3f3f46; border-radius:12px; padding:20px; box-sizing:border-box; color:#fafafa; text-align:left;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #27272a; padding-bottom:10px;">
+        <h3 style="margin:0; font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px;">
+          <span>🖨️ Druk grafiku na A4</span>
+        </h3>
+        <span class="close-btn" onclick="zamknijModalDrukuGrafiku()" style="font-size:22px; cursor:pointer; color:#a1a1aa;">&times;</span>
+      </div>
+      
+      <div style="font-size:12.5px; color:#a1a1aa; margin-bottom:16px; line-height:1.4;">
+        Wybierz sposób wydruku grafiku na kartce A4:
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Opcja 1: Wzdłuż kartki (obrócony 90°) -->
+        <button type="button" onclick="wykonajDrukGrafiku('obrocony')" style="padding:14px 16px; border-radius:10px; background:#27272a; border:1.5px solid #6366f1; color:white; text-align:left; cursor:pointer; display:flex; align-items:center; gap:12px; transition:all 0.15s ease;">
+          <span style="font-size:24px;">🔄</span>
+          <div>
+            <div style="font-size:14px; font-weight:800; color:#818cf8;">Wzdłuż kartki (Obrócony 90°) – Zalecany</div>
+            <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Dla telefonów i drukarek pionowych. Pełne 285 mm szerokości grafiku, po wyjęciu wystarczy obrócić kartkę w dłoni.</div>
+          </div>
+        </button>
+
+        <!-- Opcja 2: Poziomo (Landscape) -->
+        <button type="button" onclick="wykonajDrukGrafiku('poziomo')" style="padding:14px 16px; border-radius:10px; background:#27272a; border:1px solid #3f3f46; color:white; text-align:left; cursor:pointer; display:flex; align-items:center; gap:12px; transition:all 0.15s ease;">
+          <span style="font-size:24px;">📄</span>
+          <div>
+            <div style="font-size:14px; font-weight:700; color:#fafafa;">Poziomo (Landscape A4)</div>
+            <div style="font-size:11.5px; color:#a1a1aa; margin-top:2px;">Standardowy układ poziomy dla komputerów z wymuszoną orientacją poziomą w sterowniku.</div>
+          </div>
+        </button>
+      </div>
+
+      <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+        <button type="button" onclick="zamknijModalDrukuGrafiku()" class="btn-secondary" style="width:auto; padding:7px 16px; font-size:12px;">Anuluj</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

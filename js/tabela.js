@@ -299,6 +299,13 @@
       }
 
       var html = '<table class="tbl-grid">';
+      html += '<colgroup>';
+      html += '<col class="tbl-col-ministrant" style="width:145px; min-width:145px;">';
+      for (var cd = 0; cd < naglowek.length; cd++) {
+        html += '<col class="tbl-col-day">';
+      }
+      html += '<col class="tbl-col-suma" style="width:34px; min-width:34px;">';
+      html += '</colgroup>';
       
       html += '<thead><tr class="tbl-header-sticky">';
       html += '<th class="tbl-sticky-col tbl-header-sticky" style="min-width:160px;">Ministrant</th>';
@@ -473,7 +480,24 @@
       stEl.textContent = cssTekst;
     }
 
-    function drukujTabeleMiesiaca() {
+    function otworzModalDrukuGrafiku() {
+      var m = document.getElementById('modal-opcje-druku-grafiku');
+      if (m) m.style.display = 'flex';
+      else drukujTabeleMiesiaca('obrocony');
+    }
+
+    function zamknijModalDrukuGrafiku() {
+      var m = document.getElementById('modal-opcje-druku-grafiku');
+      if (m) m.style.display = 'none';
+    }
+
+    function wykonajDrukGrafiku(typ) {
+      zamknijModalDrukuGrafiku();
+      drukujTabeleMiesiaca(typ);
+    }
+
+    function drukujTabeleMiesiaca(typ) {
+      var mode = typ || 'obrocony';
       var dane = tabelaPrzegladanyMiesiacDane || tabelaMiesiacaDane;
       var curKey = wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
       var parsed = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(curKey) : { nazwaMiesiaca: 'Październik', rok: 2026 };
@@ -486,15 +510,24 @@
       }
       var printMiesiacEl = document.getElementById('print-tabela-miesiac');
       if (printMiesiacEl) {
-        printMiesiacEl.textContent = 'Parafia pw. św. Józefa';
+        printMiesiacEl.textContent = 'Parafia pw. św. Józefa w Zabrzegu';
       }
 
-      ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm; }');
       document.body.classList.remove('print-mode-podsumowanie');
-      document.body.classList.add('print-mode-tabela');
+      document.body.classList.remove('print-mode-tabela');
+      document.body.classList.remove('print-mode-tabela-obrocona');
+
+      if (mode === 'poziomo') {
+        ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm; }');
+        document.body.classList.add('print-mode-tabela');
+      } else {
+        ustawStylStronyDruku('@page { size: A4 portrait; margin: 0; }');
+        document.body.classList.add('print-mode-tabela-obrocona');
+      }
+
       setTimeout(function() {
         window.print();
-      }, 50);
+      }, 70);
     }
 
     function wyliczObecnosciMinistranta(komorki) {
@@ -916,6 +949,9 @@
     window.wyliczObecnosciMinistranta = wyliczObecnosciMinistranta;
     window.odmienMiesiacDopelniacz = odmienMiesiacDopelniacz;
     window.drukujTabeleMiesiaca = drukujTabeleMiesiaca;
+    window.otworzModalDrukuGrafiku = otworzModalDrukuGrafiku;
+    window.zamknijModalDrukuGrafiku = zamknijModalDrukuGrafiku;
+    window.wykonajDrukGrafiku = wykonajDrukGrafiku;
 
     function wybierzDzienTygodniaKafelek(keyOrDay) {
       var found = aktywneDyzuryTydzienLista.find(function(x) { 

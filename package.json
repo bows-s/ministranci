@@ -1,6 +1,6 @@
 {
   "name": "ministranci",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "scripts": {
     "test": "node scripts/test_modular_e2e.js",
     "sync:gazetka": "node scripts/sync_gazetka.js",
