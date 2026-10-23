@@ -1,4 +1,14 @@
 {
+  "name": "ministranci",
+  "version": "1.6.5",
+  "scripts": {
+    "test": "node scripts/test_modular_e2e.js",
+    "sync:gazetka": "node scripts/sync_gazetka.js",
+    "remind:morning": "node scripts/wyslij_poranne_przypomnienia.js",
+    "cron:month": "node scripts/cron_generuj_kolejny_miesiac.js",
+    "backup": "node scripts/backup_firestore.js",
+    "audit:gielda": "node scripts/nocny_audyt_gieldy.js"
+  },
   "dependencies": {
     "pdf-parse": "^2.4.5",
     "romcal": "^1.3.0"

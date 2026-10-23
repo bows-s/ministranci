@@ -1,5 +1,6 @@
 const https = require('https');
 const { PDFParse } = require('pdf-parse');
+const { sendTelegramMessage } = require('./notify_telegram');
 
 const API_KEY = "AIzaSyAsgkKWXr-L3fDHQODxioVssvIGL9SQePk";
 const PROJECT_ID = "makole-85f32";
@@ -422,6 +423,7 @@ async function syncAllBulletins() {
   console.log(`      ✅ Zaktualizowano pomyślnie konfiguracja/harmonogram_liturgiczny!`);
 
   console.log("\n🎉 Synchronizacja z gazetką parafialną zakończona sukcesem!");
+  await sendTelegramMessage(`📰 <b>Synchronizacja Gazetki Parafialnej</b>\n\n✅ Zsynchronizowano wydania: ${processedIssues.join(', ') || 'brak nowych'}\n📅 Dni w harmonogramie: ${Object.keys(monthsMap).join(', ')}`);
 }
 
 if (require.main === module) {

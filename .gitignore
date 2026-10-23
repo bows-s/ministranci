@@ -3,3 +3,5 @@ node_modules/
 sync_gazetka.log
 *.pdf
 *.bak*
+backups/
+serviceAccountKey*.json

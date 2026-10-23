@@ -1,0 +1,26 @@
+name: Nocny Audyt i Czyszczenie Giełdy
+
+on:
+  schedule:
+    # Codziennie o 21:15 UTC (23:15 czasu polskiego w lecie / 22:15 w zimie)
+    - cron: '15 21 * * *'
+  workflow_dispatch: # Uruchomienie na żądanie
+
+jobs:
+  audyt:
+    name: Sprawdź i wygaś przedawnione oferty
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Uruchomienie audytu
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/nocny_audyt_gieldy.js

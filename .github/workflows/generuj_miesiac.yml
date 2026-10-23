@@ -1,0 +1,26 @@
+name: Automatyczne Generowanie Grafiku na Nowy Miesiąc
+
+on:
+  schedule:
+    # 25. dnia każdego miesiąca o 02:00 UTC (04:00/03:00 czasu polskiego)
+    - cron: '0 2 25 * *'
+  workflow_dispatch: # Możliwość uruchomienia na żądanie
+
+jobs:
+  generuj:
+    name: Wygeneruj kolejny miesiąc w Firestore
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Uruchomienie generatora
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/cron_generuj_kolejny_miesiac.js

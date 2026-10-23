@@ -1,0 +1,26 @@
+name: Poranne Przypomnienia o Służbie
+
+on:
+  schedule:
+    # Codziennie o 05:00 UTC (07:00 czasu polskiego letniego / 06:00 zimowego)
+    - cron: '0 5 * * *'
+  workflow_dispatch: # Możliwość uruchomienia testowego ręcznie z poziomu GitHuba
+
+jobs:
+  przypomnienia:
+    name: Wyślij powiadomienia PUSH o dzisiejszej służbie
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Wysłanie powiadomień
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/wyslij_poranne_przypomnienia.js
