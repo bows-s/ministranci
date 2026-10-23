@@ -480,15 +480,21 @@
       var nazwaM = (dane && dane.nazwaMiesiaca) || parsed.nazwaMiesiaca || 'Miesiąc';
       var r = (dane && dane.rok) || parsed.rok || (new Date()).getFullYear();
 
+      var printTytulEl = document.getElementById('print-tabela-tytul');
+      if (printTytulEl) {
+        printTytulEl.textContent = 'GRAFIK SŁUŻBY • ' + nazwaM.toUpperCase() + ' ' + r;
+      }
       var printMiesiacEl = document.getElementById('print-tabela-miesiac');
       if (printMiesiacEl) {
-        printMiesiacEl.textContent = 'Parafia pw. św. Józefa • ' + nazwaM + ' ' + r;
+        printMiesiacEl.textContent = 'Parafia pw. św. Józefa';
       }
 
-      ustawStylStronyDruku('@page { size: landscape; margin: 4mm; }');
+      ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm; }');
       document.body.classList.remove('print-mode-podsumowanie');
       document.body.classList.add('print-mode-tabela');
-      window.print();
+      setTimeout(function() {
+        window.print();
+      }, 50);
     }
 
     function wyliczObecnosciMinistranta(komorki) {
