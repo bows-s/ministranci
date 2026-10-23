@@ -1109,6 +1109,41 @@
       color: #a1a1aa;
       font-weight: 500;
     }
+    .tbl-day-holiday {
+      background: linear-gradient(180deg, rgba(234, 179, 8, 0.32) 0%, rgba(161, 98, 7, 0.48) 100%) !important;
+      color: #fef08a !important;
+      font-weight: 800;
+      border-bottom: 2.5px solid #eab308 !important;
+      border-left: 1px solid rgba(234, 179, 8, 0.35) !important;
+      border-right: 1px solid rgba(234, 179, 8, 0.35) !important;
+      box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.25), 0 2px 8px rgba(234, 179, 8, 0.15);
+      position: relative;
+    }
+    .tbl-day-holiday .tbl-holiday-badge {
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: #713f12;
+      background: #fde047;
+      padding: 1px 4px;
+      border-radius: 3px;
+      margin-top: 2px;
+      display: inline-block;
+      text-transform: uppercase;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .tbl-cell-holiday {
+      background: rgba(234, 179, 8, 0.08) !important;
+      border-left: 1px dashed rgba(234, 179, 8, 0.22) !important;
+      border-right: 1px dashed rgba(234, 179, 8, 0.22) !important;
+    }
+    .tbl-cell-holiday.is-me {
+      background: rgba(234, 179, 8, 0.14) !important;
+    }
+    .kropka-dyzuru-swieto {
+      background: #fde047 !important;
+      box-shadow: 0 0 8px rgba(234, 179, 8, 0.85), inset 0 0 2px #713f12 !important;
+    }
     .tbl-group-header-row td {
       background: #27272a !important;
       font-weight: 600;

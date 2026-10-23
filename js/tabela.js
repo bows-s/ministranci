@@ -303,10 +303,14 @@
       html += '<th class="tbl-sticky-col tbl-header-sticky" style="min-width:160px;">Ministrant</th>';
       for (var d = 0; d < naglowek.length; d++) {
         var dayObj = naglowek[d];
-        var dayClass = dayObj.czyNiedziela ? 'tbl-day-sun' : (dayObj.czySobota ? 'tbl-day-sat' : '');
-        html += '<th class="' + dayClass + '" style="min-width:32px;">' +
-                  '<div>' + dayObj.dzien + '</div>' +
-                  '<div style="font-size:10px; font-weight:normal;">' + dayObj.skrotDnia + '</div>' +
+        var isHol = dayObj.czySwieto || (d === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
+        var dayClass = isHol ? 'tbl-day-holiday' : (dayObj.czyNiedziela ? 'tbl-day-sun' : (dayObj.czySobota ? 'tbl-day-sat' : ''));
+        var holidayBadge = isHol ? '<div class="tbl-holiday-badge">ŚWIĘTO</div>' : '';
+        var holidayTitle = isHol ? (' title="' + (dayObj.nazwaSwieta || 'Uroczystość Wszystkich Świętych') + ' • Uroczystość (+5 pkt)"') : '';
+        html += '<th class="' + dayClass + '"' + holidayTitle + ' style="min-width:34px;">' +
+                  '<div style="' + (isHol ? 'color:#fde047; font-weight:800;' : '') + '">' + dayObj.dzien + '</div>' +
+                  '<div style="font-size:10px; font-weight:' + (isHol ? '700' : 'normal') + '; color:' + (isHol ? '#fef08a' : 'inherit') + ';">' + dayObj.skrotDnia + '</div>' +
+                  holidayBadge +
                 '</th>';
       }
       html += '<th style="min-width:45px; background:#27272a; font-weight:600; color:#71717a; letter-spacing:0.03em;">SUMA</th>';
@@ -363,11 +367,12 @@
         for (var c = 0; c < row.komorki.length; c++) {
           var k = row.komorki[c];
           var dNum = c + 1;
+          var isHol = (naglowek[c] && naglowek[c].czySwieto) || (c === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
           var isSun = (naglowek[c] && naglowek[c].czyNiedziela);
           var isSat = (naglowek[c] && naglowek[c].czySobota);
 
           var czyMaDyzurKomorki = !!k.maDyzur;
-          if ((isSat || isSun) && typeof wyznaczEfektywnaGodzineWeekendowaDlaMinistranta === 'function') {
+          if ((isSat || isSun || isHol) && typeof wyznaczEfektywnaGodzineWeekendowaDlaMinistranta === 'function') {
             var sunDayNum = isSat ? (dNum + 1) : dNum;
             var efWknd = wyznaczEfektywnaGodzineWeekendowaDlaMinistranta(row, sunDayNum, 0, dane);
             if (efWknd && efWknd.godzina) {
@@ -375,12 +380,21 @@
             }
           }
 
-          var cellStyle = isSun ? 'background:rgba(69,10,10,0.18);' : (isSat ? 'background:rgba(255,255,255,0.02);' : '');
-          if (isMe) {
-            cellStyle += ' background-color:rgba(8,51,68,0.22);';
-          }
-          if (czyMaDyzurKomorki && (k.wartosc === null || k.wartosc === undefined || k.wartosc === '')) {
-            cellStyle += ' background:rgba(39,39,42,0.45);';
+          var cellClass = '';
+          var cellStyle = '';
+          if (isHol) {
+            cellClass = 'tbl-cell-holiday' + (isMe ? ' is-me' : '');
+            if (czyMaDyzurKomorki && (k.wartosc === null || k.wartosc === undefined || k.wartosc === '')) {
+              cellStyle = 'background:rgba(234, 179, 8, 0.12) !important;';
+            }
+          } else {
+            cellStyle = isSun ? 'background:rgba(69,10,10,0.18);' : (isSat ? 'background:rgba(255,255,255,0.02);' : '');
+            if (isMe) {
+              cellStyle += ' background-color:rgba(8,51,68,0.22);';
+            }
+            if (czyMaDyzurKomorki && (k.wartosc === null || k.wartosc === undefined || k.wartosc === '')) {
+              cellStyle += ' background:rgba(39,39,42,0.45);';
+            }
           }
 
           var tooltipLit = '';
@@ -397,24 +411,48 @@
 
           var content = '';
           var numWartosc = parseFloat(k.wartosc);
-          if (k.wartosc === 5 || k.wartosc === '5') {
-            content = '<span class="tabela-badge b-obecny">5</span>';
-          } else if (!isNaN(numWartosc) && numWartosc < 0) {
-            content = '<span class="tabela-badge b-nieobecny">' + k.wartosc + '</span>';
-          } else if (k.wartosc === 0 || k.wartosc === '0') {
-            content = '<span class="tabela-badge b-uspraw">0</span>';
-          } else if (k.wartosc === 4 || k.wartosc === '4') {
-            content = '<span class="tabela-badge b-zastepca">4</span>';
-          } else if (k.wartosc === 1 || k.wartosc === '1') {
-            content = '<span class="tabela-badge b-oddany">1</span>';
-          } else if (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== '') {
-            content = '<span class="tabela-badge" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(74,222,128,0.4); font-weight:800;">' + k.wartosc + '</span>';
-          } else if (czyMaDyzurKomorki) {
-            content = '<span style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
+          if (isHol) {
+            if (k.wartosc === 5 || k.wartosc === '5') {
+              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(202,138,4,0.45) 100%); color:#fef08a; border:1px solid #facc15; font-weight:800; box-shadow:0 0 6px rgba(234,179,8,0.4);">5</span>';
+            } else if (k.wartosc === 7 || k.wartosc === '7') {
+              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.4) 0%, rgba(245,158,11,0.5) 100%); color:#ffffff; border:1px solid #fde047; font-weight:800; box-shadow:0 0 8px rgba(234,179,8,0.6);">7</span>';
+            } else if (k.wartosc === 9 || k.wartosc === '9') {
+              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.5) 0%, rgba(217,119,6,0.6) 100%); color:#ffffff; border:1px solid #fef08a; font-weight:800; box-shadow:0 0 10px rgba(234,179,8,0.75);">9</span>';
+            } else if (!isNaN(numWartosc) && numWartosc < 0) {
+              content = '<span class="tabela-badge b-nieobecny">' + k.wartosc + '</span>';
+            } else if (k.wartosc === 0 || k.wartosc === '0') {
+              content = '<span class="tabela-badge b-uspraw">0</span>';
+            } else if (k.wartosc === 4 || k.wartosc === '4') {
+              content = '<span class="tabela-badge b-zastepca">4</span>';
+            } else if (k.wartosc === 1 || k.wartosc === '1') {
+              content = '<span class="tabela-badge b-oddany">1</span>';
+            } else if (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== '') {
+              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(34,197,94,0.3) 100%); color:#fef08a; border:1px solid #facc15; font-weight:800;">' + k.wartosc + '</span>';
+            } else if (czyMaDyzurKomorki) {
+              content = '<span style="font-size:16px; color:#fde047; text-shadow:0 0 6px rgba(234,179,8,0.8); line-height:1;" title="Dyżur w Święto">•</span>';
+            }
+          } else {
+            if (k.wartosc === 5 || k.wartosc === '5') {
+              content = '<span class="tabela-badge b-obecny">5</span>';
+            } else if (!isNaN(numWartosc) && numWartosc < 0) {
+              content = '<span class="tabela-badge b-nieobecny">' + k.wartosc + '</span>';
+            } else if (k.wartosc === 0 || k.wartosc === '0') {
+              content = '<span class="tabela-badge b-uspraw">0</span>';
+            } else if (k.wartosc === 4 || k.wartosc === '4') {
+              content = '<span class="tabela-badge b-zastepca">4</span>';
+            } else if (k.wartosc === 1 || k.wartosc === '1') {
+              content = '<span class="tabela-badge b-oddany">1</span>';
+            } else if (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== '') {
+              content = '<span class="tabela-badge" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(74,222,128,0.4); font-weight:800;">' + k.wartosc + '</span>';
+            } else if (czyMaDyzurKomorki) {
+              content = '<span style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
+            }
           }
 
           var titleAttr = tooltipLit ? (' title="' + tooltipLit + '"') : (k.wartosc !== null && k.wartosc !== undefined ? (' title="' + k.wartosc + ' pkt"') : '');
-          html += '<td style="' + cellStyle + '"' + titleAttr + '>' + content + '</td>';
+          var classAttr = cellClass ? (' class="' + cellClass + '"') : '';
+          var styleAttr = cellStyle ? (' style="' + cellStyle + '"') : '';
+          html += '<td' + classAttr + styleAttr + titleAttr + '>' + content + '</td>';
         }
 
         html += '<td style="font-weight:700; font-size:13px; color:#60a5fa; background:#27272a;">' + row.suma + '</td>';

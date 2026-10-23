@@ -193,7 +193,7 @@ function wyznaczRotowaneGodzinyGrup(rok, miesiacIdx) {
   };
 }
 
-async function generujMiesiac(docelowyKlucz) {
+async function generujMiesiac(docelowyKlucz, forceOverwrite = false) {
   let docelowaNazwa = docelowyKlucz;
   let targetRok = 2026;
   let targetMIdx = 9; // Październik domyślnie
@@ -214,9 +214,9 @@ async function generujMiesiac(docelowyKlucz) {
 
   // 1. Zabezpieczenie idempotentności: sprawdzenie czy miesiąc już istnieje
   const checkIstniejacy = await pobierzDokument('stan_grafiku', docelowaNazwa);
-  if (checkIstniejacy.exists) {
+  if (checkIstniejacy.exists && !forceOverwrite) {
     console.log(`⚠️ UWAGA: Dokument stan_grafiku/${docelowaNazwa} JUŻ ISTNIEJE w Firestore!`);
-    console.log(`🔒 ZABLOKOWANO NADPISANIE: Dane o obecnościach, punktach i zamianach są chronione.`);
+    console.log(`🔒 ZABLOKOWANO NADPISANIE: Dane o obecnościach, punktach i zamianach są chronione. Użyj forceOverwrite aby nadpisać.`);
     return { sukces: false, juzIstnieje: true };
   }
 
@@ -375,6 +375,12 @@ async function generujMiesiac(docelowyKlucz) {
   console.log(`Zapisywanie nowego grafiku do Firestore: stan_grafiku/${docelowaNazwa}...`);
   await zapiszDokument('stan_grafiku', docelowaNazwa, nowyStanGrafiku);
 
+  // Alias bez polskich znaków
+  const asciiKey = docelowaNazwa.replace(/ź/g, 'z').replace(/ł/g, 'l').replace(/ą/g, 'a').replace(/ę/g, 'e').replace(/ś/g, 's').replace(/ć/g, 'c').replace(/ż/g, 'z').replace(/ń/g, 'n').replace(/ó/g, 'o');
+  if (asciiKey !== docelowaNazwa) {
+    await zapiszDokument('stan_grafiku', asciiKey, nowyStanGrafiku).catch(() => {});
+  }
+
   console.log(`✓ SUKCES! Wygenerowano i zapisano miesiąc: ${docelowaNazwa} (${dniWNowym} dni, ${noweWiersze.length} ministrantów).`);
   return { sukces: true, docId: docelowaNazwa };
 }
@@ -382,7 +388,8 @@ async function generujMiesiac(docelowyKlucz) {
 // Uruchomienie z linii poleceń
 if (require.main === module) {
   const target = process.argv[2] || 'Październik_2026';
-  generujMiesiac(target)
+  const force = process.argv.includes('--force');
+  generujMiesiac(target, force)
     .then(res => {
       console.log('Wynik operacji:', res);
       process.exit(0);
