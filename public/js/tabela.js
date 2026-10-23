@@ -528,6 +528,24 @@
       return total;
     }
 
+    function odmienMiesiacDopelniacz(nazwaMiesiaca) {
+      if (!nazwaMiesiaca) return '';
+      var m = nazwaMiesiaca.toLowerCase().trim();
+      if (m.indexOf('stycz') !== -1) return 'Stycznia';
+      if (m.indexOf('lut') !== -1) return 'Lutego';
+      if (m.indexOf('mar') !== -1) return 'Marca';
+      if (m.indexOf('kwiec') !== -1) return 'Kwietnia';
+      if (m.indexOf('maj') !== -1) return 'Maja';
+      if (m.indexOf('czer') !== -1) return 'Czerwca';
+      if (m.indexOf('lip') !== -1) return 'Lipca';
+      if (m.indexOf('sierp') !== -1) return 'Sierpnia';
+      if (m.indexOf('wrzes') !== -1) return 'Września';
+      if (m.indexOf('pa') !== -1 || m.indexOf('pazd') !== -1) return 'Października';
+      if (m.indexOf('list') !== -1) return 'Listopada';
+      if (m.indexOf('grud') !== -1) return 'Grudnia';
+      return nazwaMiesiaca;
+    }
+
     function renderujPodsumowanieMiesiacaDoDruku(optDocKey) {
       var selTbl = document.getElementById('select-miesiac-tabeli');
       var selRank = document.getElementById('select-ranking-miesiac');
@@ -767,12 +785,14 @@
 
       var dataDzis = (new Date()).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric' });
 
+      var miesiacDopelniacz = odmienMiesiacDopelniacz(nazwaMiesiaca);
+
       var htmlArkusz = '<div style="background:white; color:#0f172a; padding:24px 28px; border-radius:8px; font-family:\'Inter\', -apple-system, sans-serif; font-size:11.5px; line-height:1.4;">' +
         '<div style="text-align:center; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:18px;">' +
-          '<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#475569;">Parafia Rzymskokatolicka pw. św. Józefa Oblubieńca NMP</div>' +
-          '<h1 style="font-size:19px; font-weight:800; margin:5px 0 2px 0; color:#0f172a; letter-spacing:-0.5px; text-transform:uppercase;">Podsumowanie Służby Liturgicznej</h1>' +
-          '<div style="font-size:14px; font-weight:700; color:#2563eb; text-transform:uppercase;">' + nazwaMiesiaca + ' ' + rok + '</div>' +
-          '<div style="font-size:10px; color:#64748b; margin-top:4px;">Wygenerowano: ' + dataDzis + ' • System LSO Parafii</div>' +
+          '<h1 style="font-size:22px; font-weight:800; margin:0 0 4px 0; color:#0f172a; letter-spacing:-0.5px; text-transform:uppercase;">' +
+            'Podsumowanie ' + miesiacDopelniacz + ' ' + rok +
+          '</h1>' +
+          '<div style="font-size:10.5px; color:#64748b; font-weight:500;">Wygenerowano: ' + dataDzis + '</div>' +
         '</div>' +
 
         '<div style="margin-bottom:18px;">' +
@@ -888,6 +908,7 @@
     window.wykonajDrukPodsumowaniaMiesiaca = wykonajDrukPodsumowaniaMiesiaca;
     window.renderujPodsumowanieMiesiacaDoDruku = renderujPodsumowanieMiesiacaDoDruku;
     window.wyliczObecnosciMinistranta = wyliczObecnosciMinistranta;
+    window.odmienMiesiacDopelniacz = odmienMiesiacDopelniacz;
     window.drukujTabeleMiesiaca = drukujTabeleMiesiaca;
 
     function wybierzDzienTygodniaKafelek(keyOrDay) {
