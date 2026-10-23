@@ -9,6 +9,57 @@ const POLSKIE_MIESIACE = [
 ];
 const SKROTY_DNI = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "Sb"];
 
+// Stałe uroczystości i święta nakazane / specjalne (z podwyższoną punktacją, np. 5 pkt za Wszystkich Świętych)
+const SWIETA_LITURGICZNE_STALE = {
+  "01-01": { nazwa: "Uroczystość Świętej Bożej Rodzicielki", punkty: 5, porzadekNiedzielny: true },
+  "01-06": { nazwa: "Uroczystość Objawienia Pańskiego (Trzech Króli)", punkty: 5, porzadekNiedzielny: true },
+  "05-01": { nazwa: "Św. Józefa Rzemieślnika", punkty: 4, porzadekNiedzielny: false },
+  "05-03": { nazwa: "Uroczystość NMP Królowej Polski", punkty: 5, porzadekNiedzielny: true },
+  "08-15": { nazwa: "Uroczystość Wniebowzięcia NMP", punkty: 5, porzadekNiedzielny: true },
+  "11-01": { nazwa: "Uroczystość Wszystkich Świętych", punkty: 5, porzadekNiedzielny: true },
+  "11-02": { nazwa: "Wspomnienie Wszystkich Wiernych Zmarłych (Zaduszki)", punkty: 4, porzadekNiedzielny: false },
+  "11-11": { nazwa: "Narodowe Święto Niepodległości", punkty: 4, porzadekNiedzielny: false },
+  "12-25": { nazwa: "Uroczystość Narodzenia Pańskiego (Boże Narodzenie)", punkty: 5, porzadekNiedzielny: true },
+  "12-26": { nazwa: "Święto św. Szczepana", punkty: 5, porzadekNiedzielny: true }
+};
+
+function pobierzInformacjeOSwiecie(rok, mIdx, dzien) {
+  const mm = String(mIdx + 1).padStart(2, '0');
+  const dd = String(dzien).padStart(2, '0');
+  const kluczStaly = `${mm}-${dd}`;
+  if (SWIETA_LITURGICZNE_STALE[kluczStaly]) {
+    return SWIETA_LITURGICZNE_STALE[kluczStaly];
+  }
+
+  // Obliczenie Wielkanocy dla świąt ruchomych
+  const a = rok % 19;
+  const b = Math.floor(rok / 100);
+  const c = rok % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const easterMonth = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+  const easterDay = ((h + l - 7 * m + 114) % 31) + 1;
+  const easterDate = new Date(rok, easterMonth, easterDay, 12, 0, 0);
+
+  const curDate = new Date(rok, mIdx, dzien, 12, 0, 0);
+  const diffDays = Math.round((curDate - easterDate) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 1) {
+    return { nazwa: "Poniedziałek Wielkanocny", punkty: 5, porzadekNiedzielny: true };
+  }
+  if (diffDays === 60) {
+    return { nazwa: "Uroczystość Najświętszego Ciała i Krwi Chrystusa (Boże Ciało)", punkty: 5, porzadekNiedzielny: true };
+  }
+  return null;
+}
+
 // Zamiana obiektów JS na format Firestore REST API v1
 function toFirestoreValue(val) {
   if (val === null || val === undefined) return { nullValue: null };
@@ -187,17 +238,25 @@ async function generujMiesiac(docelowyKlucz) {
 
   const baza = bazaDoc.data;
 
-  // 3. Obliczenie dni docelowego miesiąca
+  // 3. Obliczenie dni docelowego miesiąca oraz świąt i uroczystości
   const dniWNowym = new Date(targetRok, targetMIdx + 1, 0).getDate();
   const dniNaglowek = [];
+  const dniSwiateczneMap = {};
+
   for (let d = 1; d <= dniWNowym; d++) {
     const dt = new Date(targetRok, targetMIdx, d);
     const dow = dt.getDay(); // 0 = Nd, 1 = Pn, ..., 6 = Sb
+    const swieto = pobierzInformacjeOSwiecie(targetRok, targetMIdx, d);
+    if (swieto) dniSwiateczneMap[d] = swieto;
+
     dniNaglowek.push({
       dzien: d,
       skrotDnia: SKROTY_DNI[dow],
       czySobota: dow === 6,
-      czyNiedziela: dow === 0
+      czyNiedziela: dow === 0,
+      czySwieto: !!swieto,
+      nazwaSwieta: swieto ? swieto.nazwa : null,
+      punktyZaObecnosc: swieto ? swieto.punkty : (dow === 0 ? 3 : 3)
     });
   }
 
@@ -237,10 +296,11 @@ async function generujMiesiac(docelowyKlucz) {
     for (let d = 1; d <= dniWNowym; d++) {
       const dtNowy = new Date(targetRok, targetMIdx, d);
       const dowNowy = dtNowy.getDay();
+      const swietoInfo = dniSwiateczneMap[d];
       let maDyzur = false;
 
-      if (dowNowy === 0) {
-        // Każdy ministrant ma dyżur w niedzielę w godzinie swojej grupy
+      if (dowNowy === 0 || (swietoInfo && swietoInfo.porzadekNiedzielny)) {
+        // Każdy ministrant ma dyżur w niedzielę lub w święto z porządkiem niedzielnym (w godzinie swojej grupy)
         maDyzur = true;
       } else if (dowNowy >= 1 && dowNowy <= 5 && dowNowy === stalyDzienTygodnia) {
         // Stały dyżur w tygodniu

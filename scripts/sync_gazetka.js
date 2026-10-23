@@ -247,16 +247,36 @@ async function parseGazetkaPdf(pdfUrl) {
       } else {
         const isSun = (cur.dayName.toLowerCase() === 'niedziela');
         const isVigil = (cur.dayName.toLowerCase() === 'sobota' && tCur.timeStr === '17:00');
+        const isWszystkichSwietych = (cur.dayNum === 1 && cur.monthStr === 'listopada');
+        const isHoliday5Pkt = isWszystkichSwietych || (cur.dayNum === 6 && cur.monthStr === 'stycznia') || (cur.dayNum === 3 && cur.monthStr === 'maja') || (cur.dayNum === 15 && cur.monthStr === 'sierpnia') || (cur.dayNum === 25 && cur.monthStr === 'grudnia') || (cur.dayNum === 26 && cur.monthStr === 'grudnia');
+
         let nazwaMszy = 'Msza św.';
-        if (isSchoolMass) nazwaMszy = 'Msza św. szkolna';
-        else if (isSun) nazwaMszy = 'Msza św. niedzielna';
-        else if (isVigil) nazwaMszy = 'Msza św. (Wigilia niedzielna)';
+        let pts = 3;
+        let typMszy = 'msza';
+
+        if (isHoliday5Pkt) {
+          pts = 5;
+          typMszy = 'msza_swieto';
+          nazwaMszy = isWszystkichSwietych ? 'Uroczystość Wszystkich Świętych' : 'Msza św. świąteczna';
+        } else if (isSchoolMass) {
+          nazwaMszy = 'Msza św. szkolna';
+          typMszy = 'msza_szkolna';
+          pts = 3;
+        } else if (isSun) {
+          nazwaMszy = 'Msza św. niedzielna';
+          typMszy = 'msza_niedziela';
+          pts = 3;
+        } else if (isVigil) {
+          nazwaMszy = 'Msza św. (Wigilia niedzielna)';
+          typMszy = 'msza_niedziela';
+          pts = 3;
+        }
 
         msze.push({
           godzina: tCur.timeStr,
           nazwa: nazwaMszy,
-          punkty: (isSun || isVigil) ? 3 : 5,
-          typ: isSchoolMass ? 'msza_szkolna' : (isSun || isVigil ? 'msza_niedziela' : 'msza')
+          punkty: pts,
+          typ: typMszy
         });
       }
     }
@@ -312,11 +332,15 @@ async function parseGazetkaPdf(pdfUrl) {
       });
     }
 
+    const isWszystkichSwietych = (cur.dayNum === 1 && cur.monthStr === 'listopada');
     daysResult.push({
       dzien: cur.dayNum,
       dzienTygodnia: cur.dayName,
       miesiacNazwa: monthInfo ? monthInfo.name : cur.monthStr,
       miesiacIdx: monthInfo ? monthInfo.idx : 9,
+      czySwieto: isWszystkichSwietych,
+      nazwaSwieta: isWszystkichSwietych ? 'Uroczystość Wszystkich Świętych' : null,
+      punktyZaObecnosc: isWszystkichSwietych ? 5 : 3,
       msze: msze,
       nabozenstwa: nabozenstwa,
       godzinyMszy: msze.map(m => m.godzina)

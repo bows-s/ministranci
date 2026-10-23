@@ -1306,10 +1306,17 @@ function czyMaDostepDoZakrystii(nazwisko) {
         var dSun = (dow === 6) ? (dNum + 1) : dNum;
         var sunColIdx = dSun - 1;
 
+        // Wykrywanie dni świątecznych i uroczystości (np. 1 listopada - Wszystkich Świętych -> 5 pkt):
+        var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? daneTabeli.dniNaglowek[dNum - 1] : null;
+        var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(new Date(currentYear, currentMonthIdx, dNum)) : null;
+        var isHoliday5Pkt = (dNaglowek && (dNaglowek.czySwieto || dNaglowek.punktyZaObecnosc === 5)) ||
+                            (dNum === 1 && currentMonthIdx === 10) || // 1 listopada Wszystkich Świętych
+                            (litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
+
         // Podstawowy rodzaj z reguł ogólnych (msze św. są zawsze widoczne):
-        var domyslnyRodzaj = isWeekendMass ? 'msza_niedziela' : 'msza_tydzien';
-        var domyslnePkt = isWeekendMass ? 3 : 5;
-        var domyslnaNazwa = isWeekendMass ? (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę') : ((dow === 4 && cleanG === '17:00') ? 'Msza św. szkolna' : 'Msza w tygodniu');
+        var domyslnyRodzaj = isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien');
+        var domyslnePkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 3);
+        var domyslnaNazwa = isHoliday5Pkt ? ((litInfo && litInfo.nazwa) ? litInfo.nazwa : 'Uroczystość Wszystkich Świętych') : (isWeekendMass ? (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę') : ((dow === 4 && cleanG === '17:00') ? 'Msza św. szkolna' : 'Msza w tygodniu'));
 
         if (isFirstSatRose) {
           domyslnyRodzaj = 'msza_roza';
@@ -1327,9 +1334,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
             domyslnePkt = nFromH.punkty || (dow === 0 ? 3 : 2);
             domyslnaNazwa = nFromH.nazwa || 'Nabożeństwo';
           } else if (mFromH) {
-            domyslnyRodzaj = (mFromH.typ && mFromH.typ !== 'nabozenstwo') ? mFromH.typ : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien');
-            domyslnePkt = mFromH.punkty || (isWeekendMass ? 3 : 5);
-            domyslnaNazwa = mFromH.nazwa || 'Msza św.';
+            domyslnyRodzaj = (mFromH.typ && mFromH.typ !== 'nabozenstwo') ? mFromH.typ : (isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien'));
+            domyslnePkt = mFromH.punkty || (isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 3));
+            domyslnaNazwa = mFromH.nazwa || (isHoliday5Pkt ? 'Uroczystość Wszystkich Świętych' : 'Msza św.');
           }
         }
 
@@ -1645,7 +1652,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
               var status = 'OBECNY';
               var domyslnyStatus = 'OBECNY';
               var typ = 'DOMYSLNY';
-              var pkt = isWeekendMass ? 3 : 5;
+              var pkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 3);
               var zastepuje = null;
               var opisGieldy = zamianaInfoText || '';
 
@@ -2312,23 +2319,26 @@ function czyMaDostepDoZakrystii(nazwisko) {
         else if (m.status === 'NIEOBECNY') cardClass += ' is-absent';
         else if (m.status === 'USPRAWIEDLIWIONY') cardClass += ' is-excused';
 
+        var czySwieto5Pkt = (zakrystiaStan.rodzajLiturgii === 'msza_swieto' || zakrystiaStan.punktyLiturgii === 5 || (zakrystiaStan.wybranyDzien === 1 && currentMonthIdx === 10));
         var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
         var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
-        var ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
+        var ptsDlaObecnego = czySwieto5Pkt ? 5 : (zakrystiaStan.punktyLiturgii || 3);
         if (m.typ === 'ZASTEPCA') {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
         } else if (m.typ === 'DODATKOWY') {
           if (zakrystiaStan.recznieUstawionePunkty) {
-            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
+            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || (czySwieto5Pkt ? 5 : 3);
           } else if (typeof m.obecnyPkt === 'number') {
             ptsDlaObecnego = m.obecnyPkt;
+          } else if (czySwieto5Pkt) {
+            ptsDlaObecnego = 5;
           } else if (czyDodatkowa) {
             ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
           } else {
             ptsDlaObecnego = czyNiedziela ? 1 : 2;
           }
         } else {
-          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
+          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (czySwieto5Pkt ? 5 : (zakrystiaStan.punktyLiturgii || 3));
         }
 
         var badgeHtml = '';

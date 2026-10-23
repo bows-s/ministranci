@@ -3,7 +3,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.6.5';
+    var APP_VERSION = '1.6.6';
 
     function sprawdzWersjeAplikacji() {
       try {
