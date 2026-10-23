@@ -497,10 +497,10 @@
             var gOdd = cleanTime(ofe.godzinaOddawana || ofe.godzina || '10:00');
             var gPrzej = cleanTime(mojaGodzWtedy);
 
-            // Przejęcie / zamiana dyżuru: brak 2h cutoffu, można wziąć do samego końca (aż do rozpoczęcia mszy)
-            if (czyMszaJuzSieRozpoczela(ofe.dzien, gOdd, data.rok, data.miesiacIdx) ||
-                czyMszaJuzSieRozpoczela(ofe.dzien, gPrzej, data.rok, data.miesiacIdx)) {
-              throw new Error('Msza już się rozpoczęła - nie można już dokonać zamiany.');
+            // Wymiana 1 za 1: MUSI być co najmniej 2 godziny przed mszą (druga osoba nie może się nagle dowiedzieć 10 min przed)
+            if (czyZbytPoznoNaWystawienie(ofe.dzien, gOdd, data.rok, data.miesiacIdx) ||
+                czyZbytPoznoNaWystawienie(ofe.dzien, gPrzej, data.rok, data.miesiacIdx)) {
+              throw new Error('Zbyt późno na zamianę 1 za 1. Wymiana musi nastąpić co najmniej 2 godziny przed obiema mszami.');
             }
 
             var nowaListaGn = lista.filter(function(o) { return o.id !== id; });
@@ -560,10 +560,10 @@
               throw new Error('Jeden z wybranych dni nie ma zaplanowanej służby w parafii.');
             }
 
-            // Przejęcie / zamiana dyżuru: brak 2h cutoffu, można wziąć do samego końca (aż do rozpoczęcia mszy)
-            if (czyMszaJuzSieRozpoczela(dzienOddawany, gOddT, data.rok, data.miesiacIdx) ||
-                czyMszaJuzSieRozpoczela(dzienPrzejmowany, gPrzejT, data.rok, data.miesiacIdx)) {
-              throw new Error('Msza już się rozpoczęła - nie można już dokonać zamiany.');
+            // Wymiana 1 za 1: MUSI być co najmniej 2 godziny przed mszą (druga osoba nie może się nagle dowiedzieć 10 min przed)
+            if (czyZbytPoznoNaWystawienie(dzienOddawany, gOddT, data.rok, data.miesiacIdx) ||
+                czyZbytPoznoNaWystawienie(dzienPrzejmowany, gPrzejT, data.rok, data.miesiacIdx)) {
+              throw new Error('Zbyt późno na zamianę 1 za 1. Wymiana musi nastąpić co najmniej 2 godziny przed obiema mszami.');
             }
 
             var wiersze = data.wiersze || [];

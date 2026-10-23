@@ -1954,10 +1954,22 @@ function czyMaDostepDoZakrystii(nazwisko) {
             }
             budujZakrystie(docData);
           } else {
-            console.warn('Zakrystia: brak dokumentu w Firestore');
+            console.warn('Zakrystia: brak dokumentu w Firestore, sprawdzam pamięć podręczną');
+            var cached = isNextMonthZak ? daneKolejnegoMiesiaca : tabelaMiesiacaDane;
+            if (cached && cached.wiersze) {
+              budujZakrystie(cached);
+            } else {
+              kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Nie udało się załadować grafiku dla tej daty. Spróbuj odświeżyć stronę.</div>';
+            }
           }
         }).catch(function(err) {
           console.warn('Firestore zakrystia error:', err);
+          var cached = isNextMonthZak ? daneKolejnegoMiesiaca : tabelaMiesiacaDane;
+          if (cached && cached.wiersze) {
+            budujZakrystie(cached);
+          } else {
+            kontener.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Wystąpił błąd połączenia z bazą grafiku. Spróbuj odświeżyć stronę.</div>';
+          }
         });
       }
     }
@@ -2295,6 +2307,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (zakrystiaStan) {
         zakrystiaStan.maRozaniec = false;
       }
+      var curDocKey = (zakrystiaStan && zakrystiaStan.docKey) || pobierzAktywnyKluczMiesiaca();
+      var isNextMDoc = (daneKolejnegoMiesiaca && typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(curDocKey, daneKolejnegoMiesiaca.docId));
+      var daneTabeli = isNextMDoc ? daneKolejnegoMiesiaca : (tabelaMiesiacaDane || {});
+      var currentMonthIdx = (zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (daneTabeli.miesiacIdx !== undefined ? daneTabeli.miesiacIdx : (new Date()).getMonth());
+      var currentYear = (zakrystiaStan && zakrystiaStan.rok) || daneTabeli.rok || (new Date()).getFullYear();
+      var colIdx = (zakrystiaStan && zakrystiaStan.dzien) ? (zakrystiaStan.dzien - 1) : 0;
+      var wiersze = daneTabeli.wiersze || [];
+
       var naglowek = document.getElementById('zakrystia-msza-naglowek');
       var podtytul = document.getElementById('zakrystia-msza-podtytul');
       var stanInfo = document.getElementById('zakrystia-stan-zapisania');
