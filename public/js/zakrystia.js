@@ -3346,6 +3346,191 @@ function czyMaDostepDoZakrystii(nazwisko) {
       return kandydaci.length === 1 ? kandydaci[0] : null;
     }
 
+    // =============================================================
+    // POWIADOMIENIA NA ŻYWO NA TELEGRAM Z ZAKRYSTII
+    // =============================================================
+    function wyslijAlertTelegramZakrystia(stan) {
+      try {
+        var botToken = '8928454251:AAERM9vwRwolBiXGhO4RoGgbuytobqE9X9g';
+        var chatId = '1953233927';
+        if (!stan || !stan.ministranci) return;
+
+        var obecni = [];
+        var nieobecni = [];
+        var usprawiedliwieni = [];
+
+        stan.ministranci.forEach(function(m) {
+          var pts = (typeof m.punkty === 'number') ? m.punkty : (m.obecnyPkt || 0);
+          var extra = '';
+          if (m.typ === 'ZASTEPCA') extra = ' (zastępca)';
+          else if (m.typ === 'DODATKOWY') extra = ' (dodatkowa)';
+          if (m.karaPunkty) extra += ' [⚠️ -' + m.karaPunkty + ' kara]';
+
+          if (m.tylkoRozaniec) {
+            obecni.push('• ' + m.nazwisko + ' (+2 pkt, różaniec)');
+          } else if (m.status === 'OBECNY') {
+            obecni.push('• ' + m.nazwisko + ' (+' + pts + ' pkt' + extra + ')');
+          } else if (m.status === 'NIEOBECNY') {
+            nieobecni.push('• ' + m.nazwisko + ' (-5 pkt)');
+          } else if (m.status === 'USPRAWIEDLIWIONY') {
+            usprawiedliwieni.push('• ' + m.nazwisko + ' (0 pkt, uspraw.)');
+          }
+        });
+
+        var lines = [
+          '🔔 <b>Zakrystia: Zapisano obecność!</b>',
+          '📅 <b>' + (stan.dataTekst || (stan.dzien + ' dzień')) + '</b> • godz. <b>' + (stan.godzina || '') + '</b>',
+          '⛪ <i>' + (stan.nazwaLiturgii || 'Msza św.') + '</i>',
+          '👤 Zapisujący: <b>' + ((globalUser && globalUser.nazwisko) ? globalUser.nazwisko : 'Kościelny') + '</b>',
+          ''
+        ];
+
+        if (obecni.length > 0) {
+          lines.push('🟢 <b>Obecni (' + obecni.length + '):</b>');
+          lines.push(obecni.join('\n'));
+          lines.push('');
+        } else {
+          lines.push('🟢 <b>Obecni:</b> brak\n');
+        }
+
+        if (nieobecni.length > 0) {
+          lines.push('🔴 <b>Nieobecni (' + nieobecni.length + '):</b>');
+          lines.push(nieobecni.join('\n'));
+          lines.push('');
+        }
+
+        if (usprawiedliwieni.length > 0) {
+          lines.push('🟡 <b>Usprawiedliwieni (' + usprawiedliwieni.length + '):</b>');
+          lines.push(usprawiedliwieni.join('\n'));
+          lines.push('');
+        }
+
+        var messageText = lines.join('\n').trim();
+
+        fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: messageText,
+            parse_mode: 'HTML'
+          })
+        }).then(function(res) {
+          return res.json();
+        }).then(function(data) {
+          if (data && data.ok) {
+            console.log('[Telegram] Alert z Zakrystii wysłany na żywo!');
+          }
+        }).catch(function(err) {
+          console.warn('[Telegram] Błąd wysyłki alertu:', err);
+        });
+      } catch(e) {
+        console.warn('[Telegram] Wyjątek podczas wysyłania alertu:', e);
+      }
+    }
+
+    // =============================================================
+    // KOLEJKA OFFLINE DLA ZAKRYSTII (ODPORNOŚĆ NA BRAK INTERNETU)
+    // =============================================================
+    var KLUCZ_KOLEJKI_OFFLINE = 'min_kolejka_offline_zakrystia';
+
+    function pobierzKolejkeOfflineZakrystia() {
+      try {
+        var raw = localStorage.getItem(KLUCZ_KOLEJKI_OFFLINE);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function zapiszKolejkeOfflineZakrystia(kolejka) {
+      try {
+        localStorage.setItem(KLUCZ_KOLEJKI_OFFLINE, JSON.stringify(kolejka || []));
+      } catch(e) {}
+      aktualizujWskaznikKolejkiOffline();
+    }
+
+    function dodajDoKolejkiOfflineZakrystia(wpis) {
+      var kolejka = pobierzKolejkeOfflineZakrystia();
+      var existingIdx = kolejka.findIndex(function(it) { return it.logId === wpis.logId; });
+      if (existingIdx !== -1) {
+        kolejka[existingIdx] = wpis;
+      } else {
+        kolejka.push(wpis);
+      }
+      zapiszKolejkeOfflineZakrystia(kolejka);
+    }
+
+    function usunZKolejkiOfflineZakrystia(logId) {
+      var kolejka = pobierzKolejkeOfflineZakrystia().filter(function(it) { return it.logId !== logId; });
+      zapiszKolejkeOfflineZakrystia(kolejka);
+    }
+
+    function aktualizujWskaznikKolejkiOffline() {
+      var kolejka = pobierzKolejkeOfflineZakrystia();
+      var badge = document.getElementById('zakrystia-offline-badge');
+      if (badge) {
+        if (kolejka.length > 0) {
+          badge.style.display = 'inline-flex';
+          badge.innerHTML = '🟡 ' + kolejka.length + ' wpis(y) offline (czekają na zasięg)';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+    }
+
+    async function przetworzKolejkeOfflineZakrystia() {
+      var kolejka = pobierzKolejkeOfflineZakrystia();
+      if (!kolejka.length || !dbFirestore) return;
+
+      console.log('[Offline Queue] Sprawdzam ' + kolejka.length + ' oczekujących wpisów...');
+      var nowaKolejka = [];
+
+      for (var i = 0; i < kolejka.length; i++) {
+        var item = kolejka[i];
+        try {
+          var promises = [];
+          if (item.tabelaDoZapisu && item.targetDocKey) {
+            promises.push(dbFirestore.collection('stan_grafiku').doc(item.targetDocKey).set(item.tabelaDoZapisu, { merge: true }));
+            if (item.wariantKlucza && item.wariantKlucza !== item.targetDocKey) {
+              promises.push(dbFirestore.collection('stan_grafiku').doc(item.wariantKlucza).set(item.tabelaDoZapisu, { merge: true }));
+            }
+          }
+          if (item.obecnoscPayload && item.logId) {
+            promises.push(dbFirestore.collection('obecnosc').doc(item.logId).set(item.obecnoscPayload));
+          }
+          await Promise.all(promises);
+          console.log('[Offline Queue] Zsynchronizowano wpis z bazy:', item.logId);
+
+          if (item.stanDoTelegramu) {
+            wyslijAlertTelegramZakrystia(item.stanDoTelegramu);
+          }
+        } catch(err) {
+          console.warn('[Offline Queue] Nie udało się wysłać wpisu ' + item.logId + ', pozostaje w kolejce:', err);
+          nowaKolejka.push(item);
+        }
+      }
+
+      zapiszKolejkeOfflineZakrystia(nowaKolejka);
+      if (kolejka.length > 0 && nowaKolejka.length === 0) {
+        pokazToast('✓ Wszystkie zaległe obecności z Zakrystii zostały pomyślnie zsynchronizowane z serwerem!');
+      }
+    }
+
+    window.addEventListener('online', function() {
+      console.log('[Sieć] Powrót połączenia internetowego, przetwarzam kolejkę offline...');
+      przetworzKolejkeOfflineZakrystia();
+    });
+    setInterval(function() {
+      if (navigator.onLine && pobierzKolejkeOfflineZakrystia().length > 0) {
+        przetworzKolejkeOfflineZakrystia();
+      }
+    }, 25000);
+
+    window.przetworzKolejkeOfflineZakrystia = przetworzKolejkeOfflineZakrystia;
+    window.pobierzKolejkeOfflineZakrystia = pobierzKolejkeOfflineZakrystia;
+    window.wyslijAlertTelegramZakrystia = wyslijAlertTelegramZakrystia;
+
     async function zakrystiaZapiszObecnosc() {
       if (!czyMaDostepDoZakrystii(globalUser ? globalUser.nazwisko : "")) {
         alert("Brak uprawnień do zapisywania obecności w zakrystii.");
@@ -3829,37 +4014,60 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var logId = logIdPrefix + (zakrystiaStan.dzien < 10 ? '0' : '') + zakrystiaStan.dzien + '_' + zakrystiaStan.godzina.replace(':', '');
       var firestoreSuccess = true;
 
-      if (dbFirestore) {
+      var wariantKlucza = wyznaczWariantKluczaMiesiaca(targetDocKey);
+      var obecnoscPayload = {
+        dzien: zakrystiaStan.dzien,
+        miesiacIdx: zakrystiaStan.miesiacIdx,
+        rok: zakrystiaStan.rok,
+        docKey: targetDocKey,
+        godzina: zakrystiaStan.godzina,
+        dataTekst: zakrystiaStan.dataTekst,
+        rodzajLiturgii: zakrystiaStan.rodzajLiturgii,
+        punktyLiturgii: zakrystiaStan.punktyLiturgii,
+        recznieUstawionePunkty: !!zakrystiaStan.recznieUstawionePunkty,
+        nazwaLiturgii: zakrystiaStan.nazwaLiturgii,
+        maRozaniec: !!zakrystiaStan.maRozaniec,
+        zapisano: new Date().toISOString(),
+        zapisanoPrzez: (globalUser && globalUser.nazwisko) ? globalUser.nazwisko : 'Kościelny',
+        ministranci: zakrystiaStan.ministranci
+      };
+
+      var wpisDoKolejki = {
+        id: 'off_' + logId + '_' + Date.now(),
+        logId: logId,
+        targetDocKey: targetDocKey,
+        wariantKlucza: wariantKlucza,
+        tabelaDoZapisu: tabelaDoZapisu,
+        obecnoscPayload: obecnoscPayload,
+        stanDoTelegramu: JSON.parse(JSON.stringify(zakrystiaStan)),
+        utworzono: Date.now()
+      };
+
+      // 1. Zawsze natychmiast zapisujemy do kolejki offline w telefonie (100% gwarancja bezpieczeństwa)
+      dodajDoKolejkiOfflineZakrystia(wpisDoKolejki);
+
+      // 2. Jeśli mamy internet i Firestore, próbujemy zapisać na serwerze od razu:
+      if (dbFirestore && navigator.onLine) {
         try {
           var promises = [];
           if (tabelaDoZapisu) {
             promises.push(dbFirestore.collection('stan_grafiku').doc(targetDocKey).set(tabelaDoZapisu, { merge: true }));
-            var wariantKlucza = wyznaczWariantKluczaMiesiaca(targetDocKey);
             if (wariantKlucza && wariantKlucza !== targetDocKey) {
               promises.push(dbFirestore.collection('stan_grafiku').doc(wariantKlucza).set(tabelaDoZapisu, { merge: true }));
             }
           }
-          promises.push(dbFirestore.collection('obecnosc').doc(logId).set({
-            dzien: zakrystiaStan.dzien,
-            miesiacIdx: zakrystiaStan.miesiacIdx,
-            rok: zakrystiaStan.rok,
-            docKey: targetDocKey,
-            godzina: zakrystiaStan.godzina,
-            dataTekst: zakrystiaStan.dataTekst,
-            rodzajLiturgii: zakrystiaStan.rodzajLiturgii,
-            punktyLiturgii: zakrystiaStan.punktyLiturgii,
-            recznieUstawionePunkty: !!zakrystiaStan.recznieUstawionePunkty,
-            nazwaLiturgii: zakrystiaStan.nazwaLiturgii,
-            maRozaniec: !!zakrystiaStan.maRozaniec,
-            zapisano: new Date().toISOString(),
-            zapisanoPrzez: (globalUser && globalUser.nazwisko) ? globalUser.nazwisko : 'Kościelny',
-            ministranci: zakrystiaStan.ministranci
-          }));
+          promises.push(dbFirestore.collection('obecnosc').doc(logId).set(obecnoscPayload));
           await Promise.all(promises);
+
+          // Pomyślny zapis na serwerze: usuwamy z kolejki offline i wysyłamy alert Telegram na żywo!
+          usunZKolejkiOfflineZakrystia(logId);
+          wyslijAlertTelegramZakrystia(zakrystiaStan);
         } catch(errFs) {
-          console.error('Błąd zapisu Firestore:', errFs);
+          console.warn('Zapis do Firestore napotkał problem sieciowy (wpis zabezpieczony w kolejce offline):', errFs);
           firestoreSuccess = false;
         }
+      } else {
+        firestoreSuccess = false;
       }
 
       if (spinner) spinner.style.display = 'none';
@@ -3867,11 +4075,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (!firestoreSuccess) {
         if (btn) {
           btn.disabled = false;
-          btn.innerText = 'BŁĄD SIECI - KLIKNIJ ABY PONOWIĆ';
+          btn.innerText = '✓ ZAPISANO OFFLINE (' + zakrystiaStan.ministranci.length + ' ministrantów)';
           btn.style.opacity = '1';
           btn.style.cursor = 'pointer';
         }
-        alert('Błąd zapisu: brak stabilnego połączenia z internetem. Upewnij się, że masz zasięg i kliknij "ZAPISZ OBECNOŚĆ" ponownie.');
+        pokazToast('📡 Zapisano lokalnie w pamięci telefonu. Wyśle się automatycznie po odzyskaniu internetu.');
+        pokazModalSukcesuZakrystii(zakrystiaStan.nazwaLiturgii + ' (' + zakrystiaStan.godzina + ')', zakrystiaStan.ministranci.length, true);
         return;
       }
 
@@ -3889,6 +4098,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
       } catch(eVib) {}
 
-      // Wielkie, nie do przeoczenia potwierdzenie sukcesu
-      pokazModalSukcesuZakrystii(zakrystiaStan.nazwaLiturgii + ' (' + zakrystiaStan.godzina + ')', zakrystiaStan.ministranci.length);
+      // Wielkie, nie do przeoczenia potwierdzenie sukcesu online
+      pokazModalSukcesuZakrystii(zakrystiaStan.nazwaLiturgii + ' (' + zakrystiaStan.godzina + ')', zakrystiaStan.ministranci.length, false);
     }

@@ -3,7 +3,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.6.9';
+    var APP_VERSION = '1.7.0';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -1349,11 +1349,15 @@
     }
 
     
-    function pokazModalSukcesuZakrystii(liturgiaTekst, ilosc) {
+    function pokazModalSukcesuZakrystii(liturgiaTekst, ilosc, czyOffline) {
       var modal = document.getElementById('modal-sukces-zakrystia');
       var opis = document.getElementById('modal-sukces-zakrystia-opis');
       if (opis) {
-        opis.innerHTML = 'Obecność na: <b>' + (liturgiaTekst || 'Mszy') + '</b><br>została trwale i pomyślnie zapisana w grafiku dla <b>' + ilosc + '</b> ministrantów.';
+        if (czyOffline) {
+          opis.innerHTML = 'Obecność na: <b>' + (liturgiaTekst || 'Mszy') + '</b><br>została <b>bezpiecznie zapisana w telefonie</b> dla <b>' + ilosc + '</b> ministrantów.<br><br><span style="color:#fde047; font-size:13px; display:inline-block; background:rgba(234,179,8,0.12); padding:10px 14px; border-radius:8px; border:1px solid rgba(234,179,8,0.25); line-height:1.4;">📡 Chwilowy brak połączenia z serwerem. Wpis trafił do <b>kolejki offline</b> i wyśle się automatycznie, gdy tylko telefon złapie zasięg!</span>';
+        } else {
+          opis.innerHTML = 'Obecność na: <b>' + (liturgiaTekst || 'Mszy') + '</b><br>została trwale i pomyślnie zapisana w grafiku dla <b>' + ilosc + '</b> ministrantów.';
+        }
       }
       if (modal) modal.style.display = 'flex';
       aktualizujBlokadeScrolla();

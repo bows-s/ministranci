@@ -358,10 +358,9 @@
         var safeRowNazw = (row.nazwisko || '').replace(/'/g, "\\'");
         html += '<td class="tbl-sticky-col" style="' + rowStyle + (isMe ? ' border-left:3px solid #22d3ee !important;' : '') + ' cursor:pointer;" onclick="otworzProfilMinistranta(\'' + safeRowNazw + '\')" title="Kliknij, aby otworzyć profil">' +
                   '<div style="font-weight:700; color:#fafafa; display:flex; align-items:center; justify-content:space-between; gap:4px;">' +
-                    '<span>' + row.nazwisko + (isMe ? ' <span style="font-size:10px; font-weight:700; color:#22d3ee; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:1px 5px; border-radius:4px; margin-left:4px;">Ty</span>' : '') + '</span>' +
-                    '' +
+                    '<span class="tbl-name-label">' + row.nazwisko + (isMe ? ' <span class="no-print" style="font-size:10px; font-weight:700; color:#22d3ee; background:rgba(6,182,212,0.15); border:1px solid rgba(6,182,212,0.3); padding:1px 5px; border-radius:4px; margin-left:4px;">Ty</span>' : '') + '</span>' +
                   '</div>' +
-                  '<div style="font-size:10px; color:#a1a1aa;">' + row.grupa + '</div>' +
+                  '<div class="tbl-row-grupa" style="font-size:10px; color:#a1a1aa;">' + row.grupa + '</div>' +
                 '</td>';
 
         for (var c = 0; c < row.komorki.length; c++) {
@@ -463,9 +462,268 @@
       kontener.innerHTML = html;
     }
 
+    function ustawStylStronyDruku(cssTekst) {
+      var stEl = document.getElementById('dynamic-print-page-style');
+      if (!stEl) {
+        stEl = document.createElement('style');
+        stEl.id = 'dynamic-print-page-style';
+        document.head.appendChild(stEl);
+      }
+      stEl.textContent = cssTekst;
+    }
+
     function drukujTabeleMiesiaca() {
+      ustawStylStronyDruku('@page { size: landscape; margin: 4mm; }');
+      document.body.classList.remove('print-mode-podsumowanie');
+      document.body.classList.add('print-mode-tabela');
       window.print();
     }
+
+    function renderujPodsumowanieMiesiacaDoDruku(optDocKey) {
+      var targetKey = optDocKey || wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
+      var isNext = (daneKolejnegoMiesiaca && typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(targetKey, daneKolejnegoMiesiaca.docId));
+      var dane = isNext ? daneKolejnegoMiesiaca : (tabelaMiesiacaDane || {});
+      var wiersze = dane.wiersze || [];
+      var parsed = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(targetKey) : { nazwaMiesiaca: 'Październik', rok: 2026 };
+      var nazwaMiesiaca = dane.nazwaMiesiaca || parsed.nazwaMiesiaca || 'Miesiąc';
+      var rok = dane.rok || parsed.rok || (new Date()).getFullYear();
+
+      var arkuszEl = document.getElementById('arkusz-podsumowania-tresc');
+      if (!arkuszEl) return;
+
+      if (!wiersze.length) {
+        arkuszEl.innerHTML = '<div style="text-align:center; padding:30px; color:#ef4444;">Brak danych grafiku dla tego miesiąca do wygenerowania podsumowania.</div>';
+        return;
+      }
+
+      // Filtrujemy tylko ministrantów (bez kościelnego i proboszcza)
+      var servers = wiersze.filter(function(w) {
+        if (!w || !w.nazwisko) return false;
+        var n = w.nazwisko.toLowerCase().trim();
+        return n !== 'kościelny' && n !== 'koscielny' && n.indexOf('proboszcz') === -1;
+      }).map(function(w) {
+        var msze = 0;
+        (w.komorki || []).forEach(function(c) {
+          if (!c) return;
+          if (c.liturgie && typeof c.liturgie === 'object') {
+            Object.keys(c.liturgie).forEach(function(k) {
+              var val = c.liturgie[k];
+              var num = (typeof val === 'number') ? val : (val && typeof val.punkty === 'number' ? val.punkty : parseFloat(val));
+              if (!isNaN(num) && num > 0) msze++;
+            });
+          } else if (typeof c.wartosc === 'number' && c.wartosc > 0) {
+            msze++;
+          }
+        });
+
+        var stInfo = (typeof wyznaczStopienMinistranta === 'function') ? wyznaczStopienMinistranta(w.nazwisko, wiersze) : { stopien: w.stopien || 'Ministrant' };
+        var stopienNazwa = stInfo.stopien || w.stopien || 'Ministrant';
+        var grParaf = (typeof wyznaczGrupeParafialna === 'function') ? wyznaczGrupeParafialna(w.nazwisko, w.grupa) : (w.grupa || 'Grupa');
+
+        return {
+          nazwisko: w.nazwisko,
+          stopien: stopienNazwa,
+          grupa: grParaf,
+          punkty: (typeof w.suma === 'number') ? w.suma : 0,
+          msze: msze
+        };
+      });
+
+      // Sortowanie: punkty malejąco, msze malejąco, alfabetycznie
+      servers.sort(function(a, b) {
+        if (b.punkty !== a.punkty) return b.punkty - a.punkty;
+        if (b.msze !== a.msze) return b.msze - a.msze;
+        return a.nazwisko.localeCompare(b.nazwisko, 'pl');
+      });
+
+      // Przypisanie miejsc (1, 2, 3...)
+      var curMiejsce = 1;
+      servers.forEach(function(s, idx) {
+        if (idx > 0 && s.punkty < servers[idx - 1].punkty) {
+          curMiejsce = idx + 1;
+        }
+        s.miejsce = curMiejsce;
+      });
+
+      // Średnie statystyki
+      var totalOsob = servers.length;
+      var sumPkt = servers.reduce(function(acc, s) { return acc + s.punkty; }, 0);
+      var sumMsze = servers.reduce(function(acc, s) { return acc + s.msze; }, 0);
+      var srPkt = totalOsob > 0 ? (sumPkt / totalOsob).toFixed(2) : '0.00';
+      var srMsze = totalOsob > 0 ? (sumMsze / totalOsob).toFixed(2) : '0.00';
+
+      // Grupy (I, II, III, IV)
+      var grupyMap = {};
+      servers.forEach(function(s) {
+        var gShort = 'I';
+        var gUp = (s.grupa || '').toUpperCase();
+        if (gUp.indexOf('CZERWON') !== -1 || gUp.indexOf(' I ') !== -1 || gUp.indexOf('GRUPA I') !== -1 || gUp === 'I') gShort = 'I';
+        else if (gUp.indexOf('POMARAŃCZ') !== -1 || gUp.indexOf('POMARANCZ') !== -1 || gUp.indexOf(' II ') !== -1 || gUp.indexOf('GRUPA II') !== -1 || gUp === 'II') gShort = 'II';
+        else if (gUp.indexOf('ZIELON') !== -1 || gUp.indexOf(' III ') !== -1 || gUp.indexOf('GRUPA III') !== -1 || gUp === 'III') gShort = 'III';
+        else if (gUp.indexOf('ŻÓŁT') !== -1 || gUp.indexOf('ZOLT') !== -1 || gUp.indexOf(' IV ') !== -1 || gUp.indexOf('GRUPA IV') !== -1 || gUp === 'IV') gShort = 'IV';
+
+        if (!grupyMap[gShort]) grupyMap[gShort] = { grupa: gShort, count: 0, pkt: 0, msze: 0 };
+        grupyMap[gShort].count++;
+        grupyMap[gShort].pkt += s.punkty;
+        grupyMap[gShort].msze += s.msze;
+      });
+
+      var grupyArr = Object.keys(grupyMap).map(function(k) {
+        var g = grupyMap[k];
+        return {
+          grupa: g.grupa,
+          count: g.count,
+          pktNaOsobe: g.count > 0 ? (g.pkt / g.count).toFixed(2) : '0.00',
+          obcNaOsobe: g.count > 0 ? (g.msze / g.count).toFixed(2) : '0.00'
+        };
+      }).sort(function(a, b) {
+        return parseFloat(b.pktNaOsobe) - parseFloat(a.pktNaOsobe);
+      });
+
+      grupyArr.forEach(function(g, idx) {
+        g.miejsce = idx + 1;
+      });
+
+      // Budowanie wierszy tabeli indywidualnej
+      var rowsHtml = '';
+      servers.forEach(function(s, idx) {
+        var medal = '';
+        var bgRow = (idx % 2 === 1) ? 'background:#f8fafc;' : 'background:#ffffff;';
+        if (s.miejsce === 1) {
+          medal = ' 🥇';
+          bgRow = 'background:#fefce8;';
+        } else if (s.miejsce === 2) {
+          medal = ' 🥈';
+          bgRow = 'background:#f8fafc;';
+        } else if (s.miejsce === 3) {
+          medal = ' 🥉';
+          bgRow = 'background:#fffbeb;';
+        }
+
+        var stopienStr = s.stopien ? (' <span style="color:#64748b; font-weight:500;">(' + s.stopien + ')</span>') : '';
+        rowsHtml += '<tr style="' + bgRow + ' border-bottom:1px solid #e2e8f0;">' +
+                      '<td style="padding:6px 8px; border:1px solid #cbd5e1; text-align:center; font-weight:700;">' + s.miejsce + medal + '</td>' +
+                      '<td style="padding:6px 10px; border:1px solid #cbd5e1; font-weight:700; color:#0f172a;">' + s.nazwisko + stopienStr + '</td>' +
+                      '<td style="padding:6px 8px; border:1px solid #cbd5e1; text-align:center; font-weight:800; font-size:12px; color:#1e293b;">' + s.punkty + '</td>' +
+                      '<td style="padding:6px 8px; border:1px solid #cbd5e1; text-align:center; font-weight:600; color:#334155;">' + s.msze + '</td>' +
+                    '</tr>';
+      });
+
+      // Budowanie wierszy tabeli grup
+      var grupyRowsHtml = '';
+      grupyArr.forEach(function(g, idx) {
+        var gMedal = '';
+        if (g.miejsce === 1) gMedal = ' 🏆';
+        var bgG = (idx % 2 === 1) ? 'background:#f8fafc;' : 'background:#ffffff;';
+        grupyRowsHtml += '<tr style="' + bgG + ' border-bottom:1px solid #e2e8f0;">' +
+                           '<td style="padding:6px 8px; border:1px solid #cbd5e1; text-align:center; font-weight:700;">' + g.miejsce + gMedal + '</td>' +
+                           '<td style="padding:6px 10px; border:1px solid #cbd5e1; text-align:center; font-weight:800; font-size:12px; color:#0f172a;">Grupa ' + g.grupa + '</td>' +
+                           '<td style="padding:6px 8px; border:1px solid #cbd5e1; text-align:center; font-weight:700; color:#1e293b;">' + g.pktNaOsobe + '</td>' +
+                           '<td style="padding:6px 8px; border:1px solid #cbd5e1; text-align:center; font-weight:700; color:#334155;">' + g.obcNaOsobe + '</td>' +
+                         '</tr>';
+      });
+
+      var dataDzis = (new Date()).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      var htmlArkusz = '<div style="background:white; color:#0f172a; padding:24px 28px; border-radius:8px; font-family:\'Inter\', -apple-system, sans-serif; font-size:11.5px; line-height:1.4;">' +
+        '<div style="text-align:center; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:18px;">' +
+          '<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#475569;">Parafia Rzymskokatolicka pw. św. Józefa Oblubieńca NMP</div>' +
+          '<h1 style="font-size:19px; font-weight:800; margin:5px 0 2px 0; color:#0f172a; letter-spacing:-0.5px; text-transform:uppercase;">Podsumowanie Służby Liturgicznej</h1>' +
+          '<div style="font-size:14px; font-weight:700; color:#2563eb; text-transform:uppercase;">' + nazwaMiesiaca + ' ' + rok + '</div>' +
+          '<div style="font-size:10px; color:#64748b; margin-top:4px;">Wygenerowano: ' + dataDzis + ' • System LSO Parafii</div>' +
+        '</div>' +
+
+        '<div style="margin-bottom:18px;">' +
+          '<div style="font-size:11.5px; font-weight:800; text-transform:uppercase; margin-bottom:6px; color:#0f172a; letter-spacing:0.5px;">1. Klasyfikacja Indywidualna (Ranking Miesiąca)</div>' +
+          '<table style="width:100%; border-collapse:collapse; text-align:left; font-size:11.5px; border:1px solid #cbd5e1;">' +
+            '<thead>' +
+              '<tr style="background:#f1f5f9; border-bottom:2px solid #0f172a; font-weight:800; color:#0f172a;">' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:70px; text-align:center;">MIEJSCE</th>' +
+                '<th style="padding:6px 10px; border:1px solid #cbd5e1;">IMIĘ I NAZWISKO</th>' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:85px; text-align:center;">PUNKTY</th>' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:95px; text-align:center;">ILOŚĆ MSZY</th>' +
+              '</tr>' +
+            '</thead>' +
+            '<tbody>' +
+              rowsHtml +
+            '</tbody>' +
+          '</table>' +
+        '</div>' +
+
+        '<div style="margin-bottom:18px; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden;">' +
+          '<table style="width:100%; border-collapse:collapse; font-size:11.5px;">' +
+            '<tr style="background:#f8fafc; border-bottom:1px solid #cbd5e1;">' +
+              '<td style="padding:7px 12px; font-weight:700; color:#334155;">Średnia punktów na ministranta</td>' +
+              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a; width:130px;">' + srPkt + '</td>' +
+            '</tr>' +
+            '<tr style="background:#ffffff; border-bottom:1px solid #cbd5e1;">' +
+              '<td style="padding:7px 12px; font-weight:700; color:#334155;">Średnia obecności na ministranta</td>' +
+              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a;">' + srMsze + '</td>' +
+            '</tr>' +
+            '<tr style="background:#f8fafc;">' +
+              '<td style="padding:7px 12px; font-weight:700; color:#334155;">Łączna liczba odprawionych służb w miesiącu</td>' +
+              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a;">' + sumMsze + '</td>' +
+            '</tr>' +
+          '</table>' +
+        '</div>' +
+
+        '<div style="margin-bottom:20px;">' +
+          '<div style="font-size:11.5px; font-weight:800; text-transform:uppercase; margin-bottom:6px; color:#0f172a; letter-spacing:0.5px;">2. Klasyfikacja Grupowa</div>' +
+          '<table style="width:100%; border-collapse:collapse; text-align:left; font-size:11.5px; border:1px solid #cbd5e1;">' +
+            '<thead>' +
+              '<tr style="background:#f1f5f9; border-bottom:2px solid #0f172a; font-weight:800; color:#0f172a;">' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:100px; text-align:center;">Ranking Grup</th>' +
+                '<th style="padding:6px 10px; border:1px solid #cbd5e1; text-align:center;">Grupa</th>' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:110px; text-align:center;">Pkt na osobe</th>' +
+                '<th style="padding:6px 8px; border:1px solid #cbd5e1; width:110px; text-align:center;">Obc na osobe</th>' +
+              '</tr>' +
+            '</thead>' +
+            '<tbody>' +
+              grupyRowsHtml +
+            '</tbody>' +
+          '</table>' +
+        '</div>' +
+
+        '<div style="display:flex; justify-content:space-between; margin-top:30px; padding-top:10px; font-size:10.5px; color:#64748b;">' +
+          '<div style="text-align:center; width:200px; border-top:1px dashed #94a3b8; padding-top:6px;">Podpis Animatora LSO</div>' +
+          '<div style="text-align:center; width:200px; border-top:1px dashed #94a3b8; padding-top:6px;">Podpis Opiekuna / Proboszcza</div>' +
+        '</div>' +
+      '</div>';
+
+      arkuszEl.innerHTML = htmlArkusz;
+    }
+
+    function otworzDrukPodsumowaniaMiesiaca(optDocKey) {
+      renderujPodsumowanieMiesiacaDoDruku(optDocKey);
+      var modal = document.getElementById('modal-druk-podsumowania');
+      if (modal) modal.style.display = 'flex';
+      if (typeof aktualizujBlokadeScrolla === 'function') aktualizujBlokadeScrolla();
+    }
+
+    function zamknijDrukPodsumowaniaMiesiaca() {
+      var modal = document.getElementById('modal-druk-podsumowania');
+      if (modal) modal.style.display = 'none';
+      document.body.classList.remove('print-mode-podsumowanie');
+      if (typeof aktualizujBlokadeScrolla === 'function') aktualizujBlokadeScrolla();
+    }
+
+    function wykonajDrukPodsumowaniaMiesiaca() {
+      ustawStylStronyDruku('@page { size: portrait; margin: 8mm; }');
+      document.body.classList.remove('print-mode-tabela');
+      document.body.classList.add('print-mode-podsumowanie');
+      window.print();
+    }
+
+    window.addEventListener('afterprint', function() {
+      document.body.classList.remove('print-mode-tabela');
+      document.body.classList.remove('print-mode-podsumowanie');
+    });
+
+    window.otworzDrukPodsumowaniaMiesiaca = otworzDrukPodsumowaniaMiesiaca;
+    window.zamknijDrukPodsumowaniaMiesiaca = zamknijDrukPodsumowaniaMiesiaca;
+    window.wykonajDrukPodsumowaniaMiesiaca = wykonajDrukPodsumowaniaMiesiaca;
+    window.renderujPodsumowanieMiesiacaDoDruku = renderujPodsumowanieMiesiacaDoDruku;
+    window.drukujTabeleMiesiaca = drukujTabeleMiesiaca;
 
     function wybierzDzienTygodniaKafelek(keyOrDay) {
       var found = aktywneDyzuryTydzienLista.find(function(x) { 

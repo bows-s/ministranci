@@ -108,7 +108,7 @@ console.log('\nTesting cross-module function calls:');
 
 // 1. Version check
 console.log('APP_VERSION:', sandbox.APP_VERSION);
-if (sandbox.APP_VERSION !== '1.6.9') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
+if (sandbox.APP_VERSION !== '1.7.0') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
 
 // 2. Liturgy check
 const litDzis = sandbox.wyznaczDaneLiturgiczne(new Date());
@@ -189,3 +189,4 @@ if (!sandbox.czyMszaJuzSieRozpoczela(targetDatePast.getDate(), hPastStr, targetD
 console.log('Exchange cutoff rules (offer >= 2h, take until start with no cutoff): OK');
 
 console.log('\nAll integration tests passed successfully!');
+process.exit(0);
