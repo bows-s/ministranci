@@ -108,7 +108,7 @@ console.log('\nTesting cross-module function calls:');
 
 // 1. Version check
 console.log('APP_VERSION:', sandbox.APP_VERSION);
-if (sandbox.APP_VERSION !== '1.6.7') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
+if (sandbox.APP_VERSION !== '1.6.8') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
 
 // 2. Liturgy check
 const litDzis = sandbox.wyznaczDaneLiturgiczne(new Date());
@@ -156,5 +156,36 @@ if (!alreadyServedAt10) throw new Error('Should detect that altar server already
 const notServedYet = sandbox.czyMinistrantBylJuzNaInnejMszyWSwieto({ komorki: [{ liturgie: {} }] }, 0, '10:00');
 if (notServedYet) throw new Error('Should detect altar server has not served yet on holiday!');
 console.log('Holiday scoring tests (5 pkt for 1st mass, +2 for 2nd mass): OK');
+
+// 6. Test cutoff rules:
+// - Wystawienie mszy na giełdę: min. 2h przed rozpoczęciem mszy
+// - Wzięcie mszy / przejęcie dyżuru: brak 2h cutoffu (można wziąć np. 10 minut przed rozpoczęciem)
+const now = new Date();
+const targetDateIn3h = new Date(now.getTime() + 3 * 3600 * 1000);
+const targetDateIn10m = new Date(now.getTime() + 10 * 60 * 1000);
+const targetDatePast = new Date(now.getTime() - 10 * 60 * 1000);
+
+const h3Str = String(targetDateIn3h.getHours()).padStart(2, '0') + ':' + String(targetDateIn3h.getMinutes()).padStart(2, '0');
+const h10mStr = String(targetDateIn10m.getHours()).padStart(2, '0') + ':' + String(targetDateIn10m.getMinutes()).padStart(2, '0');
+const hPastStr = String(targetDatePast.getHours()).padStart(2, '0') + ':' + String(targetDatePast.getMinutes()).padStart(2, '0');
+
+// Wystawienie w 3h: DOZWOLONE
+if (sandbox.czyZbytPoznoNaWystawienie(targetDateIn3h.getDate(), h3Str, targetDateIn3h.getFullYear(), targetDateIn3h.getMonth())) {
+  throw new Error('Should allow offering mass that is in 3 hours!');
+}
+// Wystawienie w 10m: ZABLOKOWANE (mniej niż 2h)
+if (!sandbox.czyZbytPoznoNaWystawienie(targetDateIn10m.getDate(), h10mStr, targetDateIn10m.getFullYear(), targetDateIn10m.getMonth())) {
+  throw new Error('Should block offering mass that is in 10 minutes (less than 2 hours)!');
+}
+
+// Wzięcie mszy w 10m: DOZWOLONE (msza jeszcze się nie rozpoczęła, brak 2h cutoffu!)
+if (sandbox.czyMszaJuzSieRozpoczela(targetDateIn10m.getDate(), h10mStr, targetDateIn10m.getFullYear(), targetDateIn10m.getMonth())) {
+  throw new Error('Should allow taking mass 10 minutes before start (mass has not started yet)!');
+}
+// Wzięcie mszy po rozpoczęciu: ZABLOKOWANE
+if (!sandbox.czyMszaJuzSieRozpoczela(targetDatePast.getDate(), hPastStr, targetDatePast.getFullYear(), targetDatePast.getMonth())) {
+  throw new Error('Should block taking mass that has already started!');
+}
+console.log('Exchange cutoff rules (offer >= 2h, take until start with no cutoff): OK');
 
 console.log('\nAll integration tests passed successfully!');

@@ -1,15 +1,14 @@
 // =============================================================
-    // HELPERY CZASOWE I CUTOFF MSZY (MIN. 2 GODZINY PRZED ROZPOCZĘCIEM)
+    // HELPERY CZASOWE I REGUŁY GIEŁDY:
+    // 1. WYSTAWIENIE MSZY (oddanie / zgłoszenie / oferta): MIN. 2 GODZINY PRZED ROZPOCZĘCIEM!
+    // 2. WZIĘCIE / PRZEJĘCIE MSZY (wolny dyżur lub zamiana): BRAK CUTOFFU 2H - DO SAMEGO KOŃCA (aż do rozpoczęcia mszy)!
     // =============================================================
-    // =============================================================
-    // UNIWERSALNE HELPERY CZASOWE I CUTOFF MSZY (TYDZIEŃ + WEEKEND)
-    // =============================================================
-    function czyMszaPrzeterminowanaUniwersalna(dzien, godzinaStr, rok, miesiacIdx, tryb) {
-      if (!dzien) return false;
+    function wyznaczCzasMszy(dzien, godzinaStr, rok, miesiacIdx) {
+      if (!dzien) return null;
       var now = new Date();
       var curY = (rok !== undefined && rok !== null) ? rok : now.getFullYear();
       var curM = (miesiacIdx !== undefined && miesiacIdx !== null) ? miesiacIdx : now.getMonth();
-      var gClean = cleanTime(godzinaStr) || '18:00';
+      var gClean = (typeof cleanTime === 'function' ? cleanTime(godzinaStr) : godzinaStr) || '18:00';
 
       // Obsługa wigilii niedzielnej w sobotę 17:00: jeśli dzień to niedziela, a godzina to 17:00, realny dzień to sobota (dzien - 1)
       var dow = new Date(curY, curM, dzien).getDay();
@@ -21,22 +20,39 @@
         var ph = parseInt(parts[0], 10), pm = parseInt(parts[1], 10);
         if (!isNaN(ph) && !isNaN(pm)) { h = ph; m = pm; }
       }
+      return new Date(curY, curM, realD, h, m, 0, 0).getTime();
+    }
 
-      var mszaTime = new Date(curY, curM, realD, h, m, 0, 0).getTime();
-      if (tryb === 'start' || tryb === 'zgloszenie') {
-        return now.getTime() >= mszaTime;
+    function czyMszaJuzSieRozpoczela(dzien, godzinaStr, rok, miesiacIdx) {
+      var mszaTime = wyznaczCzasMszy(dzien, godzinaStr, rok, miesiacIdx);
+      if (!mszaTime) return false;
+      return Date.now() >= mszaTime;
+    }
+
+    // Min. 2 godziny przed rozpoczęciem mszy WYŁĄCZNIE przy wystawianiu nowej oferty lub oddawaniu dyżuru
+    function czyZbytPoznoNaWystawienie(dzien, godzinaStr, rok, miesiacIdx) {
+      var mszaTime = wyznaczCzasMszy(dzien, godzinaStr, rok, miesiacIdx);
+      if (!mszaTime) return false;
+      var cutoffWystawienia = mszaTime - (2 * 60 * 60 * 1000);
+      return Date.now() >= cutoffWystawienia;
+    }
+
+    function czyMszaPrzeterminowanaUniwersalna(dzien, godzinaStr, rok, miesiacIdx, tryb) {
+      if (tryb === 'start' || tryb === 'zgloszenie' || tryb === 'wez' || tryb === 'przejmij' || tryb === 'wziecie') {
+        return czyMszaJuzSieRozpoczela(dzien, godzinaStr, rok, miesiacIdx);
       }
-      var cutoffTime = mszaTime - (2 * 60 * 60 * 1000); // cutoff 2h przed mszą
-      return now.getTime() >= cutoffTime;
+      // Domyślnie dla wystawiania / tworzenia oferty: cutoff min. 2h
+      return czyZbytPoznoNaWystawienie(dzien, godzinaStr, rok, miesiacIdx);
     }
 
     // Skrótowe aliasy dla 100% kompatybilności wstecznej:
-    function czyWeekendMszaPrzeterminowana(d, g, r, m) { return czyMszaPrzeterminowanaUniwersalna(d, g, r, m, 'zamiana'); }
-    function czyTydzienMszaPrzeterminowana(d, g, r, m) { return czyMszaPrzeterminowanaUniwersalna(d, g, r, m, 'zamiana'); }
-    function czyZbytPoznoNaZamiane(d, g, r, m) { return czyMszaPrzeterminowanaUniwersalna(d, g, r, m, 'zamiana'); }
-    function czyMszaJuzSieRozpoczela(d, g, r, m) { return czyMszaPrzeterminowanaUniwersalna(d, g, r, m, 'start'); }
-    function czyWeekendZgloszeniePrzeterminowane(d, g, r, m) { return czyMszaPrzeterminowanaUniwersalna(d, g, r, m, 'start'); }
-    function czyTydzienZgloszeniePrzeterminowane(d, g, r, m) { return czyMszaPrzeterminowanaUniwersalna(d, g, r, m, 'start'); }
+    // Wystawienie mszy (min. 2h przed rozpoczęciem):
+    function czyWeekendMszaPrzeterminowana(d, g, r, m) { return czyZbytPoznoNaWystawienie(d, g, r, m); }
+    function czyTydzienMszaPrzeterminowana(d, g, r, m) { return czyZbytPoznoNaWystawienie(d, g, r, m); }
+    function czyZbytPoznoNaZamiane(d, g, r, m) { return czyZbytPoznoNaWystawienie(d, g, r, m); }
+    // Wzięcie mszy / start mszy (brak 2h cutoffu):
+    function czyWeekendZgloszeniePrzeterminowane(d, g, r, m) { return czyMszaJuzSieRozpoczela(d, g, r, m); }
+    function czyTydzienZgloszeniePrzeterminowane(d, g, r, m) { return czyMszaJuzSieRozpoczela(d, g, r, m); }
 
     function autoRozliczWygasleOfertyFirestore(data) {
       if (!data || !dbFirestore) return;
@@ -52,16 +68,13 @@
       var gt = data.gieldaTydzien || [];
 
       // 1. Sprawdź oferty weekendowe (gieldaNiedziele)
+      // Oferty na giełdzie są aktywne do samego końca – wygasają dopiero w momencie rozpoczęcia mszy!
       gn.forEach(function(o) {
         if (!o || o.status !== 'AKTYWNA') return;
         var gO = cleanTime(o.godzinaOddawana || o.godzina || '10:00');
-        var akceptowane = o.akceptowaneGodziny || o.godzinyAkceptowane || [];
-        var wlasnaMszaCutoff = czyWeekendMszaPrzeterminowana(o.dzien, gO, curY, curM);
-        var aktywneAlternatywy = akceptowane.filter(function(g) {
-          return !czyWeekendMszaPrzeterminowana(o.dzien, g, curY, curM);
-        });
+        var wlasnaMszaWystartowala = czyMszaJuzSieRozpoczela(o.dzien, gO, curY, curM);
 
-        if (wlasnaMszaCutoff || aktywneAlternatywy.length === 0) {
+        if (wlasnaMszaWystartowala) {
           o.status = 'WYGASLA_USPRAWIEDLIWIONA';
           dirtyGn = true;
           // Automatycznie usprawiedliwiamy ministranta (0 pkt zamiast -5 pkt)
@@ -85,7 +98,9 @@
         if (!o || o.status !== 'AKTYWNA') return;
         var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
         var gO = cleanTime(o.godzina) || '18:00';
-        if (czyTydzienMszaPrzeterminowana(dO, gO, curY, curM)) {
+        var mszaWystartowala = czyMszaJuzSieRozpoczela(dO, gO, curY, curM);
+
+        if (mszaWystartowala) {
           dirtyGt = true;
           var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, o.wystawiajacy); });
           if (row && row.komorki && row.komorki[dO - 1]) {
@@ -94,29 +109,36 @@
               dirtyWiersze = true;
             }
           }
-          if (o.autoOddaj && !czyLiturgiaJuzMinela(dO, gO, null, curY, curM)) {
-            o.status = 'PRZEKSZTALCONA_NA_WOLNY';
-            var wolne = data.wolneZastepstwa || [];
-            var zam = data.zamianyZastepstwa || [];
-            var nowaWolna = {
-              id: 'z_auto_' + dO + '_' + Date.now(),
-              dzien: dO,
-              oddajacy: o.wystawiajacy,
-              godzina: gO,
-              typ: 'Tydzień',
-              status: 'OCZEKUJE',
-              punkty: 4,
-              utworzono: Date.now()
-            };
-            wolne.push(nowaWolna);
-            zam.push(nowaWolna);
-            data.wolneZastepstwa = wolne;
-            data.zamianyZastepstwa = zam;
-            dirtyWolne = true;
-            dirtyZamiany = true;
-          } else {
-            o.status = 'WYGASLA_USPRAWIEDLIWIONA';
+          o.status = 'WYGASLA_USPRAWIEDLIWIONA';
+        } else if (o.autoOddaj && czyZbytPoznoNaWystawienie(dO, gO, curY, curM)) {
+          // Jeśli nikt się nie wymienił na 2h przed mszą, automatycznie przekształć na wolny dyżur (+4 pkt) do wzięcia aż do momentu mszy
+          dirtyGt = true;
+          var rowA = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, o.wystawiajacy); });
+          if (rowA && rowA.komorki && rowA.komorki[dO - 1]) {
+            if (rowA.komorki[dO - 1].wartosc === null || rowA.komorki[dO - 1].wartosc === undefined || rowA.komorki[dO - 1].wartosc === '') {
+              rowA.komorki[dO - 1].wartosc = 0;
+              dirtyWiersze = true;
+            }
           }
+          o.status = 'PRZEKSZTALCONA_NA_WOLNY';
+          var wolne = data.wolneZastepstwa || [];
+          var zam = data.zamianyZastepstwa || [];
+          var nowaWolna = {
+            id: 'z_auto_' + dO + '_' + Date.now(),
+            dzien: dO,
+            oddajacy: o.wystawiajacy,
+            godzina: gO,
+            typ: 'Tydzień',
+            status: 'OCZEKUJE',
+            punkty: 4,
+            utworzono: Date.now()
+          };
+          wolne.push(nowaWolna);
+          zam.push(nowaWolna);
+          data.wolneZastepstwa = wolne;
+          data.zamianyZastepstwa = zam;
+          dirtyWolne = true;
+          dirtyZamiany = true;
         }
       });
 
@@ -475,10 +497,10 @@
             var gOdd = cleanTime(ofe.godzinaOddawana || ofe.godzina || '10:00');
             var gPrzej = cleanTime(mojaGodzWtedy);
 
-            // Walidacja cutoffu min. 2h dla obu mszy
-            if (czyMszaPrzeterminowanaUniwersalna(ofe.dzien, gOdd, data.rok, data.miesiacIdx, 'zamiana') ||
-                czyMszaPrzeterminowanaUniwersalna(ofe.dzien, gPrzej, data.rok, data.miesiacIdx, 'zamiana')) {
-              throw new Error('Zbyt późno na zamianę. Zamiany weekendowe są możliwe najpóźniej na 2 godziny przed mszą.');
+            // Przejęcie / zamiana dyżuru: brak 2h cutoffu, można wziąć do samego końca (aż do rozpoczęcia mszy)
+            if (czyMszaJuzSieRozpoczela(ofe.dzien, gOdd, data.rok, data.miesiacIdx) ||
+                czyMszaJuzSieRozpoczela(ofe.dzien, gPrzej, data.rok, data.miesiacIdx)) {
+              throw new Error('Msza już się rozpoczęła - nie można już dokonać zamiany.');
             }
 
             var nowaListaGn = lista.filter(function(o) { return o.id !== id; });
@@ -538,10 +560,10 @@
               throw new Error('Jeden z wybranych dni nie ma zaplanowanej służby w parafii.');
             }
 
-            // Walidacja cutoffu min. 2h
-            if (czyMszaPrzeterminowanaUniwersalna(dzienOddawany, gOddT, data.rok, data.miesiacIdx, 'zamiana') ||
-                czyMszaPrzeterminowanaUniwersalna(dzienPrzejmowany, gPrzejT, data.rok, data.miesiacIdx, 'zamiana')) {
-              throw new Error('Zbyt późno na zamianę. Zamiany 1:1 są możliwe najpóźniej na 2 godziny przed mszą.');
+            // Przejęcie / zamiana dyżuru: brak 2h cutoffu, można wziąć do samego końca (aż do rozpoczęcia mszy)
+            if (czyMszaJuzSieRozpoczela(dzienOddawany, gOddT, data.rok, data.miesiacIdx) ||
+                czyMszaJuzSieRozpoczela(dzienPrzejmowany, gPrzejT, data.rok, data.miesiacIdx)) {
+              throw new Error('Msza już się rozpoczęła - nie można już dokonać zamiany.');
             }
 
             var wiersze = data.wiersze || [];
@@ -1429,6 +1451,9 @@
           var idx = wolne.findIndex(function(o) { return o.id === ofertaId; });
           if (idx === -1 || wolne[idx].status !== 'OCZEKUJE') {
             throw new Error("Ta służba została już przejęta przez innego ministranta!");
+          }
+          if (czyMszaJuzSieRozpoczela(wolne[idx].dzien, cleanTime(wolne[idx].godzina) || '18:00', data.rok, data.miesiacIdx)) {
+            throw new Error("Msza już się rozpoczęła - nie można już przejąć tej służby.");
           }
           
           var oddajacy = wolne[idx].oddajacy;

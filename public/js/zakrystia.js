@@ -255,18 +255,14 @@
         };
       });
 
-      // 4c. Automatyczne rozliczenie wygasłych ofert weekendowych na 0 pkt (usprawiedliwienie)
+      // 4c. Automatyczne rozliczenie wygasłych ofert weekendowych na 0 pkt (usprawiedliwienie po rozpoczęciu mszy)
       var allGN = docData.gieldaNiedziele || (tabelaMiesiacaDane && tabelaMiesiacaDane.gieldaNiedziele) || [];
       allGN.forEach(function(o) {
         if (!o || o.status === 'ANULOWANA' || o.status === 'ZAAKCEPTOWANA') return;
         var gO = cleanTime(o.godzinaOddawana || o.godzina || '10:00');
-        var akceptowane = o.akceptowaneGodziny || o.godzinyAkceptowane || [];
-        var wlasnaMszaCutoff = czyWeekendMszaPrzeterminowana(o.dzien, gO, currentYear, currentMonthIdx);
-        var aktywneAlternatywy = akceptowane.filter(function(g) {
-          return !czyWeekendMszaPrzeterminowana(o.dzien, g, currentYear, currentMonthIdx);
-        });
+        var wlasnaMszaWystartowala = czyMszaJuzSieRozpoczela(o.dzien, gO, currentYear, currentMonthIdx);
 
-        if (wlasnaMszaCutoff || aktywneAlternatywy.length === 0 || o.status === 'WYGASLA_USPRAWIEDLIWIONA') {
+        if (wlasnaMszaWystartowala || o.status === 'WYGASLA_USPRAWIEDLIWIONA') {
           o.status = 'WYGASLA_USPRAWIEDLIWIONA';
           if (czyToSamoNazwisko(o.wystawiajacy, nazwisko)) {
             if (godzinyWeekendy[o.dzien]) {
@@ -285,14 +281,14 @@
         }
       });
 
-      // 4d. Automatyczne rozliczenie wygasłych ofert w tygodniu na 0 pkt (usprawiedliwienie)
+      // 4d. Automatyczne rozliczenie wygasłych ofert w tygodniu na 0 pkt (usprawiedliwienie po rozpoczęciu mszy)
       var allGT = docData.gieldaTydzien || (tabelaMiesiacaDane && tabelaMiesiacaDane.gieldaTydzien) || [];
       allGT.forEach(function(o) {
         if (!o || o.status === 'ANULOWANA' || o.status === 'ZAAKCEPTOWANA') return;
         var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
         var gO = cleanTime(o.godzina) || '18:00';
-        var isCutoffPassed = czyTydzienMszaPrzeterminowana(dO, gO, currentYear, currentMonthIdx);
-        if (isCutoffPassed || o.status === 'WYGASLA_USPRAWIEDLIWIONA' || o.status === 'PRZEKSZTALCONA_NA_WOLNY') {
+        var isStartedPassed = czyMszaJuzSieRozpoczela(dO, gO, currentYear, currentMonthIdx);
+        if (isStartedPassed || o.status === 'WYGASLA_USPRAWIEDLIWIONA' || o.status === 'PRZEKSZTALCONA_NA_WOLNY') {
           if (czyToSamoNazwisko(o.wystawiajacy, nazwisko)) {
             if (userRow && userRow.komorki && userRow.komorki[dO - 1]) {
               if (userRow.komorki[dO - 1].wartosc === null || userRow.komorki[dO - 1].wartosc === undefined || userRow.komorki[dO - 1].wartosc === '') {
@@ -745,14 +741,14 @@
           var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
           if (dO < currentDay) return false;
           var gO = o.godzina || pobierzGodzineDlaDniaTygodnia(currentYear, currentMonthIdx, dO);
-          if (czyTydzienMszaPrzeterminowana(dO, gO, currentYear, currentMonthIdx)) return false;
+          if (czyMszaJuzSieRozpoczela(dO, gO, currentYear, currentMonthIdx)) return false;
           return true;
         }),
         gieldaNiedziele: (docData.gieldaNiedziele || (tabelaMiesiacaDane && tabelaMiesiacaDane.gieldaNiedziele) || []).filter(function(o) {
           if (!o || o.status === 'ANULOWANA' || o.status === 'ZAAKCEPTOWANA' || (o.status && o.status.indexOf('WYGASLA') !== -1)) return false;
           if (o.dzien < currentDay) return false;
           var gO = o.godzinaOddawana || o.godzina || '10:00';
-          if (czyWeekendMszaPrzeterminowana(o.dzien, gO, currentYear, currentMonthIdx)) return false;
+          if (czyMszaJuzSieRozpoczela(o.dzien, gO, currentYear, currentMonthIdx)) return false;
           return true;
         }),
         liturgieDodatkowe: (function() {

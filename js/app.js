@@ -3,7 +3,7 @@
     // Wszystkie elementy DOM są powyżej tego skryptu w HTML, więc są dostępne.
     // Lista ministrantów jest już w HTML (0 ms czekania)!
     // =============================================================
-    var APP_VERSION = '1.6.7';
+    var APP_VERSION = '1.6.8';
 
     function sprawdzWersjeAplikacji() {
       try {
@@ -432,12 +432,12 @@
         var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
         if (dO < res.dzisDzien) return false;
         var gO = o.godzina || pobierzGodzineDlaDniaTygodnia(res.rok, res.miesiacIdx, dO);
-        return !czyTydzienMszaPrzeterminowana(dO, gO, res.rok, res.miesiacIdx);
+        return !czyMszaJuzSieRozpoczela(dO, gO, res.rok, res.miesiacIdx);
       }).length;
       var cntGn = (res.gieldaNiedziele || []).filter(function(o) {
         if (!czyOfertaAktywna(o)) return false;
         if (o.dzien < res.dzisDzien) return false;
-        return !czyWeekendMszaPrzeterminowana(o.dzien, o.godzinaOddawana || o.godzina || '10:00', res.rok, res.miesiacIdx);
+        return !czyMszaJuzSieRozpoczela(o.dzien, o.godzinaOddawana || o.godzina || '10:00', res.rok, res.miesiacIdx);
       }).length;
       var wolneDlaMnie = (res.wolneZastepstwa || []).filter(function(z) {
         if (!z || !z.dzien || z.czyMoje) return false;
@@ -685,7 +685,7 @@
             } else if (item.typ === 'tydzien') {
               var godzWTyg = pobierzGodzineDlaDniaTygodnia(res.rok, res.miesiacIdx, item.dzien);
               if (item.ofertaGielda) {
-                var isExpiredT = czyTydzienMszaPrzeterminowana(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
+                var isExpiredT = czyMszaJuzSieRozpoczela(item.dzien, godzWTyg, res.rok, res.miesiacIdx);
                 if (isExpiredT || item.ofertaGielda.status === 'WYGASLA_USPRAWIEDLIWIONA' || item.ofertaGielda.status === 'PRZEKSZTALCONA_NA_WOLNY') {
                   htmlDyzury += renderKafalekDyzuru(pelnaData, 'Wygasła oferta wymiany (brak chętnego) • Usprawiedliwiony (0 pkt, brak minusa)', {
                     border: '#f59e0b', bg: '#18181b', opisCol: '#fbbf24', bold: true
@@ -709,7 +709,7 @@
               var subTekst = item.czyZamienione ? ' (po zamianie)' : '';
               if (item.ofertaGielda) {
                 var gOdd = item.ofertaGielda.godzinaOddawana || item.godzina || '10:00';
-                var isExpiredW = czyWeekendMszaPrzeterminowana(item.dzien, gOdd, res.rok, res.miesiacIdx);
+                var isExpiredW = czyMszaJuzSieRozpoczela(item.dzien, gOdd, res.rok, res.miesiacIdx);
                 if (isExpiredW || item.ofertaGielda.status === 'WYGASLA_USPRAWIEDLIWIONA') {
                   htmlDyzury += renderKafalekDyzuru(pelnaData, 'Wygasła oferta wymiany (brak chętnego) • Usprawiedliwiony (0 pkt, brak minusa)', {
                     border: '#f59e0b', bg: '#18181b', opisCol: '#fbbf24', bold: true
@@ -964,7 +964,7 @@
         var dO = o.dzienOddawany !== undefined ? o.dzienOddawany : o.dzien;
         if (dO < res.dzisDzien) return false;
         var gO = o.godzina || pobierzGodzineDlaDniaTygodnia(res.rok, res.miesiacIdx, dO);
-        if (czyTydzienMszaPrzeterminowana(dO, gO, res.rok, res.miesiacIdx)) return false;
+        if (czyMszaJuzSieRozpoczela(dO, gO, res.rok, res.miesiacIdx)) return false;
         return true;
       });
       var nextGt = (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.gieldaTydzien || []).filter(function(o) {
@@ -974,7 +974,7 @@
         if (!o || o.status === 'ANULOWANA' || o.status === 'ZAAKCEPTOWANA' || (o.status && o.status.indexOf('WYGASLA') !== -1)) return false;
         if (o.dzien < res.dzisDzien) return false;
         var gO = o.godzinaOddawana || o.godzina || '10:00';
-        if (czyWeekendMszaPrzeterminowana(o.dzien, gO, res.rok, res.miesiacIdx)) return false;
+        if (czyMszaJuzSieRozpoczela(o.dzien, gO, res.rok, res.miesiacIdx)) return false;
         return true;
       });
       var nextGn = (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.gieldaNiedziele || []).filter(function(o) {
@@ -1076,13 +1076,13 @@
                        waznaDoInfo + autoOddajInfo;
 
             var godzOdd = o.godzina || pobierzGodzineDlaDniaTygodnia(o.rok, o.miesiacIdx, dOdd);
-            var isCutoffTydz = czyTydzienMszaPrzeterminowana(dOdd, godzOdd, o.rok, o.miesiacIdx);
-            var isCutoffDopasowany = dopasowanyDzien ? czyTydzienMszaPrzeterminowana(dopasowanyDzien, pobierzGodzineDlaDniaTygodnia(o.rok, o.miesiacIdx, dopasowanyDzien), o.rok, o.miesiacIdx) : false;
+            var isStartedTydz = czyMszaJuzSieRozpoczela(dOdd, godzOdd, o.rok, o.miesiacIdx);
+            var isStartedDopasowany = dopasowanyDzien ? czyMszaJuzSieRozpoczela(dopasowanyDzien, pobierzGodzineDlaDniaTygodnia(o.rok, o.miesiacIdx, dopasowanyDzien), o.rok, o.miesiacIdx) : false;
 
             if (isMyOffer) {
               html += '<div style="margin-top:10px;"><button class="btn-cancel" onclick="anulujTydzien(\'' + o.id + '\', \'' + o.docKey + '\')">Anuluj ofertę</button></div>';
-            } else if (isCutoffTydz || isCutoffDopasowany) {
-              html += '<div style="margin-top:10px;"><button class="btn-action" disabled style="opacity:0.5; cursor:not-allowed; background:#27272a; color:#a1a1aa; border-color:#3f3f46;">Zbyt późno na zamianę (< 2h do mszy)</button></div>';
+            } else if (isStartedTydz || isStartedDopasowany) {
+              html += '<div style="margin-top:10px;"><button class="btn-action" disabled style="opacity:0.5; cursor:not-allowed; background:#27272a; color:#a1a1aa; border-color:#3f3f46;">Msza już się rozpoczęła</button></div>';
             } else if (dopasowanyDzien) {
               html += '<div style="margin-top:10px;"><button class="btn-action" onclick="akceptujTydzien(\'' + o.id + '\', ' + dopasowanyDzien + ', \'' + o.docKey + '\')">Oddaj ' + formatujDateDnia(dopasowanyDzien, res, o.rok, o.miesiacIdx, o.nazwaMiesiacaGen) + ' i weź ten dzień</button></div>';
             } else {
@@ -1113,7 +1113,7 @@
             var godzOdd = on.godzinaOddawana || on.godzina || '10:00';
 
             var pasujeGodzina = mojaGodzinaWtedy && (akceptowaneGodz.indexOf(cleanTime(mojaGodzinaWtedy)) !== -1 || akceptowaneGodz.indexOf(mojaGodzinaWtedy) !== -1);
-            var isCutoffWknd = czyWeekendMszaPrzeterminowana(on.dzien, godzOdd, on.rok, on.miesiacIdx) || (mojaGodzinaWtedy && czyWeekendMszaPrzeterminowana(on.dzien, mojaGodzinaWtedy, on.rok, on.miesiacIdx));
+            var isStartedWknd = czyMszaJuzSieRozpoczela(on.dzien, godzOdd, on.rok, on.miesiacIdx) || (mojaGodzinaWtedy && czyMszaJuzSieRozpoczela(on.dzien, mojaGodzinaWtedy, on.rok, on.miesiacIdx));
 
             var badgeMonthW = on.kolejnyMiesiac 
               ? ' <span style="font-size:10px; font-weight:700; color:#93c5fd; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); padding:2px 6px; border-radius:4px; text-transform:uppercase; margin-left:6px;">Nowy miesiąc</span>' 
@@ -1128,8 +1128,8 @@
 
             if (isMyOfferWknd) {
               html += '<div style="margin-top:10px;"><button class="btn-cancel" onclick="anulujNiedziele(\'' + on.id + '\', \'' + on.docKey + '\')">Anuluj ofertę</button></div>';
-            } else if (isCutoffWknd) {
-              html += '<div style="margin-top:10px;"><button class="btn-action" disabled style="opacity:0.5; cursor:not-allowed; background:#27272a; color:#a1a1aa; border-color:#3f3f46;">Zbyt późno na zamianę (< 2h do mszy)</button></div>';
+            } else if (isStartedWknd) {
+              html += '<div style="margin-top:10px;"><button class="btn-action" disabled style="opacity:0.5; cursor:not-allowed; background:#27272a; color:#a1a1aa; border-color:#3f3f46;">Msza już się rozpoczęła</button></div>';
             } else if (pasujeGodzina) {
               html += '<div style="margin-top:10px;"><button class="btn-action" onclick="akceptujNiedziele(\'' + on.id + '\', \'' + on.docKey + '\')">Zamień swoją ' + mojaGodzinaWtedy + ' na ' + godzOdd + '</button></div>';
             } else {
