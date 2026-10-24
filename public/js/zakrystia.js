@@ -1346,7 +1346,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         // Podstawowy rodzaj z reguł ogólnych (msze św. są zawsze widoczne):
         var domyslnyRodzaj = isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien');
-        var domyslnePkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 3);
+        var domyslnePkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5);
         var domyslnaNazwa = isHoliday5Pkt ? ((litInfo && litInfo.nazwa) ? litInfo.nazwa : 'Uroczystość Wszystkich Świętych') : (isWeekendMass ? (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę') : ((dow === 4 && cleanG === '17:00') ? 'Msza św. szkolna' : 'Msza w tygodniu'));
 
         if (isFirstSatRose) {
@@ -1366,7 +1366,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             domyslnaNazwa = nFromH.nazwa || 'Nabożeństwo';
           } else if (mFromH) {
             domyslnyRodzaj = (mFromH.typ && mFromH.typ !== 'nabozenstwo') ? mFromH.typ : (isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien'));
-            domyslnePkt = mFromH.punkty || (isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 3));
+            domyslnePkt = mFromH.punkty || (isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5));
             domyslnaNazwa = mFromH.nazwa || (isHoliday5Pkt ? 'Uroczystość Wszystkich Świętych' : 'Msza św.');
           }
         }
@@ -1683,7 +1683,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
               var status = 'OBECNY';
               var domyslnyStatus = 'OBECNY';
               var typ = 'DOMYSLNY';
-              var pkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 3);
+              var pkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5);
               var zastepuje = null;
               var opisGieldy = zamianaInfoText || '';
 
