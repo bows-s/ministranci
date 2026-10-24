@@ -926,26 +926,26 @@ function czyMaDostepDoZakrystii(nazwisko) {
       };
     }
 
+    function rozpoznajNumerGrupy(nazwa) {
+      if (!nazwa) return 0;
+      var s = nazwa.toLowerCase();
+      if (s.indexOf("czerwon") !== -1) return 1;
+      if (s.indexOf("pomarańcz") !== -1 || s.indexOf("pomarancz") !== -1) return 2;
+      if (s.indexOf("zielon") !== -1) return 3;
+      if (s.indexOf("żółt") !== -1 || s.indexOf("zolt") !== -1) return 4;
+      if (/(?:^|[\s(\[])(?:iv|4)(?:[\s)\]]|$)/i.test(s)) return 4;
+      if (/(?:^|[\s(\[])(?:iii|3)(?:[\s)\]]|$)/i.test(s)) return 3;
+      if (/(?:^|[\s(\[])(?:ii|2)(?:[\s)\]]|$)/i.test(s)) return 2;
+      if (/(?:^|[\s(\[])(?:i|1)(?:[\s)\]]|$)/i.test(s)) return 1;
+      return 0;
+    }
+
     function dopasujGrupe(nazwa1, nazwa2) {
       if (!nazwa1 || !nazwa2) return false;
-      var n1 = nazwa1.toLowerCase();
-      var n2 = nazwa2.toLowerCase();
-      if (n1 === n2 || n1.indexOf(n2) !== -1 || n2.indexOf(n1) !== -1) return true;
-      if ((n1.indexOf('czerwon') !== -1 && n2.indexOf('czerwon') !== -1) ||
-          (n1.indexOf('pomarańcz') !== -1 && n2.indexOf('pomarańcz') !== -1) ||
-          (n1.indexOf('pomarancz') !== -1 && n2.indexOf('pomarancz') !== -1) ||
-          (n1.indexOf('zielon') !== -1 && n2.indexOf('zielon') !== -1) ||
-          (n1.indexOf('żółt') !== -1 && n2.indexOf('żółt') !== -1) ||
-          (n1.indexOf('zolt') !== -1 && n2.indexOf('zolt') !== -1)) {
-        return true;
-      }
-      var r = ["iv", "iii", "ii", "i"];
-      for (var k = 0; k < r.length; k++) {
-        var roman = r[k];
-        var reg = new RegExp("(^|\\s|\\()" + roman + "(\\s|\\)|$)");
-        if (reg.test(n1) && reg.test(n2)) return true;
-      }
-      return false;
+      var g1 = rozpoznajNumerGrupy(nazwa1);
+      var g2 = rozpoznajNumerGrupy(nazwa2);
+      if (g1 > 0 && g2 > 0) return g1 === g2;
+      return nazwa1.toLowerCase().trim() === nazwa2.toLowerCase().trim();
     }
 
     function czyToSamoNazwisko(n1, n2) {
