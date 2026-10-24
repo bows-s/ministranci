@@ -343,6 +343,21 @@
           localStorage.setItem('fcm_user', globalUser.nazwisko || '');
           var urzadzenie = /Android/i.test(navigator.userAgent) ? 'Android PWA' : (/iPhone|iPad/i.test(navigator.userAgent) ? 'iOS PWA' : 'Komputer');
 
+          // Zapis lustrzany w Firestore dla odporności na awarie
+          if (typeof dbFirestore !== 'undefined' && dbFirestore) {
+            try {
+              dbFirestore.collection('tokeny_fcm').doc(token).set({
+                nazwisko: globalUser.nazwisko || 'Anonim',
+                urzadzenie: urzadzenie,
+                token: token,
+                fcmToken: token,
+                zaktualizowano: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+            } catch(e) {
+              console.warn("Błąd zapisu tokenu do Firestore:", e);
+            }
+          }
+
           callBackend('zapiszTokenFCM', [globalUser.nazwisko || 'Anonim', token, urzadzenie], function(res) {
             console.log("Odpowiedź zapisu tokenu:", res);
             if (res && res.sukces) {
@@ -454,3 +469,143 @@
         }
       });
     }
+
+    function sprawdzAutomatycznyPromptPowiadomien() {
+      // Promptujemy tylko zalogowane osoby
+      if (!globalUser || !globalUser.nazwisko || globalUser.nazwisko === 'Anonim') {
+        return;
+      }
+
+      // Sprawdzamy czy powiadomienia są w ogóle wspierane
+      if (!('Notification' in window)) {
+        return;
+      }
+
+      var hasLocalToken = !!localStorage.getItem('fcm_token');
+      var tokenUser = localStorage.getItem('fcm_user') || '';
+      var isCurrentUser = (hasLocalToken && tokenUser && tokenUser.trim().toLowerCase() === globalUser.nazwisko.trim().toLowerCase());
+
+      // Jeśli profil ma już aktywny token na tym urządzeniu -> nie pytamy
+      if (isCurrentUser) {
+        return;
+      }
+
+      // Jeśli przeglądarka ma już uprawnienie 'granted', ale token się zresetował -> cicho rejestrujemy w tle bez okna
+      if (Notification.permission === 'granted') {
+        zarejestrujTokenFCM(false);
+        return;
+      }
+
+      // Jeśli użytkownik na stałe zablokował powiadomienia ('denied') -> nie spamujemy modalem
+      if (Notification.permission === 'denied') {
+        return;
+      }
+
+      // Sprawdzamy czy użytkownik nie kliknął "Przypomnij później" w ciągu ostatnich 24h
+      var snooze = parseInt(localStorage.getItem('fcm_prompt_snooze') || '0', 10);
+      if (Date.now() < snooze) {
+        return;
+      }
+
+      var m = document.getElementById('modal-push-prompt');
+      if (!m) return;
+
+      var subtitle = document.getElementById('push-prompt-subtitle');
+      if (subtitle) {
+        subtitle.innerHTML = 'Cześć <b>' + globalUser.nazwisko + '</b>! Nie przegap swoich dyżurów i okazji na dodatkowe punkty.';
+      }
+
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      var isStandalone = window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+
+      var iosNote = document.getElementById('push-prompt-ios-note');
+      var btnAction = document.getElementById('btn-push-prompt-action');
+
+      if (isIOS && !isStandalone) {
+        if (iosNote) iosNote.style.display = 'block';
+        if (btnAction) {
+          btnAction.innerHTML = '<span>📱 Zobacz jak włączyć na iPhone</span>';
+        }
+      } else {
+        if (iosNote) iosNote.style.display = 'none';
+        if (btnAction) {
+          btnAction.innerHTML = '<span>🔔 Włącz powiadomienia</span>';
+        }
+      }
+
+      // Otwórz modal z delikatnym opóźnieniem (1.2s), aby pulpit zdążył się płynnie załadować
+      setTimeout(function() {
+        var stillNoToken = !localStorage.getItem('fcm_token');
+        if (stillNoToken && globalUser && globalUser.nazwisko && m) {
+          m.style.display = 'flex';
+        }
+      }, 1200);
+    }
+
+    async function zaakceptujPromptPowiadomien() {
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      var isStandalone = window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+
+      if (isIOS && !isStandalone) {
+        zamknijModalPushPrompt();
+        otworzIosModal();
+        return;
+      }
+
+      var btn = document.getElementById('btn-push-prompt-action');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="mini-spin"></span> Włączanie powiadomień...';
+      }
+
+      try {
+        if (!('Notification' in window)) {
+          alert('Twoja przeglądarka nie obsługuje powiadomień.');
+          zamknijModalPushPrompt();
+          return;
+        }
+
+        var perm = Notification.permission;
+        if (perm !== 'granted') {
+          perm = await Notification.requestPermission();
+        }
+
+        if (perm === 'granted') {
+          pokazToast('Uprawnienia przyznane! Rejestrowanie telefonu... ⏳');
+          await zarejestrujTokenFCM(true);
+          zamknijModalPushPrompt();
+          localStorage.removeItem('fcm_prompt_snooze');
+          pokazToast('🔔 Powiadomienia włączone pomyślnie!');
+        } else {
+          zamknijModalPushPrompt();
+          // Jeśli odmówił, odłóż prompt na 48h
+          localStorage.setItem('fcm_prompt_snooze', String(Date.now() + 48 * 60 * 60 * 1000));
+          alert('Nie zezwolono na powiadomienia w przeglądarce.');
+          sprawdzStanPowiadomien();
+        }
+      } catch(err) {
+        console.error('Błąd włączania powiadomień:', err);
+        zamknijModalPushPrompt();
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>🔔 Włącz powiadomienia</span>';
+        }
+      }
+    }
+
+    function odrzucPromptPowiadomien() {
+      zamknijModalPushPrompt();
+      // Odłóż na 24 godziny
+      localStorage.setItem('fcm_prompt_snooze', String(Date.now() + 24 * 60 * 60 * 1000));
+    }
+
+    function zamknijModalPushPrompt() {
+      var m = document.getElementById('modal-push-prompt');
+      if (m) m.style.display = 'none';
+    }
+
+    window.sprawdzAutomatycznyPromptPowiadomien = sprawdzAutomatycznyPromptPowiadomien;
+    window.zaakceptujPromptPowiadomien = zaakceptujPromptPowiadomien;
+    window.odrzucPromptPowiadomien = odrzucPromptPowiadomien;
+    window.zamknijModalPushPrompt = zamknijModalPushPrompt;
