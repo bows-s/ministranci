@@ -308,20 +308,20 @@
       html += '</colgroup>';
       
       html += '<thead><tr class="tbl-header-sticky">';
-      html += '<th class="tbl-sticky-col tbl-header-sticky" style="min-width:160px;">Ministrant</th>';
+      html += '<th class="tbl-sticky-col tbl-header-sticky">Ministrant</th>';
       for (var d = 0; d < naglowek.length; d++) {
         var dayObj = naglowek[d];
         var isHol = dayObj.czySwieto || (d === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
         var dayClass = isHol ? 'tbl-day-holiday' : (dayObj.czyNiedziela ? 'tbl-day-sun' : (dayObj.czySobota ? 'tbl-day-sat' : ''));
         var holidayBadge = isHol ? '<div class="tbl-holiday-badge">ŚWIĘTO</div>' : '';
         var holidayTitle = isHol ? (' title="' + (dayObj.nazwaSwieta || 'Uroczystość Wszystkich Świętych') + ' • Uroczystość (+5 pkt)"') : '';
-        html += '<th class="' + dayClass + '"' + holidayTitle + ' style="min-width:34px;">' +
+        html += '<th class="' + dayClass + '"' + holidayTitle + '>' +
                   '<div style="' + (isHol ? 'color:#fde047; font-weight:800;' : '') + '">' + dayObj.dzien + '</div>' +
                   '<div style="font-size:10px; font-weight:' + (isHol ? '700' : 'normal') + '; color:' + (isHol ? '#fef08a' : 'inherit') + ';">' + dayObj.skrotDnia + '</div>' +
                   holidayBadge +
                 '</th>';
       }
-      html += '<th style="min-width:45px; background:#27272a; font-weight:600; color:#71717a; letter-spacing:0.03em;">SUMA</th>';
+      html += '<th class="tbl-th-suma" style="background:#27272a; font-weight:600; color:#71717a; letter-spacing:0.03em;">SUMA</th>';
       html += '</tr></thead>';
 
       html += '<tbody>';
@@ -481,9 +481,7 @@
     }
 
     function otworzModalDrukuGrafiku() {
-      var m = document.getElementById('modal-opcje-druku-grafiku');
-      if (m) m.style.display = 'flex';
-      else drukujTabeleMiesiaca('poziomo');
+      drukujTabeleMiesiaca();
     }
 
     function zamknijModalDrukuGrafiku() {
@@ -491,13 +489,11 @@
       if (m) m.style.display = 'none';
     }
 
-    function wykonajDrukGrafiku(typ) {
-      zamknijModalDrukuGrafiku();
-      drukujTabeleMiesiaca(typ);
+    function wykonajDrukGrafiku() {
+      drukujTabeleMiesiaca();
     }
 
-    function drukujTabeleMiesiaca(typ) {
-      var mode = typ || 'poziomo';
+    function drukujTabeleMiesiaca() {
       var dane = tabelaPrzegladanyMiesiacDane || tabelaMiesiacaDane;
       var curKey = wybranyMiesiacTabeli || (typeof pobierzAktywnyKluczMiesiaca === 'function' ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026');
       var parsed = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(curKey) : { nazwaMiesiaca: 'Październik', rok: 2026 };
@@ -506,7 +502,7 @@
 
       var printTytulEl = document.getElementById('print-tabela-tytul');
       if (printTytulEl) {
-        printTytulEl.textContent = 'GRAFIK SŁUŻBY • ' + nazwaM.toUpperCase() + ' ' + r;
+        printTytulEl.textContent = 'GRAFIK SŁUŻBY MINISTRANTÓW • ' + nazwaM.toUpperCase() + ' ' + r;
       }
       var printMiesiacEl = document.getElementById('print-tabela-miesiac');
       if (printMiesiacEl) {
@@ -514,16 +510,10 @@
       }
 
       document.body.classList.remove('print-mode-podsumowanie');
-      document.body.classList.remove('print-mode-tabela');
       document.body.classList.remove('print-mode-tabela-obrocona');
+      document.body.classList.add('print-mode-tabela');
 
-      if (mode === 'poziomo') {
-        ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm 3mm 5mm; }');
-        document.body.classList.add('print-mode-tabela');
-      } else {
-        ustawStylStronyDruku('@page { size: A4 portrait; margin: 0; }');
-        document.body.classList.add('print-mode-tabela-obrocona');
-      }
+      ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm 3mm 5mm; }');
 
       setTimeout(function() {
         window.print();

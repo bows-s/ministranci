@@ -108,7 +108,7 @@ console.log('\nTesting cross-module function calls:');
 
 // 1. Version check
 console.log('APP_VERSION:', sandbox.APP_VERSION);
-if (sandbox.APP_VERSION !== '1.7.3') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
+if (sandbox.APP_VERSION !== '1.7.4') throw new Error('Wrong APP_VERSION: ' + sandbox.APP_VERSION);
 
 // 2. Liturgy check
 const litDzis = sandbox.wyznaczDaneLiturgiczne(new Date());
