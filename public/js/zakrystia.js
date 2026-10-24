@@ -1573,10 +1573,16 @@ function czyMaDostepDoZakrystii(nazwisko) {
               opisDyzuru = 'Dyżur przed mszą 18:00';
             }
 
-            // Jeśli ministrant oddał swój dyżur z powiązanej mszy, nie proponuj go jako domyślnego uczestnika nabożeństwa:
+            // Jeśli ministrant oddał swój dyżur z powiązanej mszy LUB się z niej usprawiedliwił (0 pkt), nie proponuj go jako domyślnego uczestnika nabożeństwa:
             if (maDyzurNaMszy) {
+              var isUsprawiedliwionyZMszy = (kCur && (kCur.wartosc === 0 || kCur.wartosc === '0' || kCur.czyUsprawiedliwiony)) ||
+                                           (dow === 6 && kSun && (kSun.wartosc === 0 || kSun.wartosc === '0' || kSun.czyUsprawiedliwiony)) ||
+                                           (dow === 0 && colIdx > 0 && w.komorki && w.komorki[colIdx - 1] && (w.komorki[colIdx - 1].wartosc === 0 || w.komorki[colIdx - 1].wartosc === '0' || w.komorki[colIdx - 1].czyUsprawiedliwiony));
               var ofZ = znajdzOferteDlaMinistranta(w.nazwisko, dNum, linkedMassHour);
               if (ofZ && (ofZ.status === 'PRZEJETE' || ofZ.status === 'OCZEKUJE' || ofZ.status === 'ZREALIZOWANE')) {
+                maDyzurNaMszy = false;
+              }
+              if (isUsprawiedliwionyZMszy) {
                 maDyzurNaMszy = false;
               }
             }
@@ -1714,9 +1720,19 @@ function czyMaDostepDoZakrystii(nazwisko) {
               }
 
               var checkVal = cellVal;
+              if (kCur && kCur.czyUsprawiedliwiony) {
+                checkVal = 0;
+              }
               // Jeśli to sobota 17:00, a komórka soboty jest pusta, sprawdź czy ministrant nie miał wpisanego 0 w niedzieli:
               if (isWeekendMass && dow === 6 && (checkVal === null || checkVal === undefined || checkVal === '')) {
-                if (kSun && (kSun.wartosc === 0 || kSun.wartosc === '0')) {
+                if (kSun && (kSun.wartosc === 0 || kSun.wartosc === '0' || kSun.czyUsprawiedliwiony)) {
+                  checkVal = 0;
+                }
+              }
+              // Jeśli to niedziela, a komórka niedzieli jest pusta, sprawdź czy nie miał wpisanego 0 w sobocie:
+              if (isWeekendMass && dow === 0 && (checkVal === null || checkVal === undefined || checkVal === '')) {
+                var satColCheck = colIdx - 1;
+                if (satColCheck >= 0 && w.komorki && w.komorki[satColCheck] && (w.komorki[satColCheck].wartosc === 0 || w.komorki[satColCheck].wartosc === '0' || w.komorki[satColCheck].czyUsprawiedliwiony)) {
                   checkVal = 0;
                 }
               }
@@ -3579,7 +3595,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
           var klucze = Object.keys(cell.liturgie);
           if (klucze.length === 0) {
-            if (cell.maDyzur && cell.czyUsprawiedliwiony) return 0;
+            if (cell.czyUsprawiedliwiony || cell.wartosc === 0 || cell.wartosc === '0' || (cell.maDyzur && (cell.wartosc === 0 || cell.wartosc === '0'))) {
+              cell.czyUsprawiedliwiony = true;
+              return 0;
+            }
             return null;
           }
           var sumaDnia = 0;
@@ -3636,10 +3655,15 @@ function czyMaDostepDoZakrystii(nazwisko) {
           var wierszU = znajdzWierszMinistranta(tabelaDoModyfikacji.wiersze, u.nazwisko);
           if (wierszU && wierszU.komorki && wierszU.komorki[colIdx]) {
             var cellU = wierszU.komorki[colIdx];
+            var hadExcuseBefore = (cellU.wartosc === 0 || cellU.wartosc === '0' || cellU.czyUsprawiedliwiony || u.domyslnyStatus === 'USPRAWIEDLIWIONY');
             if (cellU.liturgie && cellU.liturgie[gKey] !== undefined) {
               delete cellU.liturgie[gKey];
             }
-            cellU.wartosc = obliczSumeLiturgiiKomorki(cellU);
+            if (hadExcuseBefore) {
+              cellU.czyUsprawiedliwiony = true;
+            }
+            var sumU = obliczSumeLiturgiiKomorki(cellU);
+            cellU.wartosc = (hadExcuseBefore && (sumU === null || sumU === undefined)) ? 0 : sumU;
           }
         });
 

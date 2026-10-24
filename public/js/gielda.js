@@ -1143,6 +1143,7 @@
             }
             if (targetIdx >= 0 && row.komorki[targetIdx]) {
               row.komorki[targetIdx].wartosc = 0; // Usprawiedliwienie 0 pkt na właściwy dzień mszy!
+              row.komorki[targetIdx].czyUsprawiedliwiony = true;
             }
           }
 
