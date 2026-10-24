@@ -471,9 +471,19 @@
 
     function renderujKarteLiturgii(dataObj) {
       if (!dataObj) dataObj = new Date();
-      var y = dataObj.getFullYear();
-      var m = String(dataObj.getMonth() + 1).padStart(2, '0');
-      var dStrPad = String(dataObj.getDate()).padStart(2, '0');
+
+      // W sobotę 99% ministrantów sprawdzających szaty idzie na mszę o 17:00 (niedzielna wigilia),
+      // dlatego w sobotę prezentujemy szaty i formularz niedzielny (następny dzień)
+      var dow = dataObj.getDay();
+      var czySobota = (dow === 6);
+      var dataLiturgiczna = new Date(dataObj.getTime());
+      if (czySobota) {
+        dataLiturgiczna.setDate(dataLiturgiczna.getDate() + 1);
+      }
+
+      var y = dataLiturgiczna.getFullYear();
+      var m = String(dataLiturgiczna.getMonth() + 1).padStart(2, '0');
+      var dStrPad = String(dataLiturgiczna.getDate()).padStart(2, '0');
       var dataYMD = y + '-' + m + '-' + dStrPad;
 
       var lit;
@@ -482,16 +492,16 @@
           nazwa: liturgiaOverrideFirestore.nazwa || 'Wspomnienie liturgiczne',
           okres: liturgiaOverrideFirestore.okres || 'Okres Zwykły',
           kolor: liturgiaOverrideFirestore.kolor,
-          ranga: liturgiaOverrideFirestore.ranga || 'Wspomnienie',
-          wskazowka: liturgiaOverrideFirestore.wskazowka || 'Szaty liturgiczne według wskazania kościelnego.'
+          ranga: liturgiaOverrideFirestore.ranga || 'Wspomnienie'
         };
       } else {
-        lit = wyznaczDaneLiturgiczne(dataObj);
+        lit = wyznaczDaneLiturgiczne(dataLiturgiczna);
       }
 
       var paleta = KOLORY_LITURGICZNE[lit.kolor] || KOLORY_LITURGICZNE.zielony;
 
       var karta = document.getElementById('karta-liturgia-dzis');
+      var elNaglowek = document.getElementById('liturgia-naglowek-tekst');
       var elKolor = document.getElementById('liturgia-kolor-nazwa');
       var elTytul = document.getElementById('liturgia-tytul');
       var elOkres = document.getElementById('liturgia-okres');
@@ -502,6 +512,10 @@
       if (karta) {
         karta.style.borderLeft = '3px solid ' + paleta.border;
         karta.style.boxShadow = '0 0 20px -3px ' + paleta.glow;
+      }
+
+      if (elNaglowek) {
+        elNaglowek.innerText = czySobota ? 'KOLOR SZAT LITURGICZNYCH (SOBOTA 17:00 / NIEDZIELA)' : 'KOLOR SZAT LITURGICZNYCH NA DZIŚ';
       }
 
       if (elKolor) {
@@ -518,7 +532,7 @@
       }
 
       if (elRanga) {
-        elRanga.innerText = lit.ranga;
+        elRanga.innerText = czySobota ? (lit.ranga === 'Niedziela' ? 'Niedziela' : (lit.ranga + ' (Wigilia)')) : lit.ranga;
       }
 
       if (elOrb) {
@@ -527,7 +541,7 @@
       }
 
       if (elWsk) {
-        elWsk.innerText = lit.wskazowka;
+        elWsk.innerText = lit.wskazowka || '';
       }
     }
 
