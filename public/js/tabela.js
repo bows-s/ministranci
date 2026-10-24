@@ -392,7 +392,7 @@
           if (isHol) {
             cellClass = 'tbl-cell-holiday' + (isMe ? ' is-me' : '');
             if (czyMaDyzurKomorki && (k.wartosc === null || k.wartosc === undefined || k.wartosc === '')) {
-              cellStyle = 'background:rgba(234, 179, 8, 0.12) !important;';
+              cellStyle = 'background:rgba(234, 179, 8, 0.12);';
             }
           } else {
             cellStyle = isSun ? 'background:rgba(69,10,10,0.18);' : (isSat ? 'background:rgba(255,255,255,0.02);' : '');
@@ -420,11 +420,11 @@
           var numWartosc = parseFloat(k.wartosc);
           if (isHol) {
             if (k.wartosc === 5 || k.wartosc === '5') {
-              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(202,138,4,0.45) 100%); color:#fef08a; border:1px solid #facc15; font-weight:800; box-shadow:0 0 6px rgba(234,179,8,0.4);">5</span>';
+              content = '<span class="tabela-badge b-obecny b-swieto" style="background:linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(202,138,4,0.45) 100%); color:#fef08a; border:1px solid #facc15; font-weight:800; box-shadow:0 0 6px rgba(234,179,8,0.4);">5</span>';
             } else if (k.wartosc === 7 || k.wartosc === '7') {
-              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.4) 0%, rgba(245,158,11,0.5) 100%); color:#ffffff; border:1px solid #fde047; font-weight:800; box-shadow:0 0 8px rgba(234,179,8,0.6);">7</span>';
+              content = '<span class="tabela-badge b-obecny b-swieto b-swieto-7" style="background:linear-gradient(135deg, rgba(234,179,8,0.4) 0%, rgba(245,158,11,0.5) 100%); color:#ffffff; border:1px solid #fde047; font-weight:800; box-shadow:0 0 8px rgba(234,179,8,0.6);">7</span>';
             } else if (k.wartosc === 9 || k.wartosc === '9') {
-              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.5) 0%, rgba(217,119,6,0.6) 100%); color:#ffffff; border:1px solid #fef08a; font-weight:800; box-shadow:0 0 10px rgba(234,179,8,0.75);">9</span>';
+              content = '<span class="tabela-badge b-obecny b-swieto b-swieto-9" style="background:linear-gradient(135deg, rgba(234,179,8,0.5) 0%, rgba(217,119,6,0.6) 100%); color:#ffffff; border:1px solid #fef08a; font-weight:800; box-shadow:0 0 10px rgba(234,179,8,0.75);">9</span>';
             } else if (!isNaN(numWartosc) && numWartosc < 0) {
               content = '<span class="tabela-badge b-nieobecny">' + k.wartosc + '</span>';
             } else if (k.wartosc === 0 || k.wartosc === '0') {
@@ -434,9 +434,9 @@
             } else if (k.wartosc === 1 || k.wartosc === '1') {
               content = '<span class="tabela-badge b-oddany">1</span>';
             } else if (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== '') {
-              content = '<span class="tabela-badge" style="background:linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(34,197,94,0.3) 100%); color:#fef08a; border:1px solid #facc15; font-weight:800;">' + k.wartosc + '</span>';
+              content = '<span class="tabela-badge b-obecny b-swieto" style="background:linear-gradient(135deg, rgba(234,179,8,0.3) 0%, rgba(34,197,94,0.3) 100%); color:#fef08a; border:1px solid #facc15; font-weight:800;">' + k.wartosc + '</span>';
             } else if (czyMaDyzurKomorki) {
-              content = '<span style="font-size:16px; color:#fde047; text-shadow:0 0 6px rgba(234,179,8,0.8); line-height:1;" title="Dyżur w Święto">•</span>';
+              content = '<span class="tbl-bullet-dyzur" style="font-size:16px; color:#fde047; text-shadow:0 0 6px rgba(234,179,8,0.8); line-height:1;" title="Dyżur w Święto">•</span>';
             }
           } else {
             if (k.wartosc === 5 || k.wartosc === '5') {
@@ -450,9 +450,9 @@
             } else if (k.wartosc === 1 || k.wartosc === '1') {
               content = '<span class="tabela-badge b-oddany">1</span>';
             } else if (k.wartosc !== null && k.wartosc !== undefined && k.wartosc !== '') {
-              content = '<span class="tabela-badge" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(74,222,128,0.4); font-weight:800;">' + k.wartosc + '</span>';
+              content = '<span class="tabela-badge b-obecny" style="background:rgba(34,197,94,0.22); color:#4ade80; border:1px solid rgba(74,222,128,0.4); font-weight:800;">' + k.wartosc + '</span>';
             } else if (czyMaDyzurKomorki) {
-              content = '<span style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
+              content = '<span class="tbl-bullet-dyzur" style="font-size:16px; color:#a1a1aa; line-height:1;">•</span>';
             }
           }
 
@@ -508,16 +508,32 @@
       if (printMiesiacEl) {
         printMiesiacEl.textContent = '';
       }
+      var printDataGenEl = document.getElementById('print-tabela-data-gen');
+      if (printDataGenEl) {
+        var dNow = new Date();
+        var dStr = (dNow.getDate() < 10 ? '0' : '') + dNow.getDate() + '.' +
+                   ((dNow.getMonth() + 1) < 10 ? '0' : '') + (dNow.getMonth() + 1) + '.' +
+                   dNow.getFullYear();
+        printDataGenEl.textContent = 'Wygenerowano: ' + dStr;
+      }
 
       document.body.classList.remove('print-mode-podsumowanie');
       document.body.classList.remove('print-mode-tabela-obrocona');
       document.body.classList.add('print-mode-tabela');
 
       ustawStylStronyDruku('@page { size: A4 landscape; margin: 4mm 5mm 3mm 5mm; }');
+      if (typeof pokazToast === 'function') {
+        pokazToast('💡 W oknie drukowania upewnij się, że wybrany jest Układ: POZIOMA (Landscape).', 5000);
+      }
+
+      window.addEventListener('afterprint', function() {
+        document.body.classList.remove('print-mode-tabela');
+        document.body.classList.remove('print-mode-podsumowanie');
+      }, { once: true });
 
       setTimeout(function() {
         window.print();
-      }, 70);
+      }, 120);
     }
 
     function wyliczObecnosciMinistranta(komorki) {
