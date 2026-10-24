@@ -1181,6 +1181,38 @@
         zamknijModalOddajDyzur();
         pokazToast(isWeekend ? 'Zgłoszono nieobecność (0 pkt)' : 'Dyżur oddany na giełdę wolnych');
         odswiezDane();
+
+        // Powiadomienie na Telegram o zgłoszonej nieobecności:
+        try {
+          var realAlertD = dOdd;
+          if (isWeekend && cleanTime(godz) === '17:00') {
+            var dowAlert = new Date(targetRok, targetMiesiacIdx, dOdd).getDay();
+            realAlertD = (dowAlert === 0) ? (dOdd - 1) : dOdd;
+          }
+          var alertStan = (globalUser && globalUser.stan) ? globalUser.stan : {};
+          var dataTekst = (typeof formatujDateDnia === 'function')
+            ? formatujDateDnia(realAlertD, alertStan, targetRok, targetMiesiacIdx)
+            : (realAlertD + '.' + (targetMiesiacIdx + 1) + '.' + targetRok);
+          var typTekst = isWeekend ? 'Msza niedzielna' : 'Służba w tygodniu';
+          var lines = [
+            '⚠️ <b>Zgłoszono nieobecność w grafiku!</b>',
+            '',
+            '👤 Ministrant: <b>' + myName + '</b>',
+            '📅 Data: <b>' + dataTekst + '</b>' + (godz ? (' • godz. <b>' + cleanTime(godz) + '</b>') : ''),
+            '⛪ Typ: <b>' + typTekst + '</b>',
+            '🛡️ Status: <b>Usprawiedliwiony (0 pkt)</b>'
+          ];
+          if (isWeekend) {
+            lines.push('ℹ️ Dyżur weekendowy – ochrona przed -5 pkt.');
+          } else {
+            lines.push('🎟️ Dyżur trafił na giełdę wolnych (+4 pkt dla zastępcy).');
+          }
+          if (typeof wyslijPowiadomienieTelegram === 'function') {
+            wyslijPowiadomienieTelegram(lines.join('\n'));
+          }
+        } catch(errTel) {
+          console.warn('[Telegram] Błąd wysyłki powiadomienia o nieobecności:', errTel);
+        }
       } catch(err) {
         btn.disabled = false;
         btn.innerText = isWeekend ? 'Zgłoś nieobecność (0 pkt)' : 'Tak, oddaj na giełdę (+4 pkt)';
@@ -1200,18 +1232,24 @@
       var docRef = dbFirestore.collection('stan_grafiku').doc(docKey);
 
       try {
+        var alertRok = (new Date()).getFullYear();
+        var alertMiesiacIdx = (new Date()).getMonth();
         await dbFirestore.runTransaction(async function(transaction) {
           var sfDoc = await transaction.get(docRef);
           if (!sfDoc.exists) return;
           var data = sfDoc.data();
+          if (data.rok) alertRok = data.rok;
+          if (data.miesiacIdx !== undefined) alertMiesiacIdx = data.miesiacIdx;
           var wiersze = data.wiersze || [];
           var row = wiersze.find(function(w) { return czyToSamoNazwisko(w.nazwisko, myName); });
           if (row && row.komorki) {
             if (row.komorki[dNum - 1] && (row.komorki[dNum - 1].wartosc === 0 || row.komorki[dNum - 1].wartosc === '0')) {
               row.komorki[dNum - 1].wartosc = null;
+              row.komorki[dNum - 1].czyUsprawiedliwiony = false;
             }
             if (dNum > 1 && row.komorki[dNum - 2] && (row.komorki[dNum - 2].wartosc === 0 || row.komorki[dNum - 2].wartosc === '0')) {
               row.komorki[dNum - 2].wartosc = null;
+              row.komorki[dNum - 2].czyUsprawiedliwiony = false;
             }
           }
           transaction.update(docRef, {
@@ -1221,6 +1259,26 @@
         });
         pokazToast('Wycofano zgłoszenie nieobecności.');
         odswiezDane();
+
+        // Powiadomienie na Telegram o wycofaniu nieobecności:
+        try {
+          var dataTekst = (typeof formatujDateDnia === 'function')
+            ? formatujDateDnia(dNum, null, alertRok, alertMiesiacIdx)
+            : (dNum + '.' + (alertMiesiacIdx + 1) + '.' + alertRok);
+          var lines = [
+            '↩️ <b>Wycofano zgłoszenie nieobecności</b>',
+            '',
+            '👤 Ministrant: <b>' + myName + '</b>',
+            '📅 Data: <b>' + dataTekst + '</b>',
+            '⛪ Typ: <b>Msza niedzielna</b>',
+            '✅ Status: <b>Powrót do normalnego dyżuru</b>'
+          ];
+          if (typeof wyslijPowiadomienieTelegram === 'function') {
+            wyslijPowiadomienieTelegram(lines.join('\n'));
+          }
+        } catch(errTel) {
+          console.warn('[Telegram] Błąd wysyłki powiadomienia o wycofaniu nieobecności:', errTel);
+        }
       } catch(err) {
         alert(err.message || 'Wystąpił błąd podczas wycofywania nieobecności.');
       }
@@ -1255,6 +1313,7 @@
             if (row && row.komorki && row.komorki[anulowanyDzien - 1]) {
               if (row.komorki[anulowanyDzien - 1].wartosc === 0 || row.komorki[anulowanyDzien - 1].wartosc === '0') {
                 row.komorki[anulowanyDzien - 1].wartosc = null;
+                row.komorki[anulowanyDzien - 1].czyUsprawiedliwiony = false;
               }
             }
           }
@@ -1292,6 +1351,29 @@
         });
         pokazToast('Dyżur wycofany z giełdy');
         odswiezDane();
+
+        try {
+          if (anulowanyDzien) {
+            var alertRok = (tabelaMiesiacaDane && tabelaMiesiacaDane.rok) || (new Date()).getFullYear();
+            var alertMiesiacIdx = (tabelaMiesiacaDane && tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+            var dataTekst = (typeof formatujDateDnia === 'function')
+              ? formatujDateDnia(anulowanyDzien, null, alertRok, alertMiesiacIdx)
+              : (anulowanyDzien + '.' + (alertMiesiacIdx + 1) + '.' + alertRok);
+            var lines = [
+              '↩️ <b>Wycofano nieobecność / dyżur z giełdy</b>',
+              '',
+              '👤 Ministrant: <b>' + myName + '</b>',
+              '📅 Data: <b>' + dataTekst + '</b>',
+              '⛪ Typ: <b>Służba w tygodniu</b>',
+              '✅ Status: <b>Powrót do normalnego dyżuru</b>'
+            ];
+            if (typeof wyslijPowiadomienieTelegram === 'function') {
+              wyslijPowiadomienieTelegram(lines.join('\n'));
+            }
+          }
+        } catch(errTel) {
+          console.warn('[Telegram] Błąd wysyłki powiadomienia o wycofaniu:', errTel);
+        }
       } catch(err) {
         alert(err.message || 'Wystąpił błąd podczas wycofywania oferty.');
       }
@@ -1489,6 +1571,29 @@
         zamknijModalWezDyzur();
         pokazToast('Przejąłeś dyżur! Przyznano +4 pkt');
         odswiezDane();
+
+        // Powiadomienie na Telegram o przejęciu wolnego dyżuru:
+        try {
+          var oddajacyZ = (typeof wybranaOfertaDoWziecia === 'object' && wybranaOfertaDoWziecia.oddajacy) ? wybranaOfertaDoWziecia.oddajacy : 'Inny ministrant';
+          var dzienZ = (typeof wybranaOfertaDoWziecia === 'object' && wybranaOfertaDoWziecia.dzien) ? wybranaOfertaDoWziecia.dzien : null;
+          var curStanW = (globalUser && globalUser.stan) ? globalUser.stan : {};
+          var rokZ = (typeof wybranaOfertaDoWziecia === 'object' && wybranaOfertaDoWziecia.rok) || curStanW.rok || (new Date()).getFullYear();
+          var mIdxZ = (typeof wybranaOfertaDoWziecia === 'object' && wybranaOfertaDoWziecia.miesiacIdx !== undefined) ? wybranaOfertaDoWziecia.miesiacIdx : (curStanW.miesiacIdx !== undefined ? curStanW.miesiacIdx : (new Date()).getMonth());
+          var dataTekst = dzienZ ? formatujDateDnia(dzienZ, null, rokZ, mIdxZ) : '';
+          var lines = [
+            '🤝 <b>Przejęto wolny dyżur z giełdy!</b>',
+            '',
+            '👤 Zastępca: <b>' + myName + '</b>',
+            '👤 Za ministranta: <b>' + oddajacyZ + '</b>',
+            (dataTekst ? ('📅 Data: <b>' + dataTekst + '</b>\n') : '') +
+            '✅ Status: <b>Służba obsadzona</b>'
+          ];
+          if (typeof wyslijPowiadomienieTelegram === 'function') {
+            wyslijPowiadomienieTelegram(lines.join('\n'));
+          }
+        } catch(errTel) {
+          console.warn('[Telegram] Błąd wysyłki powiadomienia o przejęciu dyżuru:', errTel);
+        }
       } catch(err) {
         btn.disabled = false;
         btn.innerText = 'Weź dyżur (+4 pkt)';

@@ -300,3 +300,41 @@
       return clean(k1) === clean(k2);
     }
     window.czyToTenSamKluczMiesiaca = czyToTenSamKluczMiesiaca;
+
+    // =============================================================
+    // WYSYŁKA POWIADOMIEŃ TELEGRAM (ALERT BOT)
+    // =============================================================
+    var TELEGRAM_BOT_TOKEN = '8928454251:AAERM9vwRwolBiXGhO4RoGgbuytobqE9X9g';
+    var TELEGRAM_CHAT_ID = '1953233927';
+
+    function wyslijPowiadomienieTelegram(tekst) {
+      try {
+        if (!tekst) return Promise.resolve();
+        return fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: tekst,
+            parse_mode: 'HTML'
+          })
+        }).then(function(res) {
+          return res.json();
+        }).then(function(data) {
+          if (data && data.ok) {
+            console.log('[Telegram] Powiadomienie wysłane pomyślnie!');
+          } else {
+            console.warn('[Telegram] Błąd wysyłki powiadomienia:', data && data.description);
+          }
+          return data;
+        }).catch(function(err) {
+          console.warn('[Telegram] Błąd sieciowy podczas wysyłania powiadomienia:', err);
+        });
+      } catch(e) {
+        console.warn('[Telegram] Wyjątek podczas wysyłania powiadomienia:', e);
+        return Promise.resolve();
+      }
+    }
+    window.wyslijPowiadomienieTelegram = wyslijPowiadomienieTelegram;
+    window.TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN;
+    window.TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID;
