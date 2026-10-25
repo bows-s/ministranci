@@ -3381,6 +3381,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
     // =============================================================
     // POWIADOMIENIA NA ŻYWO NA TELEGRAM Z ZAKRYSTII
     // =============================================================
+    var ostatnieAlertyTelegram = {};
+
     function wyslijAlertTelegramZakrystia(stan) {
       try {
         var botToken = '8928454251:AAERM9vwRwolBiXGhO4RoGgbuytobqE9X9g';
@@ -3438,6 +3440,31 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
 
         var messageText = lines.join('\n').trim();
+
+        // Blokada dubli: pamięć podręczna (5 min) oraz localStorage na wypadek odświeżenia strony
+        var gKeyClean = (typeof cleanTime === 'function') ? cleanTime(stan.godzina || '') : (stan.godzina || '').replace(':', '');
+        var dedupKey = (stan.docKey || '') + '_' + (stan.dzien || '') + '_' + gKeyClean + '_' + messageText;
+        var teraz = Date.now();
+
+        if (ostatnieAlertyTelegram[dedupKey] && (teraz - ostatnieAlertyTelegram[dedupKey] < 5 * 60 * 1000)) {
+          console.log('[Telegram] Pomijam powtórzony alert zakrystii (antyspam pamięciowy):', dedupKey);
+          return;
+        }
+
+        try {
+          var lsKey = 'min_alert_tel_' + (stan.dzien || '') + '_' + gKeyClean;
+          var cachedLs = localStorage.getItem(lsKey);
+          if (cachedLs) {
+            var cData = JSON.parse(cachedLs);
+            if (cData && (teraz - cData.ts < 5 * 60 * 1000) && cData.text === messageText) {
+              console.log('[Telegram] Pomijam powtórzony alert zakrystii (localStorage):', lsKey);
+              return;
+            }
+          }
+          localStorage.setItem(lsKey, JSON.stringify({ ts: teraz, text: messageText }));
+        } catch(eLs) {}
+
+        ostatnieAlertyTelegram[dedupKey] = teraz;
 
         fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
           method: 'POST',
@@ -3565,8 +3592,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
           console.log('[Offline Queue] Zsynchronizowano wpis z bazy:', item.logId);
 
-          if (item.stanDoTelegramu) {
+          if (item.stanDoTelegramu && !item.juzWyslanoTelegram) {
             wyslijAlertTelegramZakrystia(item.stanDoTelegramu);
+            item.juzWyslanoTelegram = true;
           }
         } catch(err) {
           console.warn('[Offline Queue] Nie udało się wysłać wpisu ' + item.logId + ', pozostaje w kolejce:', err);
@@ -3594,7 +3622,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
     window.pobierzKolejkeOfflineZakrystia = pobierzKolejkeOfflineZakrystia;
     window.wyslijAlertTelegramZakrystia = wyslijAlertTelegramZakrystia;
 
+    var zakrystiaZapisTrwa = false;
+
     async function zakrystiaZapiszObecnosc() {
+      if (zakrystiaZapisTrwa) {
+        console.warn('[Zakrystia] Zapis już trwa. Ignoruję powtórne kliknięcie.');
+        return;
+      }
       if (!czyMaDostepDoZakrystii(globalUser ? globalUser.nazwisko : "")) {
         alert("Brak uprawnień do zapisywania obecności w zakrystii.");
         return;
@@ -3618,6 +3652,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         btn.style.cursor = 'wait';
       }
       if (spinner) spinner.style.display = 'inline';
+      zakrystiaZapisTrwa = true;
 
       // 1. Zaktualizuj komórki w pamięci lokalnej z obsługą niezależnych slotów liturgii
       var colIdx = zakrystiaStan.dzien - 1;
@@ -4111,6 +4146,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         tabelaDoZapisu: tabelaDoZapisu,
         obecnoscPayload: obecnoscPayload,
         stanDoTelegramu: JSON.parse(JSON.stringify(zakrystiaStan)),
+        juzWyslanoTelegram: false,
         utworzono: Date.now()
       };
 
@@ -4238,7 +4274,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             });
           }
 
-          // Pomyślny zapis na serwerze: usuwamy z kolejki offline i wysyłamy alert Telegram na żywo!
+          // Pomyślny zapis na serwerze: oznaczamy, usuwamy z kolejki offline i wysyłamy alert Telegram na żywo!
+          wpisDoKolejki.juzWyslanoTelegram = true;
           usunZKolejkiOfflineZakrystia(logId);
           wyslijAlertTelegramZakrystia(zakrystiaStan);
         } catch(errFs) {
@@ -4252,22 +4289,24 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (spinner) spinner.style.display = 'none';
 
       if (!firestoreSuccess) {
+        zakrystiaZapisTrwa = false;
         if (btn) {
-          btn.disabled = false;
+          btn.disabled = true;
           btn.innerText = '✓ ZAPISANO OFFLINE (' + zakrystiaStan.ministranci.length + ' ministrantów)';
-          btn.style.opacity = '1';
-          btn.style.cursor = 'pointer';
+          btn.style.opacity = '0.85';
+          btn.style.cursor = 'default';
         }
         pokazToast('📡 Zapisano lokalnie w pamięci telefonu. Wyśle się automatycznie po odzyskaniu internetu.');
         pokazModalSukcesuZakrystii(zakrystiaStan.nazwaLiturgii + ' (' + zakrystiaStan.godzina + ')', zakrystiaStan.ministranci.length, true);
         return;
       }
 
+      zakrystiaZapisTrwa = false;
       if (btn) {
-        btn.disabled = false;
-        btn.style.opacity = '1';
-        btn.style.cursor = 'pointer';
-        btn.innerText = 'ZAPISANO (' + zakrystiaStan.ministranci.length + ' ministrantów)';
+        btn.disabled = true;
+        btn.style.opacity = '0.85';
+        btn.style.cursor = 'default';
+        btn.innerText = '✓ ZAPISANO (' + zakrystiaStan.ministranci.length + ' ministrantów)';
       }
 
       // Haptic feedback dla Kościelnego w telefonie

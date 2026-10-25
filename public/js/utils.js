@@ -306,10 +306,17 @@
     // =============================================================
     var TELEGRAM_BOT_TOKEN = '8928454251:AAERM9vwRwolBiXGhO4RoGgbuytobqE9X9g';
     var TELEGRAM_CHAT_ID = '1953233927';
+    var ostatniePowiadomieniaTelegram = {};
 
     function wyslijPowiadomienieTelegram(tekst) {
       try {
         if (!tekst) return Promise.resolve();
+        var teraz = Date.now();
+        if (ostatniePowiadomieniaTelegram[tekst] && (teraz - ostatniePowiadomieniaTelegram[tekst] < 60 * 1000)) {
+          console.log('[Telegram] Pomijam powtórzone powiadomienie (antyspam 60s):', (tekst || '').substring(0, 30));
+          return Promise.resolve();
+        }
+        ostatniePowiadomieniaTelegram[tekst] = teraz;
         return fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
