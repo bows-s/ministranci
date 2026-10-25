@@ -130,10 +130,10 @@
     function pobierzGodzineDlaDniaTygodnia(rok, miesiacIdx, dzien) {
       if (dzien) {
         var hD = null;
-        if (typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni) {
+        var curActiveM = (typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane && tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+        if (miesiacIdx === curActiveM && typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni) {
           hD = tabelaMiesiacaDane.harmonogramDni[dzien] || tabelaMiesiacaDane.harmonogramDni['' + dzien];
-        }
-        if (!hD && typeof daneKolejnegoMiesiaca !== 'undefined' && daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.harmonogramDni) {
+        } else if (typeof daneKolejnegoMiesiaca !== 'undefined' && daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.miesiacIdx === miesiacIdx || daneKolejnegoMiesiaca.miesiacIdx === undefined) && daneKolejnegoMiesiaca.harmonogramDni) {
           hD = daneKolejnegoMiesiaca.harmonogramDni[dzien] || daneKolejnegoMiesiaca.harmonogramDni['' + dzien];
         }
         if (hD && hD.msze && hD.msze.length > 0) {

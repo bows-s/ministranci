@@ -2678,17 +2678,35 @@ function czyMaDostepDoZakrystii(nazwisko) {
     function aktualizujGodzinyZakrystiiDlaDnia(d, wybranaGodz, optM, optR) {
       var selG = document.getElementById('sel-zakrystia-godzina');
       if (!selG) return;
-      var m = (optM !== undefined && optM !== null) ? optM : ((zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth());
-      var r = optR || (zakrystiaStan && zakrystiaStan.rok) || (new Date()).getFullYear();
+      var curStan = zakrystiaStan || {};
+      var curActiveM = (tabelaMiesiacaDane && tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+      var m = (optM !== undefined && optM !== null) ? optM : ((curStan.miesiacIdx !== undefined) ? curStan.miesiacIdx : curActiveM);
+      var r = optR || curStan.rok || (new Date()).getFullYear();
       var dt = new Date(r, m, d);
       var dow = dt.getDay();
       var optHtml = '';
 
       var hD = null;
-      if (tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni && tabelaMiesiacaDane.harmonogramDni[d]) {
-        hD = tabelaMiesiacaDane.harmonogramDni[d];
-      } else if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.harmonogramDni && daneKolejnegoMiesiaca.harmonogramDni[d]) {
-        hD = daneKolejnegoMiesiaca.harmonogramDni[d];
+      var tabelaZrodlowa = null;
+      if (m === curActiveM) {
+        tabelaZrodlowa = tabelaMiesiacaDane;
+      } else {
+        if (daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.miesiacIdx === m || (daneKolejnegoMiesiaca.miesiacIdx === undefined && m === (curActiveM + 1) % 12))) {
+          tabelaZrodlowa = daneKolejnegoMiesiaca;
+        } else {
+          try {
+            var nDocKey = (typeof wyznaczKluczMiesiaca === 'function') ? wyznaczKluczMiesiaca(new Date(r, m, 1)) : ('Listopad_' + r);
+            var rawNext = localStorage.getItem('min_cached_tabela_' + nDocKey);
+            if (rawNext) {
+              tabelaZrodlowa = JSON.parse(rawNext);
+              daneKolejnegoMiesiaca = tabelaZrodlowa;
+            }
+          } catch(eNext) {}
+        }
+      }
+
+      if (tabelaZrodlowa && tabelaZrodlowa.harmonogramDni) {
+        hD = tabelaZrodlowa.harmonogramDni[d] || tabelaZrodlowa.harmonogramDni['' + d] || null;
       }
 
       if (hD && ((hD.msze && hD.msze.length > 0) || (hD.nabozenstwa && hD.nabozenstwa.length > 0))) {
@@ -2708,10 +2726,24 @@ function czyMaDostepDoZakrystii(nazwisko) {
           });
         }
       } else {
-        if (dow === 0) {
-          optHtml += '<option value="08:30" data-rodzaj="msza_niedziela" data-punkty="3" data-nazwa="Msza św. niedzielna">08:30 (Msza św. niedzielna - 3 pkt)</option>';
-          optHtml += '<option value="10:00" data-rodzaj="msza_niedziela" data-punkty="3" data-nazwa="Msza św. niedzielna">10:00 (Msza św. niedzielna - 3 pkt)</option>';
-          optHtml += '<option value="11:30" data-rodzaj="msza_niedziela" data-punkty="3" data-nazwa="Msza św. niedzielna">11:30 (Msza św. niedzielna - 3 pkt)</option>';
+        // Sprawdź czy to święto / uroczystość (np. 1 listopada - Wszystkich Świętych)
+        var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(dt) : null;
+        var isHoliday = (d === 1 && m === 10) || (litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
+
+        if (d === 1 && m === 10) {
+          // Uroczystość Wszystkich Świętych (1 listopada)
+          optHtml += '<option value="08:30" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">08:30 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
+          optHtml += '<option value="10:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">10:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
+          optHtml += '<option value="11:30" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">11:30 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
+          optHtml += '<option value="15:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">15:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
+          optHtml += '<option value="16:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">16:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
+        } else if (dow === 0 || isHoliday) {
+          var sunPts = isHoliday ? 5 : 3;
+          var sunName = isHoliday ? (litInfo ? litInfo.nazwa : 'Uroczystość Wszystkich Świętych') : 'Msza św. niedzielna';
+          var sunType = isHoliday ? 'msza_swieto' : 'msza_niedziela';
+          optHtml += '<option value="08:30" data-rodzaj="' + sunType + '" data-punkty="' + sunPts + '" data-nazwa="' + sunName + '">08:30 (' + sunName + ' - ' + sunPts + ' pkt)</option>';
+          optHtml += '<option value="10:00" data-rodzaj="' + sunType + '" data-punkty="' + sunPts + '" data-nazwa="' + sunName + '">10:00 (' + sunName + ' - ' + sunPts + ' pkt)</option>';
+          optHtml += '<option value="11:30" data-rodzaj="' + sunType + '" data-punkty="' + sunPts + '" data-nazwa="' + sunName + '">11:30 (' + sunName + ' - ' + sunPts + ' pkt)</option>';
         } else if (dow === 6) {
           if (d <= 7) {
             optHtml += '<option value="08:00" data-rodzaj="msza_roza" data-punkty="4" data-nazwa="Msza Róży Różańcowej">08:00 (Msza Róży Różańcowej - 4 pkt)</option>';
@@ -2816,11 +2848,22 @@ function czyMaDostepDoZakrystii(nazwisko) {
         selD.appendChild(optN);
       }
 
-      selD.onchange = function() {
+      selD.onchange = async function() {
         var parts = this.value.split('|');
         var dVal = parseInt(parts[0], 10);
         var mVal = parts.length > 1 ? parseInt(parts[1], 10) : curM;
         var rVal = parts.length > 2 ? parseInt(parts[2], 10) : curR;
+        if (mVal !== curM && (!daneKolejnegoMiesiaca || daneKolejnegoMiesiaca.miesiacIdx !== mVal) && typeof dbFirestore !== 'undefined' && dbFirestore) {
+          var nKey = (typeof wyznaczKluczMiesiaca === 'function') ? wyznaczKluczMiesiaca(new Date(rVal, mVal, 1)) : ('Listopad_' + rVal);
+          try {
+            var snapN = await dbFirestore.collection('stan_grafiku').doc(nKey).get();
+            if (snapN.exists) {
+              daneKolejnegoMiesiaca = snapN.data();
+              daneKolejnegoMiesiaca.docId = nKey;
+              try { localStorage.setItem('min_cached_tabela_' + nKey, JSON.stringify(daneKolejnegoMiesiaca)); } catch(e) {}
+            }
+          } catch(e) {}
+        }
         aktualizujGodzinyZakrystiiDlaDnia(dVal, null, mVal, rVal);
       };
 
