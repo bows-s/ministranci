@@ -205,14 +205,14 @@
         }
       }
 
-      // Jeśli ministrant ma dyżur w soboty o 17:00 i miesiąc kończy się w sobotę (np. 31 października)
-      if (mojaGodzinaNiedziela === "17:00" && daysInMonth >= 31) {
+      // Jeśli miesiąc kończy się w sobotę (np. 31 października) i ministrant ma dyżur na tej mszy wigilijnej (zgodnie z rotacją kolejnego miesiąca)
+      if (daysInMonth >= 28) {
         var dtLast = new Date(currentYear, currentMonthIdx, daysInMonth);
         if (dtLast.getDay() === 6) {
           var kLastSat = (userRow && userRow.komorki) ? userRow.komorki[daysInMonth - 1] : null;
           if (kLastSat && kLastSat.maDyzur) {
             godzinyWeekendy[daysInMonth + 1] = {
-              godzina: mojaGodzinaNiedziela,
+              godzina: "17:00",
               czyZamienione: false,
               czyUsprawiedliwiony: (kLastSat.wartosc === 0 || kLastSat.wartosc === "0")
             };
@@ -1000,7 +1000,16 @@ function czyMaDostepDoZakrystii(nazwisko) {
       var nazwisko = (typeof w === 'string') ? w : (w.nazwisko || '');
       var grupa = (typeof w === 'object' && w) ? (w.grupa || '') : '';
       var dData = docData || tabelaMiesiacaDane || {};
-      var bazaGodz = wyznaczGodzineWeekendowaDlaGrupy(grupa, nazwisko, dData.rok, dData.miesiacIdx, dData);
+      var rEff = dData.rok || (new Date()).getFullYear();
+      var mEff = (dData.miesiacIdx !== undefined) ? dData.miesiacIdx : (new Date()).getMonth();
+      var daysInThisM = new Date(rEff, mEff + 1, 0).getDate();
+      if (dow === 6 && dNum === daysInThisM) {
+        // Sobota na przełomie miesięcy: niedziela wypada 1. dnia kolejnego miesiąca!
+        // To niedziela kolejnego miesiąca dyktuje rotację grup na ten weekend!
+        mEff = (mEff + 1) % 12;
+        if (mEff === 0) rEff += 1;
+      }
+      var bazaGodz = wyznaczGodzineWeekendowaDlaGrupy(grupa, nazwisko, rEff, mEff, dData);
 
       var zamianyWknd = dData.zamianyNiedziele || (tabelaMiesiacaDane && tabelaMiesiacaDane.zamianyNiedziele) || [];
       var weekendSunDay = (dow === 6 ? dNum + 1 : dNum);
@@ -1501,7 +1510,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
               }
             }
           }
-          var rot = wyznaczRotowaneGodzinyGrup(currentYear, currentMonthIdx);
+          var rRot = currentYear;
+          var mRot = currentMonthIdx;
+          var daysInThisMZak = new Date(rRot, mRot + 1, 0).getDate();
+          if (dow === 6 && dNum === daysInThisMZak) {
+            mRot = (mRot + 1) % 12;
+            if (mRot === 0) rRot += 1;
+          }
+          var rot = wyznaczRotowaneGodzinyGrup(rRot, mRot);
           for (var rk in rot) {
             if (g.indexOf(rk.toUpperCase()) !== -1 || rk.toUpperCase().indexOf(g) !== -1 || dopasujGrupe(rk, g)) {
               return rot[rk];
