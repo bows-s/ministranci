@@ -2368,14 +2368,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
       // 2. Powiadomienie Telegram do bota
       if (typeof wyslijPowiadomienieTelegram === 'function') {
-        var ikonaTel = isZgloszenie ? '🕯️' : '↩️';
+        var ikonaTel = isZgloszenie ? '📌' : '↩️';
         var naglowekTel = isZgloszenie ? 'Nowe zgłoszenie na służbę' : 'Wycofanie zgłoszenia ze służby';
-        var maxStr = lit.maxOsob ? (' / ' + lit.maxOsob) : '';
-        var tMsg = ikonaTel + ' <b>' + naglowekTel + ' (Wszystkich Świętych)</b>\n' +
+        var tMsg = ikonaTel + ' <b>' + naglowekTel + '</b>\n' +
                    '👤 Ministrant: <b>' + myName + '</b>\n' +
                    '📅 Służba: ' + lit.rodzaj + ' (' + (lit.dataTekst || '') + ' • Godz. ' + (cleanTime(lit.godzina) || lit.godzina) + ')\n' +
                    '⭐ Punkty: +' + (lit.punkty || 4) + ' pkt\n' +
-                   '👥 Zgłoszeni (' + lit.zgloszeni.length + maxStr + '): ' + (lit.zgloszeni.join(', ') || 'Brak');
+                   '👥 Zgłoszeni (' + lit.zgloszeni.length + '): ' + (lit.zgloszeni.join(', ') || 'Brak');
         wyslijPowiadomienieTelegram(tMsg);
       }
 
@@ -2810,8 +2809,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
           optHtml += '<option value="08:30" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">08:30 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
           optHtml += '<option value="10:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">10:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
           optHtml += '<option value="11:30" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">11:30 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
-          optHtml += '<option value="15:00" data-rodzaj="nabozenstwo" data-punkty="4" data-nazwa="Nabożeństwo na cmentarzu i procesja">15:00 (Nabożeństwo na cmentarzu i procesja - 4 pkt)</option>';
-          optHtml += '<option value="16:00" data-rodzaj="msza_swieto" data-punkty="4" data-nazwa="Msza św. popołudniowa (Wszystkich Świętych)">16:00 (Msza św. popołudniowa - 4 pkt)</option>';
+          optHtml += '<option value="15:00" data-rodzaj="nabozenstwo" data-punkty="4" data-nazwa="Nabożeństwo na cmentarzu">15:00 (Nabożeństwo na cmentarzu - 4 pkt)</option>';
+          optHtml += '<option value="16:00" data-rodzaj="msza_swieto" data-punkty="4" data-nazwa="Msza św.">16:00 (Msza św. - 4 pkt)</option>';
         } else if (dow === 0 || isHoliday) {
           var sunPts = isHoliday ? 5 : 3;
           var sunName = isHoliday ? (litInfo ? litInfo.nazwa : 'Uroczystość Wszystkich Świętych') : 'Msza św. niedzielna';
