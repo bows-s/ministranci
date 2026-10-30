@@ -2320,24 +2320,66 @@ function czyMaDostepDoZakrystii(nazwisko) {
         return zn === myLower || zn.indexOf(myLower) !== -1 || myLower.indexOf(zn) !== -1;
       });
 
+      var isZgloszenie = (idx === -1);
       if (idx !== -1) {
         lit.zgloszeni.splice(idx, 1);
         pokazToast('Wycofano zgłoszenie ze służby.');
       } else {
         lit.zgloszeni.push(myName);
-        pokazToast('Zgłoszono obecność na ' + lit.rodzaj + '! (+3 pkt po mszy)');
+        pokazToast('Zgłoszono obecność na ' + lit.rodzaj + '! (+' + (lit.punkty || 4) + ' pkt po mszy)');
       }
 
-      // 1. Zapis do Firestore (15 ms)
+      // Synchronizacja w pamięci podręcznej obu miesięcy
+      if (tabelaMiesiacaDane && tabelaMiesiacaDane.liturgieDodatkowe) {
+        var cIdx = tabelaMiesiacaDane.liturgieDodatkowe.findIndex(function(l) { return l.id === litId; });
+        if (cIdx !== -1) tabelaMiesiacaDane.liturgieDodatkowe[cIdx].zgloszeni = lit.zgloszeni;
+      }
+      if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.liturgieDodatkowe) {
+        var nIdx = daneKolejnegoMiesiaca.liturgieDodatkowe.findIndex(function(l) { return l.id === litId; });
+        if (nIdx !== -1) daneKolejnegoMiesiaca.liturgieDodatkowe[nIdx].zgloszeni = lit.zgloszeni;
+      }
+
+      // 1. Zapis do Firestore
       if (dbFirestore) {
-        dbFirestore.collection('stan_grafiku').doc(targetDocKey).set({
-          liturgieDodatkowe: sourceList
-        }, { merge: true }).catch(function(e) {
-          console.warn('Błąd zapisu zgloszenia Firestore:', e);
+        var isNov1 = (lit.miesiacIdx === 10 || (lit.id && lit.id.indexOf('11_01') !== -1));
+        var docsToSync = [targetDocKey];
+        if (isNov1) {
+          if (docsToSync.indexOf('Listopad_2026') === -1) docsToSync.push('Listopad_2026');
+          if (docsToSync.indexOf('Pazdziernik_2026') === -1) docsToSync.push('Pazdziernik_2026');
+        }
+
+        docsToSync.forEach(function(dKey) {
+          dbFirestore.collection('stan_grafiku').doc(dKey).get().then(function(snap) {
+            if (snap.exists) {
+              var sLits = snap.data().liturgieDodatkowe || [];
+              var sIdx = sLits.findIndex(function(l) { return l.id === litId; });
+              if (sIdx !== -1) {
+                sLits[sIdx].zgloszeni = lit.zgloszeni;
+                dbFirestore.collection('stan_grafiku').doc(dKey).set({
+                  liturgieDodatkowe: sLits
+                }, { merge: true });
+              }
+            }
+          }).catch(function(e) {
+            console.warn('Błąd synchronizacji zgloszenia Firestore (' + dKey + '):', e);
+          });
         });
       }
 
-      // 2. Odśwież widok natychmiast
+      // 2. Powiadomienie Telegram do bota
+      if (typeof wyslijPowiadomienieTelegram === 'function') {
+        var ikonaTel = isZgloszenie ? '🕯️' : '↩️';
+        var naglowekTel = isZgloszenie ? 'Nowe zgłoszenie na służbę' : 'Wycofanie zgłoszenia ze służby';
+        var maxStr = lit.maxOsob ? (' / ' + lit.maxOsob) : '';
+        var tMsg = ikonaTel + ' <b>' + naglowekTel + ' (Wszystkich Świętych)</b>\n' +
+                   '👤 Ministrant: <b>' + myName + '</b>\n' +
+                   '📅 Służba: ' + lit.rodzaj + ' (' + (lit.dataTekst || '') + ' • Godz. ' + (cleanTime(lit.godzina) || lit.godzina) + ')\n' +
+                   '⭐ Punkty: +' + (lit.punkty || 4) + ' pkt\n' +
+                   '👥 Zgłoszeni (' + lit.zgloszeni.length + maxStr + '): ' + (lit.zgloszeni.join(', ') || 'Brak');
+        wyslijPowiadomienieTelegram(tMsg);
+      }
+
+      // 3. Odśwież widok natychmiast
       if (targetDocKey === pobierzAktywnyKluczMiesiaca()) {
         try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
       } else {
@@ -2726,21 +2768,38 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       if (hD && ((hD.msze && hD.msze.length > 0) || (hD.nabozenstwa && hD.nabozenstwa.length > 0))) {
+        var allDayEvents = [];
         if (hD.msze && hD.msze.length > 0) {
           hD.msze.forEach(function(mItem) {
             var gC = cleanTime(mItem.godzina);
             var mTyp = mItem.typ || (dow === 0 ? 'msza_niedziela' : 'msza_tydzien');
-            optHtml += '<option value="' + gC + '" data-rodzaj="' + mTyp + '" data-punkty="' + mItem.punkty + '" data-nazwa="' + mItem.nazwa + '">' + gC + ' (' + mItem.nazwa + ' - ' + mItem.punkty + ' pkt)</option>';
+            allDayEvents.push({
+              godzina: gC,
+              rodzaj: mTyp,
+              punkty: mItem.punkty,
+              nazwa: mItem.nazwa
+            });
           });
         }
         if (hD.nabozenstwa && hD.nabozenstwa.length > 0) {
           hD.nabozenstwa.forEach(function(nItem) {
             var gC = cleanTime(nItem.godzina);
-            if (optHtml.indexOf('value="' + gC + '"') === -1) {
-              optHtml += '<option value="' + gC + '" data-rodzaj="nabozenstwo" data-punkty="' + nItem.punkty + '" data-nazwa="' + nItem.nazwa + '">' + gC + ' (' + nItem.nazwa + ' - ' + nItem.punkty + ' pkt)</option>';
-            }
+            allDayEvents.push({
+              godzina: gC,
+              rodzaj: 'nabozenstwo',
+              punkty: nItem.punkty,
+              nazwa: nItem.nazwa
+            });
           });
         }
+        allDayEvents.sort(function(a, b) {
+          return (a.godzina || '').localeCompare(b.godzina || '');
+        });
+        allDayEvents.forEach(function(ev) {
+          if (optHtml.indexOf('value="' + ev.godzina + '"') === -1) {
+            optHtml += '<option value="' + ev.godzina + '" data-rodzaj="' + ev.rodzaj + '" data-punkty="' + ev.punkty + '" data-nazwa="' + ev.nazwa + '">' + ev.godzina + ' (' + ev.nazwa + ' - ' + ev.punkty + ' pkt)</option>';
+          }
+        });
       } else {
         // Sprawdź czy to święto / uroczystość (np. 1 listopada - Wszystkich Świętych)
         var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(dt) : null;
@@ -2751,8 +2810,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
           optHtml += '<option value="08:30" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">08:30 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
           optHtml += '<option value="10:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">10:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
           optHtml += '<option value="11:30" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">11:30 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
-          optHtml += '<option value="15:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">15:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
-          optHtml += '<option value="16:00" data-rodzaj="msza_swieto" data-punkty="5" data-nazwa="Uroczystość Wszystkich Świętych">16:00 (Uroczystość Wszystkich Świętych - 5 pkt)</option>';
+          optHtml += '<option value="15:00" data-rodzaj="nabozenstwo" data-punkty="4" data-nazwa="Nabożeństwo na cmentarzu i procesja">15:00 (Nabożeństwo na cmentarzu i procesja - 4 pkt)</option>';
+          optHtml += '<option value="16:00" data-rodzaj="msza_swieto" data-punkty="4" data-nazwa="Msza św. popołudniowa (Wszystkich Świętych)">16:00 (Msza św. popołudniowa - 4 pkt)</option>';
         } else if (dow === 0 || isHoliday) {
           var sunPts = isHoliday ? 5 : 3;
           var sunName = isHoliday ? (litInfo ? litInfo.nazwa : 'Uroczystość Wszystkich Świętych') : 'Msza św. niedzielna';

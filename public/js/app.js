@@ -522,27 +522,63 @@
               dispH = (Number(l.dzien) === 14) ? '10:00' : '11:00';
             }
 
-            htmlL += '<div class="card" style="border:1px solid rgba(99,102,241,0.3); background:#18181b; margin-bottom:12px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,0.3);">' +
+            var isWszystkichSwietych = (l.id && l.id.indexOf('11_01') !== -1) || 
+                                       (l.dzien === 1 && l.miesiacIdx === 10) || 
+                                       (l.rodzaj && (l.rodzaj.toLowerCase().indexOf('cmentarz') !== -1 || l.rodzaj.toLowerCase().indexOf('popołudniowa') !== -1));
+            var isCmentarz = l.rodzaj && l.rodzaj.toLowerCase().indexOf('cmentarz') !== -1;
+            var isMszaPop = l.rodzaj && l.rodzaj.toLowerCase().indexOf('popołudniowa') !== -1;
+
+            var cardBorder = isWszystkichSwietych 
+              ? 'border:1px solid rgba(245,158,11,0.45); background:linear-gradient(145deg, #18181b 0%, #221810 100%);' 
+              : 'border:1px solid rgba(99,102,241,0.3); background:#18181b;';
+            var badgeBg = isWszystkichSwietych 
+              ? 'background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.35);' 
+              : 'background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3);';
+            var badgeText = isWszystkichSwietych 
+              ? ('🕯️ WSZYSTKICH ŚWIĘTYCH • +' + (l.punkty || 4) + ' PKT') 
+              : ('SŁUŻBA DODATKOWA • +' + (l.punkty || 3) + ' PKT');
+            var litIkona = isCmentarz ? '🪦' : (isMszaPop ? '⛪' : '⚰️');
+
+            var zadaniaHtml = '';
+            if (isCmentarz) {
+              zadaniaHtml = '<div style="font-size:12px; color:#fef08a; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.22); border-radius:6px; padding:6px 9px; margin:7px 0 6px 0; line-height:1.4;">' +
+                              '<b>✝️ Zadania na cmentarzu:</b> krzyż procesyjny, nagłośnienie/mikrofon, latarnie/znicze, kadzielnica i łódka.' +
+                            '</div>';
+            } else if (isMszaPop) {
+              zadaniaHtml = '<div style="font-size:12px; color:#bfdbfe; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.22); border-radius:6px; padding:6px 9px; margin:7px 0 6px 0; line-height:1.4;">' +
+                              '<b>⛪ Msza w kościele:</b> bezpośrednio po procesji na cmentarzu. Wolny nabór dla wszystkich chętnych!' +
+                            '</div>';
+            }
+
+            var limitTekst = l.maxOsob ? (' / ' + l.maxOsob + ' miejsc') : '';
+
+            htmlL += '<div class="card" style="' + cardBorder + ' margin-bottom:12px; padding:14px; box-shadow:0 4px 14px rgba(0,0,0,0.3);">' +
                        '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">' +
-                         '<div>' +
-                           '<span style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); font-size:10px; font-weight:800; letter-spacing:0.5px; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:4px; text-transform:uppercase;">' +
-                             'SŁUŻBA DODATKOWA • +' + (l.punkty || 3) + ' PKT' +
+                         '<div style="width:100%;">' +
+                           '<span style="' + badgeBg + ' font-size:10px; font-weight:800; letter-spacing:0.5px; padding:3px 8px; border-radius:12px; display:inline-block; margin-bottom:4px; text-transform:uppercase;">' +
+                             badgeText +
                            '</span>' +
                            '<h3 style="margin:2px 0 4px 0; font-size:16px; color:#fafafa;">' +
-                             ikona + ' ' + l.rodzaj + ' — ' + l.dataTekst + ' • Godz. ' + dispH +
+                             litIkona + ' ' + l.rodzaj + ' — ' + l.dataTekst + ' • Godz. ' + dispH +
                            '</h3>' +
-                           '<div style="font-size:12px; color:#a1a1aa; margin-top:3px;">' +
-                             'Zgłoszeni chętni (<b>' + zgloszeni.length + '</b>): <span style="color:#fafafa; font-weight:500;">' + zgloszeniTekst + '</span>' +
+                           zadaniaHtml +
+                           '<div style="font-size:12px; color:#a1a1aa; margin-top:4px;">' +
+                             'Zgłoszeni chętni (<b>' + zgloszeni.length + limitTekst + '</b>): <span style="color:#fafafa; font-weight:500;">' + zgloszeniTekst + '</span>' +
                            '</div>' +
                          '</div>' +
                        '</div>' +
                        '<div style="margin-top:10px; display:flex; gap:8px;">' +
                          (isSigned ?
-                           '<button type="button" class="btn-cancel" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3);" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Jesteś zgłoszony (Kliknij, aby zrezygnować)</button>' :
-                           '<button type="button" class="btn-action" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:#6366f1; color:#ffffff; border:none; box-shadow:0 2px 8px rgba(99,102,241,0.3);" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Zgłaszam się (Będę • +' + (l.punkty || 3) + ' pkt)</button>') +
+                           '<button type="button" class="btn-cancel" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:rgba(239,68,68,0.18); color:#fca5a5; border:1px solid rgba(239,68,68,0.35); cursor:pointer;" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">✓ Jesteś zapisany (Kliknij, aby zrezygnować)</button>' :
+                           '<button type="button" class="btn-action" style="width:100%; padding:9px; font-size:13px; font-weight:700; background:' + (isWszystkichSwietych ? '#d97706' : '#6366f1') + '; color:#ffffff; border:none; box-shadow:0 2px 8px rgba(217,119,6,0.35); cursor:pointer;" onclick="przelaczZgloszenieLiturgia(\'' + l.id + '\')">Zapisz się na służbę (+' + (l.punkty || 4) + ' pkt)</button>') +
                        '</div>' +
                      '</div>';
           });
+          if (aktywneLiturgie.some(function(l) { return (l.id && l.id.indexOf('11_01') !== -1) || (l.dzien === 1 && l.miesiacIdx === 10); })) {
+            htmlL += '<div style="font-size:12px; color:#fde68a; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.22); border-radius:8px; padding:8px 12px; margin-bottom:12px; text-align:center; line-height:1.4;">' +
+                       '🔥 <b>Podwójna służba we Wszystkich Świętych:</b> Możesz zapisać się na cmentarz (15:00) i na mszę popołudniową (16:00) — zgarniasz wtedy łącznie aż <b>+8 punktów</b>!' +
+                     '</div>';
+          }
           boxL.innerHTML = htmlL;
           boxL.style.display = 'block';
         } else {
@@ -1159,7 +1195,7 @@
       if (listaWolneDiv) {
         var curW = (res.wolneZastepstwa || []).filter(function(z) {
           if (!z || !z.dzien) return false;
-          if (z.typ && z.typ !== 'Tydzień') return false;
+          if (z.typ && z.typ !== 'Tydzień' && z.typ !== 'Niedziela' && z.typ !== 'Dodatkowa') return false;
           if (z.status !== 'OCZEKUJE' && z.status) return false;
           if (z.dzien < res.dzisDzien) return false;
           var zG = cleanTime(z.godzina) || '18:00';
@@ -1176,7 +1212,7 @@
           var nY = daneKolejnegoMiesiaca.rok || res.rok;
           var nextKeyWz = wyznaczKluczMiesiaca(new Date(nY, nM, 1));
           nextW = daneKolejnegoMiesiaca.wolneZastepstwa.filter(function(z) {
-            return (!z.typ || z.typ === 'Tydzień') && (z.status === 'OCZEKUJE' || !z.status);
+            return (!z.typ || z.typ === 'Tydzień' || z.typ === 'Niedziela' || z.typ === 'Dodatkowa') && (z.status === 'OCZEKUJE' || !z.status);
           }).map(function(z) {
             var zOdd = (z.oddajacy || "").trim().toLowerCase();
             var isMine = !!(zOdd && (zOdd === myNamePulpit || zOdd.indexOf(myNamePulpit) !== -1 || myNamePulpit.indexOf(zOdd) !== -1));
