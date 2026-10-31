@@ -15,6 +15,7 @@
 
     function czyToDzienSwiateczny5Pkt(dNum, curMIdx, curYear, daneTabeli) {
       if (dNum === 1 && curMIdx === 10) return true; // 1 listopada - Wszystkich Świętych
+      if (dNum === 2 && curMIdx === 10) return false; // 2 listopada nie jest świętem 5 pkt
       var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? (daneTabeli.dniNaglowek[dNum - 1] || daneTabeli.dniNaglowek['' + (dNum - 1)]) : null;
       if (dNaglowek && (dNaglowek.czySwieto || dNaglowek.punktyZaObecnosc === 5)) return true;
       if (typeof wyznaczDaneLiturgiczne === 'function') {
@@ -977,7 +978,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
         g = wyznaczGrupeParafialna(nazwisko, '').toUpperCase();
       }
       var dData = docData || tabelaMiesiacaDane || {};
-      if (dData && dData.godzinyGrup && Object.keys(dData.godzinyGrup).length > 0) {
+      var isTransition = (mIdx !== undefined && mIdx !== null && dData && dData.miesiacIdx !== undefined && mIdx !== dData.miesiacIdx);
+      if (!isTransition && dData && dData.godzinyGrup && Object.keys(dData.godzinyGrup).length > 0) {
         for (var k in dData.godzinyGrup) {
           if (g.indexOf(k.toUpperCase()) !== -1 || k.toUpperCase().indexOf(g) !== -1 || dopasujGrupe(k, g)) {
             return cleanTime(dData.godzinyGrup[k]);
@@ -995,6 +997,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       return '10:00';
     }
 
+    window.wyznaczGodzineWeekendowaDlaGrupy = wyznaczGodzineWeekendowaDlaGrupy;
     function wyznaczEfektywnaGodzineWeekendowaDlaMinistranta(w, dNum, dow, docData) {
       if (!w) return { godzina: '10:00', zamiana: false, partner: null, oryginalnaGodzina: '10:00' };
       var nazwisko = (typeof w === 'string') ? w : (w.nazwisko || '');
@@ -1499,17 +1502,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
 
         function wyznaczGodzineWeekendowaDlaGrupy(grupaNazwa, nazwisko) {
-          var g = (grupaNazwa || '').toUpperCase();
-          if (!g && nazwisko) {
-            g = wyznaczGrupeParafialna(nazwisko, '').toUpperCase();
-          }
-          if (daneTabeli && daneTabeli.godzinyGrup && Object.keys(daneTabeli.godzinyGrup).length > 0) {
-            for (var k in daneTabeli.godzinyGrup) {
-              if (g.indexOf(k.toUpperCase()) !== -1 || k.toUpperCase().indexOf(g) !== -1 || dopasujGrupe(k, g)) {
-                return cleanTime(daneTabeli.godzinyGrup[k]);
-              }
-            }
-          }
           var rRot = currentYear;
           var mRot = currentMonthIdx;
           var daysInThisMZak = new Date(rRot, mRot + 1, 0).getDate();
@@ -1517,13 +1509,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
             mRot = (mRot + 1) % 12;
             if (mRot === 0) rRot += 1;
           }
-          var rot = wyznaczRotowaneGodzinyGrup(rRot, mRot);
-          for (var rk in rot) {
-            if (g.indexOf(rk.toUpperCase()) !== -1 || rk.toUpperCase().indexOf(g) !== -1 || dopasujGrupe(rk, g)) {
-              return rot[rk];
-            }
-          }
-          return '10:00';
+          return (typeof window !== 'undefined' && window.wyznaczGodzineWeekendowaDlaGrupy)
+            ? window.wyznaczGodzineWeekendowaDlaGrupy(grupaNazwa, nazwisko, rRot, mRot, daneTabeli)
+            : wyznaczGodzineWeekendowaDlaGrupy(grupaNazwa, nazwisko, rRot, mRot, daneTabeli);
         }
 
                 var wiersze = daneTabeli.wiersze || [];
@@ -1684,7 +1672,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 }
               } else {
                 if (dow === 6 && cleanG === "17:00") {
-                  maDyzur = (userGodz === "17:00") || !!(kCur && kCur.maDyzur);
+                  maDyzur = (userGodz === "17:00");
                 } else {
                   maDyzur = (userGodz === gStr || userGodz === cleanG) || ((kSun && kSun.maDyzur) && (userGodz === gStr));
                 }
@@ -2802,7 +2790,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       } else {
         // Sprawdź czy to święto / uroczystość (np. 1 listopada - Wszystkich Świętych)
         var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(dt) : null;
-        var isHoliday = (d === 1 && m === 10) || (litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
+        var isHoliday = (d === 1 && m === 10) || (d !== 2 && litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
 
         if (d === 1 && m === 10) {
           // Uroczystość Wszystkich Świętych (1 listopada)
@@ -2896,9 +2884,13 @@ function czyMaDostepDoZakrystii(nazwisko) {
       if (!selD || !selG) return;
       var curStan = zakrystiaStan || {};
       var curR = curStan.rok || (new Date()).getFullYear();
-      var curM = (curStan.miesiacIdx !== undefined) ? curStan.miesiacIdx : (new Date()).getMonth();
+      var curM = (curStan.miesiacIdx !== undefined && curStan.miesiacIdx !== null) ? curStan.miesiacIdx : (new Date()).getMonth();
+      var domyslnyD = (curStan.dzien !== undefined && curStan.dzien !== null) ? curStan.dzien : (new Date()).getDate();
+      var domyslnyM = curM;
       var daysInMonth = (tabelaMiesiacaDane && tabelaMiesiacaDane.dniNaglowek) ? tabelaMiesiacaDane.dniNaglowek.length : new Date(curR, curM + 1, 0).getDate();
       selD.innerHTML = '';
+
+      var matchedSelection = false;
 
       // 1. Dni bieżącego miesiąca
       for (var d = 1; d <= daysInMonth; d++) {
@@ -2906,7 +2898,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
         opt.value = d + '|' + curM + '|' + curR;
         var dayName = pobierzDzienTygodnia(curR, curM, d);
         opt.innerText = d + ' ' + (polishMonthsGenitive[curM] || '') + ' (' + dayName + ')';
-        if (d === curStan.dzien && curM === (curStan.miesiacIdx !== undefined ? curStan.miesiacIdx : (new Date()).getMonth())) opt.selected = true;
+        if (d === domyslnyD && curM === domyslnyM) {
+          opt.selected = true;
+          matchedSelection = true;
+        }
         selD.appendChild(opt);
       }
 
@@ -2918,31 +2913,43 @@ function czyMaDostepDoZakrystii(nazwisko) {
         optN.value = nd + '|' + nextM + '|' + nextR;
         var dayNameN = pobierzDzienTygodnia(nextR, nextM, nd);
         optN.innerText = nd + ' ' + (polishMonthsGenitive[nextM] || '') + ' (' + dayNameN + ')';
-        if (nd === curStan.dzien && curStan.miesiacIdx === nextM) optN.selected = true;
+        if (!matchedSelection && nd === domyslnyD && nextM === domyslnyM) {
+          optN.selected = true;
+          matchedSelection = true;
+        }
         selD.appendChild(optN);
       }
 
-      selD.onchange = async function() {
-        var parts = this.value.split('|');
-        var dVal = parseInt(parts[0], 10);
+      function handleDzienChange() {
+        var val = selD.value || (selD.options[selD.selectedIndex] && selD.options[selD.selectedIndex].value) || '';
+        var parts = val.split('|');
+        var dVal = parseInt(parts[0], 10) || domyslnyD || 1;
         var mVal = parts.length > 1 ? parseInt(parts[1], 10) : curM;
         var rVal = parts.length > 2 ? parseInt(parts[2], 10) : curR;
+
+        // Natychmiastowa, synchroniczna aktualizacja godzin - zero opóźnień i brak starych mszy z października!
+        aktualizujGodzinyZakrystiiDlaDnia(dVal, null, mVal, rVal);
+
+        // Tło asynchroniczne - dociągnięcie ewentualnych specyficznych danych z bazy dla innego miesiąca
         if (mVal !== curM && (!daneKolejnegoMiesiaca || daneKolejnegoMiesiaca.miesiacIdx !== mVal) && typeof dbFirestore !== 'undefined' && dbFirestore) {
           var nKey = (typeof wyznaczKluczMiesiaca === 'function') ? wyznaczKluczMiesiaca(new Date(rVal, mVal, 1)) : ('Listopad_' + rVal);
-          try {
-            var snapN = await dbFirestore.collection('stan_grafiku').doc(nKey).get();
+          dbFirestore.collection('stan_grafiku').doc(nKey).get().then(function(snapN) {
             if (snapN.exists) {
               daneKolejnegoMiesiaca = snapN.data();
               daneKolejnegoMiesiaca.docId = nKey;
               try { localStorage.setItem('min_cached_tabela_' + nKey, JSON.stringify(daneKolejnegoMiesiaca)); } catch(e) {}
+              // Odśwież godziny po załadowaniu danych z bazy
+              aktualizujGodzinyZakrystiiDlaDnia(dVal, null, mVal, rVal);
             }
-          } catch(e) {}
+          }).catch(function() {});
         }
-        aktualizujGodzinyZakrystiiDlaDnia(dVal, null, mVal, rVal);
-      };
+      }
 
-      var curParts = (selD.value || '').split('|');
-      var selDNum = parseInt(curParts[0], 10) || curStan.dzien || 1;
+      selD.onchange = handleDzienChange;
+      selD.oninput = handleDzienChange;
+
+      var curParts = (selD.value || (selD.options[selD.selectedIndex] && selD.options[selD.selectedIndex].value) || '').split('|');
+      var selDNum = parseInt(curParts[0], 10) || domyslnyD || 1;
       var selMNum = curParts.length > 1 ? parseInt(curParts[1], 10) : curM;
       var selRNum = curParts.length > 2 ? parseInt(curParts[2], 10) : curR;
       aktualizujGodzinyZakrystiiDlaDnia(selDNum, curStan.godzina, selMNum, selRNum);

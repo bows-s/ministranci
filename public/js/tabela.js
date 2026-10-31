@@ -311,7 +311,7 @@
       html += '<th class="tbl-sticky-col tbl-header-sticky">Ministrant</th>';
       for (var d = 0; d < naglowek.length; d++) {
         var dayObj = naglowek[d];
-        var isHol = dayObj.czySwieto || (d === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
+        var isHol = (dayObj.czySwieto && dayObj.dzien !== 2) || (d === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
         var dayClass = isHol ? 'tbl-day-holiday' : (dayObj.czyNiedziela ? 'tbl-day-sun' : (dayObj.czySobota ? 'tbl-day-sat' : ''));
         var holidayBadge = isHol ? '<div class="tbl-holiday-badge">ŚWIĘTO</div>' : '';
         var holidayTitle = isHol ? (' title="' + (dayObj.nazwaSwieta || 'Uroczystość Wszystkich Świętych') + ' • Uroczystość (+5 pkt)"') : '';
@@ -374,7 +374,7 @@
         for (var c = 0; c < row.komorki.length; c++) {
           var k = row.komorki[c];
           var dNum = c + 1;
-          var isHol = (naglowek[c] && naglowek[c].czySwieto) || (c === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
+          var isHol = (naglowek[c] && naglowek[c].czySwieto && naglowek[c].dzien !== 2) || (c === 0 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1)));
           var isSun = (naglowek[c] && naglowek[c].czyNiedziela);
           var isSat = (naglowek[c] && naglowek[c].czySobota);
 
