@@ -3206,8 +3206,12 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
       });
 
-      // Sortuj hierarchicznie: Animatorzy -> Lektorzy -> Starsi -> Młodsi -> Kandydaci
+      // Sortuj hierarchicznie: Dyżurny z poniedziałku (Kuba Brytner) na samej górze -> Animatorzy -> Lektorzy -> Starsi -> Młodsi -> Kandydaci
       dostepni.sort(function(a, b) {
+        var isKubaA = (zakrystiaStan && zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(a, 'Jakub Brytner'));
+        var isKubaB = (zakrystiaStan && zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(b, 'Jakub Brytner'));
+        if (isKubaA) return -1;
+        if (isKubaB) return 1;
         var stA = wyznaczStopienMinistranta(a, wRows);
         var stB = wyznaczStopienMinistranta(b, wRows);
         if (stB.ranga !== stA.ranga) return stB.ranga - stA.ranga;
@@ -3240,6 +3244,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                         '<span style="color:#60a5fa; font-weight:600;">' + stInfo.stopien + '</span>' +
                         '<span style="color:#52525b;">•</span>' +
                         '<span>' + gr + '</span>' +
+                        ((zakrystiaStan && zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(name, 'Jakub Brytner')) ? '<span style="color:#22c55e; font-weight:700;">• Dyżurny poniedziałkowy (+5 pkt)</span>' : '') +
                       '</div>' +
                     '</div>' +
                   '</label>';
@@ -3366,8 +3371,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
             pktDlaDodatkowego = juzBylNaDyzurze ? 2 : 1;
             opisDodatkowy = juzBylNaDyzurze ? 'Dodatkowa służba (+2 pkt)' : 'Dodatkowa msza (+1 pkt • po dyżurze +2 pkt)';
           } else {
-            pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 2;
-            opisDodatkowy = 'Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)';
+            var isKubaBrytnerSpecial = (zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(name, 'Jakub Brytner'));
+            pktDlaDodatkowego = isKubaBrytnerSpecial ? 5 : (zakrystiaStan.punktyLiturgii || 3);
+            opisDodatkowy = isKubaBrytnerSpecial ? 'Dyżurny poniedziałkowy (+5 pkt)' : ('Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)');
           }
 
           zakrystiaStan.ministranci.push({
@@ -3858,7 +3864,10 @@ function czyMaDostepDoZakrystii(nazwisko) {
             } else if (m.typ === 'ZASTEPCA') {
               dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
             } else if (m.typ === 'DODATKOWY') {
-              if (zakrystiaStan.recznieUstawionePunkty) {
+              var isKubaBrytnerSpecial = (zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(m.nazwisko, 'Jakub Brytner'));
+              if (isKubaBrytnerSpecial) {
+                dodajPkt = 5;
+              } else if (zakrystiaStan.recznieUstawionePunkty) {
                 dodajPkt = zakrystiaStan.punktyLiturgii || 3;
               } else if (typeof m.obecnyPkt === 'number') {
                 dodajPkt = m.obecnyPkt;
