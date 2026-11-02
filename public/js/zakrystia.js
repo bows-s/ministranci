@@ -2494,14 +2494,19 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
         var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
-        var ptsDlaObecnego = isSwietoL ? (juzBylSwieto ? 2 : 5) : (zakrystiaStan.punktyLiturgii || 3);
-        if (m.typ === 'ZASTEPCA') {
+        var isKubaBrytnerSpecialUI = (zakrystiaStan.dzien === 2 && currentMonthIdx === 10 && czyToSamoNazwisko(m.nazwisko, 'Jakub Brytner'));
+        var ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
+        if (isKubaBrytnerSpecialUI) {
+          ptsDlaObecnego = 5;
+        } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
+          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 4);
+        } else if (m.typ === 'ZASTEPCA') {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
+        } else if (isSwietoL) {
+          ptsDlaObecnego = juzBylSwieto ? 2 : 5;
         } else if (m.typ === 'DODATKOWY') {
           if (zakrystiaStan.recznieUstawionePunkty) {
-            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || (isSwietoL ? (juzBylSwieto ? 2 : 5) : 3);
-          } else if (isSwietoL) {
-            ptsDlaObecnego = juzBylSwieto ? 2 : 5;
+            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
           } else if (typeof m.obecnyPkt === 'number') {
             ptsDlaObecnego = m.obecnyPkt;
           } else if (czyDodatkowa) {
@@ -2509,8 +2514,6 @@ function czyMaDostepDoZakrystii(nazwisko) {
           } else {
             ptsDlaObecnego = czyNiedziela ? 1 : 2;
           }
-        } else {
-          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (isSwietoL ? (juzBylSwieto ? 2 : 5) : (zakrystiaStan.punktyLiturgii || 3));
         }
 
         var badgeHtml = '';
@@ -3357,6 +3360,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
           if (zakrystiaStan.recznieUstawionePunkty) {
             pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 3;
             opisDodatkowy = 'Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)';
+          } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
+            pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 4;
+            opisDodatkowy = (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' ? 'Nabożeństwo (+' : 'Dodatkowa liturgia (+') + pktDlaDodatkowego + ' pkt)';
           } else if (isSwietoL) {
             var juzBylSwieto = czyMinistrantBylJuzNaInnejMszyWSwieto(pRow, zakrystiaStan.dzien - 1, zakrystiaStan.godzina);
             pktDlaDodatkowego = juzBylSwieto ? 2 : 5;
@@ -3853,7 +3859,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var juzBylSwieto = isSwietoL ? czyMinistrantBylJuzNaInnejMszyWSwieto(wM, colIdx, gKey) : false;
 
             var dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
-            if (isSwietoL) {
+            if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
+              dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 4);
+            } else if (isSwietoL) {
               if (m.typ === 'ZASTEPCA') {
                 dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
               } else if (juzBylSwieto) {
