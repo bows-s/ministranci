@@ -405,6 +405,13 @@
             if (raw) cachedTbl = JSON.parse(raw);
           } catch(e) {}
           if (cachedTbl) {
+            var curActKey = pobierzAktywnyKluczMiesiaca();
+            var pAct = (typeof parsujKluczMiesiaca === 'function') ? parsujKluczMiesiaca(curActKey) : null;
+            if (pAct && cachedTbl.miesiacIdx !== undefined && cachedTbl.miesiacIdx !== pAct.miesiacIdx) {
+              cachedTbl = null;
+            }
+          }
+          if (cachedTbl) {
             tabelaMiesiacaDane = cachedTbl;
             var stan2 = generujStanZFirestore(n, cachedTbl);
             if (stan2) {

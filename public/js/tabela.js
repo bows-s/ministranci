@@ -379,6 +379,9 @@
           var isSat = (naglowek[c] && naglowek[c].czySobota);
 
           var czyMaDyzurKomorki = !!k.maDyzur;
+          if (dNum === 2 && (dane.miesiacIdx === 10 || (dane.nazwaMiesiaca && dane.nazwaMiesiaca.toLowerCase().indexOf('listopad') !== -1))) {
+            czyMaDyzurKomorki = false;
+          }
           if ((isSat || isSun || isHol) && typeof wyznaczEfektywnaGodzineWeekendowaDlaMinistranta === 'function') {
             var sunDayNum = isSat ? (dNum + 1) : dNum;
             var efWknd = wyznaczEfektywnaGodzineWeekendowaDlaMinistranta(row, sunDayNum, 0, dane);
