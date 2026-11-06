@@ -256,7 +256,7 @@ async function generujMiesiac(docelowyKlucz, forceOverwrite = false) {
       czyNiedziela: dow === 0,
       czySwieto: !!swieto,
       nazwaSwieta: swieto ? swieto.nazwa : null,
-      punktyZaObecnosc: swieto ? swieto.punkty : (dow === 0 ? 3 : 3)
+      punktyZaObecnosc: swieto ? swieto.punkty : ((dow === 0 || dow === 6) ? 3 : 5)
     });
   }
 

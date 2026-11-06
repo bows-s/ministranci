@@ -251,8 +251,8 @@ async function parseGazetkaPdf(pdfUrl) {
         const isHoliday5Pkt = isWszystkichSwietych || (cur.dayNum === 6 && cur.monthStr === 'stycznia') || (cur.dayNum === 3 && cur.monthStr === 'maja') || (cur.dayNum === 15 && cur.monthStr === 'sierpnia') || (cur.dayNum === 25 && cur.monthStr === 'grudnia') || (cur.dayNum === 26 && cur.monthStr === 'grudnia');
 
         let nazwaMszy = 'Msza św.';
-        let pts = 3;
-        let typMszy = 'msza';
+        let pts = 5;
+        let typMszy = 'msza_tydzien';
 
         if (isHoliday5Pkt) {
           pts = 5;
@@ -261,7 +261,7 @@ async function parseGazetkaPdf(pdfUrl) {
         } else if (isSchoolMass) {
           nazwaMszy = 'Msza św. szkolna';
           typMszy = 'msza_szkolna';
-          pts = 3;
+          pts = 5;
         } else if (isSun) {
           nazwaMszy = 'Msza św. niedzielna';
           typMszy = 'msza_niedziela';
@@ -333,6 +333,9 @@ async function parseGazetkaPdf(pdfUrl) {
     }
 
     const isWszystkichSwietych = (cur.dayNum === 1 && cur.monthStr === 'listopada');
+    const isSunD = cur.dayName.toLowerCase() === 'niedziela';
+    const isSatD = cur.dayName.toLowerCase() === 'sobota';
+    const isWeekdayD = !isSunD && !isSatD;
     daysResult.push({
       dzien: cur.dayNum,
       dzienTygodnia: cur.dayName,
@@ -340,7 +343,7 @@ async function parseGazetkaPdf(pdfUrl) {
       miesiacIdx: monthInfo ? monthInfo.idx : 9,
       czySwieto: isWszystkichSwietych,
       nazwaSwieta: isWszystkichSwietych ? 'Uroczystość Wszystkich Świętych' : null,
-      punktyZaObecnosc: isWszystkichSwietych ? 5 : 3,
+      punktyZaObecnosc: isWszystkichSwietych ? 5 : (isWeekdayD ? 5 : 3),
       msze: msze,
       nabozenstwa: nabozenstwa,
       godzinyMszy: msze.map(m => m.godzina)

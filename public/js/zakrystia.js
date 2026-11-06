@@ -1378,7 +1378,11 @@ function czyMaDostepDoZakrystii(nazwisko) {
             domyslnaNazwa = nFromH.nazwa || 'Nabożeństwo';
           } else if (mFromH) {
             domyslnyRodzaj = (mFromH.typ && mFromH.typ !== 'nabozenstwo') ? mFromH.typ : (isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien'));
-            domyslnePkt = mFromH.punkty || (isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5));
+            var hPts = mFromH.punkty;
+            if (hPts === 3 && dow >= 1 && dow <= 5 && !(dNum === 2 && currentMonthIdx === 10)) {
+              hPts = 5;
+            }
+            domyslnePkt = hPts || (isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5));
             domyslnaNazwa = mFromH.nazwa || (isHoliday5Pkt ? 'Uroczystość Wszystkich Świętych' : 'Msza św.');
           }
         }
@@ -2776,10 +2780,14 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var mNazwa = mItem.nazwa || 'Msza św.';
             // Sanityzacja: w niedzielę lub sobotę nie ma mszy szkolnej z czwartku
             if ((dow === 0 || dow === 6) && (mTyp === 'msza_szkolna' || mNazwa.toLowerCase().indexOf('szkolna') !== -1)) return;
+            var mPts = mItem.punkty;
+            if (mPts === 3 && dow >= 1 && dow <= 5 && !(d === 2 && m === 10)) {
+              mPts = 5;
+            }
             allDayEvents.push({
               godzina: gC,
               rodzaj: mTyp,
-              punkty: mItem.punkty,
+              punkty: mPts,
               nazwa: mNazwa
             });
           });
