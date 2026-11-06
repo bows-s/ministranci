@@ -1358,7 +1358,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         // Podstawowy rodzaj z reguł ogólnych (msze św. są zawsze widoczne):
         var domyslnyRodzaj = isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien');
-        var domyslnePkt = isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5);
+        var domyslnePkt = isHoliday5Pkt ? 5 : 3;
         var domyslnaNazwa = isHoliday5Pkt ? ((litInfo && litInfo.nazwa) ? litInfo.nazwa : 'Uroczystość Wszystkich Świętych') : (isWeekendMass ? (dow === 6 ? 'Msza w niedzielę (sobota 17:00)' : 'Msza w niedzielę') : ((dow === 4 && cleanG === '17:00') ? 'Msza św. szkolna' : 'Msza w tygodniu'));
 
         if (isFirstSatRose) {
@@ -1378,7 +1378,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             domyslnaNazwa = nFromH.nazwa || 'Nabożeństwo';
           } else if (mFromH) {
             domyslnyRodzaj = (mFromH.typ && mFromH.typ !== 'nabozenstwo') ? mFromH.typ : (isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien'));
-            domyslnePkt = mFromH.punkty || (isHoliday5Pkt ? 5 : (isWeekendMass ? 3 : 5));
+            domyslnePkt = mFromH.punkty || (isHoliday5Pkt ? 5 : 3);
             domyslnaNazwa = mFromH.nazwa || (isHoliday5Pkt ? 'Uroczystość Wszystkich Świętych' : 'Msza św.');
           }
         }
@@ -2000,7 +2000,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 dataTekst: dOb.dataTekst || (wybranyDzien + ' ' + (polishMonthsGenitive[parsedTgtZ.miesiacIdx] || '')),
                 dzienTygodnia: dOb.dzienTygodnia || '',
                 rodzajLiturgii: dOb.rodzajLiturgii || 'msza_tydzien',
-                punktyLiturgii: dOb.punktyLiturgii || 5,
+                punktyLiturgii: dOb.punktyLiturgii || 3,
                 nazwaLiturgii: dOb.nazwaLiturgii || 'Msza św.',
                 juzZapisane: true,
                 czyLiturgiaDodatkowa: (dOb.rodzajLiturgii === 'pogrzeb' || dOb.rodzajLiturgii === 'nabozenstwo'),
@@ -2448,7 +2448,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       }
 
       // Podświetlenie aktywnej liczby punktów (+2, +3, +4, +5)
-      var curPts = (zakrystiaStan && zakrystiaStan.punktyLiturgii) ? zakrystiaStan.punktyLiturgii : ((zakrystiaStan && zakrystiaStan.dzienTygodnia === 'niedziela') ? 3 : 5);
+      var curPts = (zakrystiaStan && zakrystiaStan.punktyLiturgii) ? zakrystiaStan.punktyLiturgii : 3;
       [2, 3, 4, 5].forEach(function(p) {
         var pill = document.getElementById('pill-punkty-' + p);
         if (pill) {
@@ -2494,11 +2494,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
 
         var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
         var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
-        var isKubaBrytnerSpecialUI = (zakrystiaStan.dzien === 2 && currentMonthIdx === 10 && czyToSamoNazwisko(m.nazwisko, 'Jakub Brytner'));
         var ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
-        if (isKubaBrytnerSpecialUI) {
-          ptsDlaObecnego = 5;
-        } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
+        if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 4);
         } else if (m.typ === 'ZASTEPCA') {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
@@ -2836,9 +2833,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
           }
           optHtml += '<option value="17:00" data-rodzaj="msza_niedziela" data-punkty="3" data-nazwa="Msza św. - Wigilia niedzielna">17:00 (Msza św. - Wigilia niedzielna - 3 pkt)</option>';
         } else if (dow === 4) {
-          optHtml += '<option value="17:00" data-rodzaj="msza_szkolna" data-punkty="5" data-nazwa="Msza św. szkolna">17:00 (Msza św. szkolna - 5 pkt)</option>';
+          optHtml += '<option value="17:00" data-rodzaj="msza_szkolna" data-punkty="3" data-nazwa="Msza św. szkolna">17:00 (Msza św. szkolna - 3 pkt)</option>';
         } else {
-          optHtml += '<option value="18:00" data-rodzaj="msza_tydzien" data-punkty="5" data-nazwa="Msza św.">18:00 (Msza św. - 5 pkt)</option>';
+          optHtml += '<option value="18:00" data-rodzaj="msza_tydzien" data-punkty="3" data-nazwa="Msza św.">18:00 (Msza św. - 3 pkt)</option>';
         }
       }
 
@@ -3209,12 +3206,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
         }
       });
 
-      // Sortuj hierarchicznie: Dyżurny z poniedziałku (Kuba Brytner) na samej górze -> Animatorzy -> Lektorzy -> Starsi -> Młodsi -> Kandydaci
+      // Sortuj hierarchicznie: Animatorzy -> Lektorzy -> Starsi -> Młodsi -> Kandydaci
       dostepni.sort(function(a, b) {
-        var isKubaA = (zakrystiaStan && zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(a, 'Jakub Brytner'));
-        var isKubaB = (zakrystiaStan && zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(b, 'Jakub Brytner'));
-        if (isKubaA) return -1;
-        if (isKubaB) return 1;
         var stA = wyznaczStopienMinistranta(a, wRows);
         var stB = wyznaczStopienMinistranta(b, wRows);
         if (stB.ranga !== stA.ranga) return stB.ranga - stA.ranga;
@@ -3247,7 +3240,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                         '<span style="color:#60a5fa; font-weight:600;">' + stInfo.stopien + '</span>' +
                         '<span style="color:#52525b;">•</span>' +
                         '<span>' + gr + '</span>' +
-                        ((zakrystiaStan && zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(name, 'Jakub Brytner')) ? '<span style="color:#22c55e; font-weight:700;">• Dyżurny poniedziałkowy (+5 pkt)</span>' : '') +
+
                       '</div>' +
                     '</div>' +
                   '</label>';
@@ -3377,9 +3370,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             pktDlaDodatkowego = juzBylNaDyzurze ? 2 : 1;
             opisDodatkowy = juzBylNaDyzurze ? 'Dodatkowa służba (+2 pkt)' : 'Dodatkowa msza (+1 pkt • po dyżurze +2 pkt)';
           } else {
-            var isKubaBrytnerSpecial = (zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(name, 'Jakub Brytner'));
-            pktDlaDodatkowego = isKubaBrytnerSpecial ? 5 : (zakrystiaStan.punktyLiturgii || 3);
-            opisDodatkowy = isKubaBrytnerSpecial ? 'Dyżurny poniedziałkowy (+5 pkt)' : ('Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)');
+            pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 3;
+            opisDodatkowy = 'Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)';
           }
 
           zakrystiaStan.ministranci.push({
@@ -3872,10 +3864,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             } else if (m.typ === 'ZASTEPCA') {
               dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
             } else if (m.typ === 'DODATKOWY') {
-              var isKubaBrytnerSpecial = (zakrystiaStan.dzien === 2 && zakrystiaStan.miesiacIdx === 10 && czyToSamoNazwisko(m.nazwisko, 'Jakub Brytner'));
-              if (isKubaBrytnerSpecial) {
-                dodajPkt = 5;
-              } else if (zakrystiaStan.recznieUstawionePunkty) {
+              if (zakrystiaStan.recznieUstawionePunkty) {
                 dodajPkt = zakrystiaStan.punktyLiturgii || 3;
               } else if (typeof m.obecnyPkt === 'number') {
                 dodajPkt = m.obecnyPkt;
