@@ -407,6 +407,62 @@
         } else {
           if (desc) desc.innerText = 'Ranking punktów ujemnych w bieżącym miesiącu (' + currentMonthName + ' ' + (stan.rok || (new Date()).getFullYear()) + ').';
           list = (stan.rankingMinusyMiesiac && stan.rankingMinusyMiesiac.length) ? stan.rankingMinusyMiesiac : ((tabelaMiesiacaDane && tabelaMiesiacaDane.rankingMinusyMiesiac) || []);
+          if ((!list || list.length === 0) && (stan.wiersze || (tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze))) {
+            var srcW = stan.wiersze || tabelaMiesiacaDane.wiersze;
+            var curRokD = stan.rok || 2026;
+            var curMIdxD = (stan.miesiacIdx !== undefined) ? stan.miesiacIdx : (new Date()).getMonth();
+            var dniNazwyMinusD = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+            var mGenD = (typeof polishMonthsGenitive !== 'undefined' && polishMonthsGenitive[curMIdxD]) || 'listopada';
+            var dynMap = {};
+            (srcW || []).forEach(function(w) {
+              if (!w || !w.nazwisko) return;
+              var n = w.nazwisko.toLowerCase().trim();
+              if (n === 'kościelny' || n === 'koscielny' || n.indexOf('pokojsk') !== -1) return;
+              var mins = [];
+              (w.komorki || []).forEach(function(c, cIdx) {
+                var dNum = cIdx + 1;
+                var dt = new Date(curRokD, curMIdxD, dNum);
+                var dow = dniNazwyMinusD[dt.getDay()];
+                if (c && c.liturgie && typeof c.liturgie === 'object') {
+                  for (var g in c.liturgie) {
+                    var v = c.liturgie[g];
+                    if (typeof v === 'number' && v < 0) {
+                      mins.push({ dzien: dNum, godzina: g, dow: dow, punkty: v, miesiac: currentMonthName, miesiacGen: mGenD, miesiacIdx: curMIdxD, rok: curRokD });
+                    }
+                  }
+                } else if (c && typeof c.wartosc === 'number' && c.wartosc < 0) {
+                  mins.push({ dzien: dNum, godzina: '', dow: dow, punkty: c.wartosc, miesiac: currentMonthName, miesiacGen: mGenD, miesiacIdx: curMIdxD, rok: curRokD });
+                }
+              });
+              if (mins.length > 0) {
+                dynMap[n] = { nazwisko: w.nazwisko, grupa: w.grupa, mins: mins };
+              }
+            });
+            var dynList = [];
+            for (var dk in dynMap) {
+              var dit = dynMap[dk];
+              var dsum = 0;
+              dit.mins.forEach(function(x) { dsum += x.punkty; });
+              dynList.push({
+                nazwisko: dit.nazwisko,
+                normName: dk,
+                minusy: dsum,
+                szczegolyMinusow: dit.mins,
+                grupa: dit.grupa,
+                pozycja: 1
+              });
+            }
+            dynList.sort(function(a, b) { return a.minusy - b.minusy; });
+            var dp = 1;
+            dynList.forEach(function(m, idx) {
+              if (idx > 0 && m.minusy > dynList[idx - 1].minusy) dp = idx + 1;
+              m.pozycja = dp;
+              m.miejsce = dp;
+            });
+            if (dynList.length > 0) {
+              list = dynList;
+            }
+          }
         }
       }
 

@@ -4418,10 +4418,115 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 r.miejsce = pz;
               });
 
+              // Przeliczenie rankingów minusowych na serwerze
+              var curRokS = sfData.rok || zakrystiaStan.rok || 2026;
+              var curMIdxS = (zakrystiaStan.miesiacIdx !== undefined) ? zakrystiaStan.miesiacIdx : ((sfData.miesiacIdx !== undefined) ? sfData.miesiacIdx : (new Date()).getMonth());
+              var curMNameS = zakrystiaStan.nazwaMiesiaca || sfData.nazwaMiesiaca || (polishMonths && polishMonths[curMIdxS]) || 'Miesiąc';
+              var mGenMinusS = (polishMonthsGenitive && polishMonthsGenitive[curMIdxS]) || '';
+              var dniNazwyMinusS = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+
+              var minusyMiesiacMapS = {};
+              serverWiersze.forEach(function(w) {
+                if (!w || !w.nazwisko) return;
+                var wNorm = w.nazwisko.toLowerCase().trim();
+                if (wNorm === 'kościelny' || wNorm === 'koscielny' || wNorm.indexOf('pokojsk') !== -1) return;
+                var mList = [];
+                (w.komorki || []).forEach(function(k, kIdx) {
+                  var dNum = kIdx + 1;
+                  var dtM = new Date(curRokS, curMIdxS, dNum);
+                  var dowName = dniNazwyMinusS[dtM.getDay()];
+                  if (k && k.liturgie && typeof k.liturgie === 'object') {
+                    for (var gKeyLit in k.liturgie) {
+                      var valL = k.liturgie[gKeyLit];
+                      if (typeof valL === 'number' && valL < 0) {
+                        mList.push({
+                          dzien: dNum,
+                          godzina: gKeyLit,
+                          miesiac: curMNameS,
+                          miesiacGen: mGenMinusS,
+                          miesiacIdx: curMIdxS,
+                          rok: curRokS,
+                          dzienTygodnia: dowName,
+                          punkty: valL
+                        });
+                      }
+                    }
+                  } else if (k && typeof k.wartosc === 'number' && k.wartosc < 0) {
+                    mList.push({
+                      dzien: dNum,
+                      godzina: '',
+                      miesiac: curMNameS,
+                      miesiacGen: mGenMinusS,
+                      miesiacIdx: curMIdxS,
+                      rok: curRokS,
+                      dzienTygodnia: dowName,
+                      punkty: k.wartosc
+                    });
+                  }
+                });
+                if (mList.length > 0) {
+                  minusyMiesiacMapS[wNorm] = { nazwisko: w.nazwisko, grupa: w.grupa, mins: mList };
+                }
+              });
+
+              var serverRMM = [];
+              for (var nKeyS in minusyMiesiacMapS) {
+                var itMM = minusyMiesiacMapS[nKeyS];
+                var sumMMS = 0;
+                itMM.mins.forEach(function(x) { sumMMS += x.punkty; });
+                serverRMM.push({
+                  nazwisko: itMM.nazwisko,
+                  normName: nKeyS,
+                  minusy: sumMMS,
+                  szczegolyMinusow: itMM.mins,
+                  grupa: itMM.grupa,
+                  pozycja: 1
+                });
+              }
+              serverRMM.sort(function(a, b) { return a.minusy - b.minusy; });
+              var pMMS = 1;
+              serverRMM.forEach(function(m, idx) {
+                if (idx > 0 && m.minusy > serverRMM[idx - 1].minusy) pMMS = idx + 1;
+                m.pozycja = pMMS;
+                m.miejsce = pMMS;
+              });
+
+              var serverRMR = Array.isArray(sfData.rankingMinusyRok) ? sfData.rankingMinusyRok.slice() : [];
+              serverWiersze.forEach(function(w) {
+                if (!w || !w.nazwisko) return;
+                var wNorm = w.nazwisko.toLowerCase().trim();
+                if (wNorm === 'kościelny' || wNorm === 'koscielny' || wNorm.indexOf('pokojsk') !== -1) return;
+                var rItem = serverRMR.find(function(it) {
+                  return (it.normName || it.nazwisko || '').toLowerCase().trim() === wNorm;
+                });
+                if (!rItem) {
+                  rItem = { nazwisko: w.nazwisko, normName: wNorm, minusy: 0, szczegolyMinusow: [], grupa: w.grupa, pozycja: 1 };
+                  serverRMR.push(rItem);
+                }
+                var starszeMinusy = (rItem.szczegolyMinusow || []).filter(function(sm) {
+                  return sm.miesiac !== curMNameS && sm.miesiacIdx !== curMIdxS;
+                });
+                var biezaceMinusy = (minusyMiesiacMapS[wNorm] && minusyMiesiacMapS[wNorm].mins) ? minusyMiesiacMapS[wNorm].mins : [];
+                rItem.szczegolyMinusow = starszeMinusy.concat(biezaceMinusy);
+                var totalM = 0;
+                rItem.szczegolyMinusow.forEach(function(sm) { totalM += (sm.punkty || 0); });
+                rItem.minusy = totalM;
+              });
+              serverRMR.sort(function(a, b) { return a.minusy - b.minusy; });
+              var pMRS = 1;
+              serverRMR.forEach(function(m, idx) {
+                if (idx > 0 && m.minusy > serverRMR[idx - 1].minusy) pMRS = idx + 1;
+                m.pozycja = pMRS;
+                m.miejsce = pMRS;
+              });
+
               transaction.update(docRef, {
                 wiersze: serverWiersze,
                 ranking: rNowy,
                 rankingMiesiac: rNowy,
+                rankingMinusyMiesiac: serverRMM,
+                rankingMinusyRok: serverRMR,
+                rankingMinusy: serverRMR,
                 zaktualizowano: firebase.firestore.FieldValue.serverTimestamp()
               });
 
@@ -4429,6 +4534,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 tabelaMiesiacaDane.wiersze = serverWiersze;
                 tabelaMiesiacaDane.ranking = rNowy;
                 tabelaMiesiacaDane.rankingMiesiac = rNowy;
+                tabelaMiesiacaDane.rankingMinusyMiesiac = serverRMM;
+                tabelaMiesiacaDane.rankingMinusyRok = serverRMR;
+                tabelaMiesiacaDane.rankingMinusy = serverRMR;
                 try { localStorage.setItem('min_cached_tabela', JSON.stringify(tabelaMiesiacaDane)); } catch(e) {}
               }
             });
