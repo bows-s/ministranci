@@ -2005,6 +2005,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
                 dzienTygodnia: dOb.dzienTygodnia || '',
                 rodzajLiturgii: dOb.rodzajLiturgii || 'msza_tydzien',
                 punktyLiturgii: dOb.punktyLiturgii || 5,
+                recznieUstawionePunkty: (dOb.recznieUstawionePunkty !== undefined) ? dOb.recznieUstawionePunkty : (dOb.punktyLiturgii !== undefined),
                 nazwaLiturgii: dOb.nazwaLiturgii || 'Msza św.',
                 juzZapisane: true,
                 czyLiturgiaDodatkowa: (dOb.rodzajLiturgii === 'pogrzeb' || dOb.rodzajLiturgii === 'nabozenstwo'),
@@ -2499,16 +2500,16 @@ function czyMaDostepDoZakrystii(nazwisko) {
         var czyNiedziela = (zakrystiaStan.rodzajLiturgii === 'msza_niedziela' || zakrystiaStan.dzienTygodnia === 'niedziela');
         var czyDodatkowa = (zakrystiaStan.rodzajLiturgii === 'pogrzeb' || zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.rodzajLiturgii === 'msza_roza' || zakrystiaStan.czyLiturgiaDodatkowa);
         var ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || (czyNiedziela ? 3 : 5));
-        if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
+        if (zakrystiaStan.recznieUstawionePunkty && zakrystiaStan.punktyLiturgii) {
+          ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : zakrystiaStan.punktyLiturgii;
+        } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 4);
         } else if (m.typ === 'ZASTEPCA') {
           ptsDlaObecnego = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
         } else if (isSwietoL) {
           ptsDlaObecnego = juzBylSwieto ? 2 : 5;
         } else if (m.typ === 'DODATKOWY') {
-          if (zakrystiaStan.recznieUstawionePunkty) {
-            ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
-          } else if (typeof m.obecnyPkt === 'number') {
+          if (typeof m.obecnyPkt === 'number') {
             ptsDlaObecnego = m.obecnyPkt;
           } else if (czyDodatkowa) {
             ptsDlaObecnego = zakrystiaStan.punktyLiturgii || 3;
@@ -3859,7 +3860,9 @@ function czyMaDostepDoZakrystii(nazwisko) {
             var juzBylSwieto = isSwietoL ? czyMinistrantBylJuzNaInnejMszyWSwieto(wM, colIdx, gKey) : false;
 
             var dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 3);
-            if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
+            if (zakrystiaStan.recznieUstawionePunkty && zakrystiaStan.punktyLiturgii) {
+              dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : zakrystiaStan.punktyLiturgii;
+            } else if (zakrystiaStan.rodzajLiturgii === 'nabozenstwo' || zakrystiaStan.czyLiturgiaDodatkowa || (zakrystiaStan.punktyLiturgii && zakrystiaStan.punktyLiturgii === 4)) {
               dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : (zakrystiaStan.punktyLiturgii || 4);
             } else if (isSwietoL) {
               if (m.typ === 'ZASTEPCA') {
@@ -3872,9 +3875,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
             } else if (m.typ === 'ZASTEPCA') {
               dodajPkt = (typeof m.obecnyPkt === 'number') ? m.obecnyPkt : 4;
             } else if (m.typ === 'DODATKOWY') {
-              if (zakrystiaStan.recznieUstawionePunkty) {
-                dodajPkt = zakrystiaStan.punktyLiturgii || 3;
-              } else if (typeof m.obecnyPkt === 'number') {
+              if (typeof m.obecnyPkt === 'number') {
                 dodajPkt = m.obecnyPkt;
               } else if (czyDodatkowa) {
                 dodajPkt = zakrystiaStan.punktyLiturgii || 3;
