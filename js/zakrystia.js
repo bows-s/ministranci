@@ -17,7 +17,7 @@
       if (dNum === 1 && curMIdx === 10) return true; // 1 listopada - Wszystkich Świętych
       if (dNum === 2 && curMIdx === 10) return false; // 2 listopada nie jest świętem 5 pkt
       var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? (daneTabeli.dniNaglowek[dNum - 1] || daneTabeli.dniNaglowek['' + (dNum - 1)]) : null;
-      if (dNaglowek && (dNaglowek.czySwieto || dNaglowek.punktyZaObecnosc === 5)) return true;
+      if (dNaglowek && dNaglowek.czySwieto) return true;
       if (typeof wyznaczDaneLiturgiczne === 'function') {
         var lit = wyznaczDaneLiturgiczne(new Date(curYear || 2026, curMIdx !== undefined ? curMIdx : 9, dNum));
         if (lit && (lit.ranga === 'Uroczystość' || (lit.nazwa && lit.nazwa.indexOf('Wszystkich Świętych') !== -1))) {
@@ -1352,7 +1352,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         // Wykrywanie dni świątecznych i uroczystości (np. 1 listopada - Wszystkich Świętych -> 5 pkt):
         var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? daneTabeli.dniNaglowek[dNum - 1] : null;
         var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(new Date(currentYear, currentMonthIdx, dNum)) : null;
-        var isHoliday5Pkt = (dNaglowek && (dNaglowek.czySwieto || dNaglowek.punktyZaObecnosc === 5)) ||
+        var isHoliday5Pkt = (dNaglowek && dNaglowek.czySwieto) ||
                             (dNum === 1 && currentMonthIdx === 10) || // 1 listopada Wszystkich Świętych
                             (litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
 
