@@ -3379,8 +3379,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
             pktDlaDodatkowego = juzBylNaDyzurze ? 2 : 1;
             opisDodatkowy = juzBylNaDyzurze ? 'Dodatkowa służba (+2 pkt)' : 'Dodatkowa msza (+1 pkt • po dyżurze +2 pkt)';
           } else {
-            pktDlaDodatkowego = zakrystiaStan.punktyLiturgii || 3;
-            opisDodatkowy = 'Dodatkowa służba (+' + pktDlaDodatkowego + ' pkt)';
+            pktDlaDodatkowego = 2;
+            opisDodatkowy = 'Dodatkowa służba (+2 pkt)';
           }
 
           zakrystiaStan.ministranci.push({
