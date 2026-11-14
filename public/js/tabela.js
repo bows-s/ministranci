@@ -594,6 +594,106 @@
       return nazwaMiesiaca;
     }
 
+    var brakPoprzedniegoMiesiacaCache = {};
+
+    function pobierzDaneMiesiacaZPamieciPodsumowanie(klucz) {
+      if (!klucz) return null;
+      var curKey = (typeof pobierzAktywnyKluczMiesiaca === 'function') ? pobierzAktywnyKluczMiesiaca() : 'Październik_2026';
+      var isCurKey = (typeof czyToTenSamKluczMiesiaca === 'function') ? czyToTenSamKluczMiesiaca(klucz, curKey) : (klucz === curKey);
+
+      if (tabelaPrzegladanyMiesiacDane && tabelaPrzegladanyMiesiacDane.wiersze && tabelaPrzegladanyMiesiacDane.wiersze.length) {
+        var matchTbl = false;
+        if (tabelaPrzegladanyMiesiacDane.docId) {
+          matchTbl = (typeof czyToTenSamKluczMiesiaca === 'function') ? czyToTenSamKluczMiesiaca(tabelaPrzegladanyMiesiacDane.docId, klucz) : (tabelaPrzegladanyMiesiacaDane.docId === klucz);
+        } else if (wybranyMiesiacTabeli) {
+          matchTbl = (typeof czyToTenSamKluczMiesiaca === 'function') ? czyToTenSamKluczMiesiaca(wybranyMiesiacTabeli, klucz) : (wybranyMiesiacTabeli === klucz);
+        }
+        if (matchTbl) return tabelaPrzegladanyMiesiacDane;
+      }
+
+      if (daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.wiersze && daneKolejnegoMiesiaca.wiersze.length) {
+        if (typeof czyToTenSamKluczMiesiaca === 'function' && czyToTenSamKluczMiesiaca(klucz, daneKolejnegoMiesiaca.docId)) {
+          return daneKolejnegoMiesiaca;
+        }
+      }
+
+      if (isCurKey && tabelaMiesiacaDane && tabelaMiesiacaDane.wiersze && tabelaMiesiacaDane.wiersze.length) {
+        return tabelaMiesiacaDane;
+      }
+
+      if (typeof localStorage !== 'undefined') {
+        try {
+          var altK = (typeof wyznaczWariantKluczaMiesiaca === 'function') ? wyznaczWariantKluczaMiesiaca(klucz) : klucz;
+          var rawC = localStorage.getItem('min_cached_tabela_' + klucz) || localStorage.getItem('min_cached_tabela_' + altK);
+          if (rawC) {
+            var parsedC = JSON.parse(rawC);
+            if (parsedC && parsedC.wiersze && parsedC.wiersze.length) {
+              return parsedC;
+            }
+          }
+        } catch(e) {}
+      }
+      return null;
+    }
+
+    function obliczStatystykiPodsumowaniaMiesiaca(dane) {
+      if (!dane || !dane.wiersze || !dane.wiersze.length) return null;
+      var wiersze = dane.wiersze;
+      var servers = wiersze.filter(function(w) {
+        if (!w || !w.nazwisko) return false;
+        var n = w.nazwisko.toLowerCase().trim();
+        return n !== 'kościelny' && n !== 'koscielny' && n.indexOf('proboszcz') === -1;
+      }).map(function(w) {
+        var msze = wyliczObecnosciMinistranta(w.komorki);
+        var stInfo = (typeof wyznaczStopienMinistranta === 'function') ? wyznaczStopienMinistranta(w.nazwisko, wiersze) : { stopien: w.stopien || 'Ministrant' };
+        var stopienNazwa = stInfo.stopien || w.stopien || 'Ministrant';
+        var grParaf = (typeof wyznaczGrupeParafialna === 'function') ? wyznaczGrupeParafialna(w.nazwisko, w.grupa) : (w.grupa || 'Grupa');
+
+        return {
+          nazwisko: w.nazwisko,
+          stopien: stopienNazwa,
+          grupa: grParaf,
+          punkty: (typeof w.suma === 'number') ? w.suma : 0,
+          msze: msze
+        };
+      });
+
+      var totalOsob = servers.length;
+      var sumPkt = servers.reduce(function(acc, s) { return acc + s.punkty; }, 0);
+      var sumMsze = servers.reduce(function(acc, s) { return acc + s.msze; }, 0);
+      var srPktNum = totalOsob > 0 ? (sumPkt / totalOsob) : 0;
+      var srMszeNum = totalOsob > 0 ? (sumMsze / totalOsob) : 0;
+
+      return {
+        servers: servers,
+        totalOsob: totalOsob,
+        sumPkt: sumPkt,
+        sumMsze: sumMsze,
+        srPktNum: srPktNum,
+        srMszeNum: srMszeNum,
+        srPkt: srPktNum.toFixed(2),
+        srMsze: srMszeNum.toFixed(2)
+      };
+    }
+
+    function formatujRoznicePodsumowania(aktualna, poprzednia, czyCalkowita) {
+      if (poprzednia === null || typeof poprzednia !== 'number' || isNaN(poprzednia)) return '';
+      var diff = aktualna - poprzednia;
+      var diffRounded = czyCalkowita ? Math.round(diff) : (Math.round(diff * 100) / 100);
+      var label, color;
+      if (diffRounded > 0) {
+        label = '▲ +' + (czyCalkowita ? diffRounded : diffRounded.toFixed(2));
+        color = '#15803d';
+      } else if (diffRounded < 0) {
+        label = '▼ ' + (czyCalkowita ? diffRounded : diffRounded.toFixed(2));
+        color = '#b91c1c';
+      } else {
+        label = '= ' + (czyCalkowita ? '0' : '0.00');
+        color = '#64748b';
+      }
+      return ' <span style="font-size:11px; font-weight:700; color:' + color + '; margin-left:4px;">(' + label + ')</span>';
+    }
+
     function renderujPodsumowanieMiesiacaDoDruku(optDocKey) {
       var selTbl = document.getElementById('select-miesiac-tabeli');
       var selRank = document.getElementById('select-ranking-miesiac');
@@ -758,7 +858,51 @@
       var sumPkt = servers.reduce(function(acc, s) { return acc + s.punkty; }, 0);
       var sumMsze = servers.reduce(function(acc, s) { return acc + s.msze; }, 0);
       var srPkt = totalOsob > 0 ? (sumPkt / totalOsob).toFixed(2) : '0.00';
-      var srMsze = totalOsob > 0 ? (sumMsze / totalOsob).toFixed(2) : '0.00';
+      var srPktNum = totalOsob > 0 ? (sumPkt / totalOsob) : 0;
+      var srMszeNum = totalOsob > 0 ? (sumMsze / totalOsob) : 0;
+      var srPkt = srPktNum.toFixed(2);
+      var srMsze = srMszeNum.toFixed(2);
+
+      // Porównanie z poprzednim miesiącem
+      var prevKey = (typeof wyznaczPoprzedniKluczMiesiaca === 'function') ? wyznaczPoprzedniKluczMiesiaca(targetKey) : null;
+      var prevDane = prevKey ? pobierzDaneMiesiacaZPamieciPodsumowanie(prevKey) : null;
+      var statsPrev = prevDane ? obliczStatystykiPodsumowaniaMiesiaca(prevDane) : null;
+
+      if (prevKey && !prevDane && !brakPoprzedniegoMiesiacaCache[prevKey] && dbFirestore) {
+        brakPoprzedniegoMiesiacaCache[prevKey] = 'pending';
+        var altPrevKey = (typeof wyznaczWariantKluczaMiesiaca === 'function') ? wyznaczWariantKluczaMiesiaca(prevKey) : prevKey;
+        (function(pKey, aKey, curTKey) {
+          function pobierzPrevDoc(idK) {
+            return dbFirestore.collection('stan_grafiku').doc(idK).get().then(function(snap) {
+              if (snap.exists && snap.data() && snap.data().wiersze && snap.data().wiersze.length) {
+                var pData = snap.data();
+                pData.docId = idK;
+                try { localStorage.setItem('min_cached_tabela_' + idK, JSON.stringify(pData)); } catch(e) {}
+                delete brakPoprzedniegoMiesiacaCache[pKey];
+                renderujPodsumowanieMiesiacaDoDruku(curTKey);
+                return true;
+              }
+              return false;
+            });
+          }
+          pobierzPrevDoc(pKey).then(function(found) {
+            if (!found && aKey !== pKey) {
+              return pobierzPrevDoc(aKey);
+            }
+            return found;
+          }).then(function(foundFinal) {
+            if (!foundFinal) {
+              brakPoprzedniegoMiesiacaCache[pKey] = true;
+            }
+          }).catch(function() {
+            brakPoprzedniegoMiesiacaCache[pKey] = true;
+          });
+        })(prevKey, altPrevKey, targetKey);
+      }
+
+      var diffSrPktHtml = statsPrev ? formatujRoznicePodsumowania(srPktNum, statsPrev.srPktNum, false) : '';
+      var diffSrMszeHtml = statsPrev ? formatujRoznicePodsumowania(srMszeNum, statsPrev.srMszeNum, false) : '';
+      var diffSumMszeHtml = statsPrev ? formatujRoznicePodsumowania(sumMsze, statsPrev.sumMsze, true) : '';
 
       // Grupy (I, II, III, IV)
       var grupyMap = {};
@@ -864,15 +1008,15 @@
           '<table style="width:100%; border-collapse:collapse; font-size:11.5px;">' +
             '<tr style="background:#f8fafc; border-bottom:1px solid #cbd5e1;">' +
               '<td style="padding:7px 12px; font-weight:700; color:#334155;">Średnia punktów na ministranta</td>' +
-              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a; width:130px;">' + srPkt + '</td>' +
+              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a; width:210px; white-space:nowrap;">' + srPkt + diffSrPktHtml + '</td>' +
             '</tr>' +
             '<tr style="background:#ffffff; border-bottom:1px solid #cbd5e1;">' +
               '<td style="padding:7px 12px; font-weight:700; color:#334155;">Średnia obecności na ministranta</td>' +
-              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a;">' + srMsze + '</td>' +
+              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a; white-space:nowrap;">' + srMsze + diffSrMszeHtml + '</td>' +
             '</tr>' +
             '<tr style="background:#f8fafc;">' +
               '<td style="padding:7px 12px; font-weight:700; color:#334155;">Łączna liczba obecności w miesiącu</td>' +
-              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a;">' + sumMsze + '</td>' +
+              '<td style="padding:7px 12px; font-weight:800; text-align:right; font-size:12.5px; color:#0f172a; white-space:nowrap;">' + sumMsze + diffSumMszeHtml + '</td>' +
             '</tr>' +
           '</table>' +
         '</div>' +
