@@ -345,3 +345,48 @@
     window.wyslijPowiadomienieTelegram = wyslijPowiadomienieTelegram;
     window.TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN;
     window.TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID;
+
+    // =============================================================
+    // DOMYŚLNE STAŁE DNI SŁUŻBY MINISTRANTÓW W TYGODNIU (1=Pn..5=Pt, -1=brak)
+    // =============================================================
+    var DOMYSLNE_STALE_DNI_MINISTRANTOW = {
+      "jakub brytner": 1,
+      "mateusz pierścieński": 1,
+      "maks erich": 2,
+      "ksawery skrzypek": 2,
+      "michał kupiec": 2,
+      "franek kik": 2,
+      "jan radliński": 4,
+      "rafał danielczok": 4,
+      "bartosz rozik": 4,
+      "marcel mazurkiewicz": 4,
+      "maciej erich": 5,
+      "mikołaj erich": 5,
+      "emil czech": 5,
+      "wiktor kowalski": -1,
+      "paweł głaz": -1,
+      "michał danielczok": -1
+    };
+
+    function wyznaczDomyslnyStalyDzienMinistranta(nazwisko) {
+      if (!nazwisko) return null;
+      var norm = String(nazwisko).toLowerCase().trim();
+      if (Object.prototype.hasOwnProperty.call(DOMYSLNE_STALE_DNI_MINISTRANTOW, norm)) {
+        return DOMYSLNE_STALE_DNI_MINISTRANTOW[norm];
+      }
+      var ascii = function(s) {
+        return String(s || '').toLowerCase().trim()
+          .replace(/ł/g, 'l').replace(/ą/g, 'a').replace(/ę/g, 'e')
+          .replace(/ś/g, 's').replace(/ć/g, 'c').replace(/ż/g, 'z')
+          .replace(/ź/g, 'z').replace(/ń/g, 'n').replace(/ó/g, 'o');
+      };
+      var normA = ascii(norm);
+      for (var k in DOMYSLNE_STALE_DNI_MINISTRANTOW) {
+        if (Object.prototype.hasOwnProperty.call(DOMYSLNE_STALE_DNI_MINISTRANTOW, k) && ascii(k) === normA) {
+          return DOMYSLNE_STALE_DNI_MINISTRANTOW[k];
+        }
+      }
+      return null;
+    }
+    window.DOMYSLNE_STALE_DNI_MINISTRANTOW = DOMYSLNE_STALE_DNI_MINISTRANTOW;
+    window.wyznaczDomyslnyStalyDzienMinistranta = wyznaczDomyslnyStalyDzienMinistranta;

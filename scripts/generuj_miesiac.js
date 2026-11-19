@@ -9,6 +9,58 @@ const POLSKIE_MIESIACE = [
 ];
 const SKROTY_DNI = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "Sb"];
 
+const DOMYSLNE_STALE_DNI_MINISTRANTOW = {
+  "jakub brytner": 1,
+  "mateusz pierścieński": 1,
+  "maks erich": 2,
+  "ksawery skrzypek": 2,
+  "michał kupiec": 2,
+  "franek kik": 2,
+  "jan radliński": 4,
+  "rafał danielczok": 4,
+  "bartosz rozik": 4,
+  "marcel mazurkiewicz": 4,
+  "maciej erich": 5,
+  "mikołaj erich": 5,
+  "emil czech": 5,
+  "wiktor kowalski": -1,
+  "paweł głaz": -1,
+  "michał danielczok": -1
+};
+
+function normalizujNazwiskoAscii(s) {
+  return String(s || '').toLowerCase().trim()
+    .replace(/ł/g, 'l').replace(/ą/g, 'a').replace(/ę/g, 'e')
+    .replace(/ś/g, 's').replace(/ć/g, 'c').replace(/ż/g, 'z')
+    .replace(/ź/g, 'z').replace(/ń/g, 'n').replace(/ó/g, 'o');
+}
+
+function wyznaczDomyslnyStalyDzien(nazwisko) {
+  if (!nazwisko) return null;
+  const norm = String(nazwisko).toLowerCase().trim();
+  if (Object.prototype.hasOwnProperty.call(DOMYSLNE_STALE_DNI_MINISTRANTOW, norm)) {
+    return DOMYSLNE_STALE_DNI_MINISTRANTOW[norm];
+  }
+  const normA = normalizujNazwiskoAscii(norm);
+  for (const k in DOMYSLNE_STALE_DNI_MINISTRANTOW) {
+    if (Object.prototype.hasOwnProperty.call(DOMYSLNE_STALE_DNI_MINISTRANTOW, k) && normalizujNazwiskoAscii(k) === normA) {
+      return DOMYSLNE_STALE_DNI_MINISTRANTOW[k];
+    }
+  }
+  return null;
+}
+
+function znajdzWpisStalychDni(staleDniCfg, nazwisko) {
+  if (!staleDniCfg || !nazwisko) return null;
+  const normA = normalizujNazwiskoAscii(nazwisko);
+  for (const k in staleDniCfg) {
+    if (Object.prototype.hasOwnProperty.call(staleDniCfg, k) && normalizujNazwiskoAscii(k) === normA) {
+      return staleDniCfg[k];
+    }
+  }
+  return null;
+}
+
 // Stałe uroczystości i święta nakazane / specjalne (z podwyższoną punktacją, np. 5 pkt za Wszystkich Świętych)
 const SWIETA_LITURGICZNE_STALE = {
   "01-01": { nazwa: "Uroczystość Świętej Bożej Rodzicielki", punkty: 5, porzadekNiedzielny: true },
@@ -238,6 +290,14 @@ async function generujMiesiac(docelowyKlucz, forceOverwrite = false) {
 
   const baza = bazaDoc.data;
 
+  let staleDniCfg = {};
+  try {
+    const sdDoc = await pobierzDokument('konfiguracja', 'stale_dni');
+    if (sdDoc.exists && sdDoc.data) staleDniCfg = sdDoc.data;
+  } catch (e) {
+    console.warn('Nie udało się odczytać konfiguracja/stale_dni:', e.message);
+  }
+
   // 3. Obliczenie dni docelowego miesiąca oraz świąt i uroczystości
   const dniWNowym = new Date(targetRok, targetMIdx + 1, 0).getDate();
   const dniNaglowek = [];
@@ -278,9 +338,17 @@ async function generujMiesiac(docelowyKlucz, forceOverwrite = false) {
       continue;
     }
 
-    // Ustalenie stałego dnia tygodnia z poprzedniego miesiąca (Pn-Pt)
-    let stalyDzienTygodnia = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia > 0) ? w.stalyDzienTygodnia : -1;
-    if (stalyDzienTygodnia === -1 && w.komorki && w.komorki.length) {
+    // Ustalenie stałego dnia tygodnia (konfiguracja/stale_dni > wiersz poprzedniego miesiąca > domyślna mapa > skan komórek)
+    const cfgEntry = znajdzWpisStalychDni(staleDniCfg, w.nazwisko);
+    const domyslnyStaly = wyznaczDomyslnyStalyDzien(w.nazwisko);
+    let stalyDzienTygodnia = -1;
+    if (cfgEntry && cfgEntry.stalyDzien > 0) {
+      stalyDzienTygodnia = cfgEntry.stalyDzien;
+    } else if (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia !== null && w.stalyDzienTygodnia > 0) {
+      stalyDzienTygodnia = w.stalyDzienTygodnia;
+    } else if ((w.stalyDzienTygodnia === undefined || w.stalyDzienTygodnia === null) && domyslnyStaly !== null) {
+      stalyDzienTygodnia = domyslnyStaly;
+    } else if (w.stalyDzienTygodnia !== -1 && domyslnyStaly !== -1 && w.komorki && w.komorki.length) {
       for (let dayIdx = 0; dayIdx < w.komorki.length; dayIdx++) {
         const dtPrev = new Date(baza.rok || 2026, baza.miesiacIdx !== undefined ? baza.miesiacIdx : 8, dayIdx + 1);
         const dowPrev = dtPrev.getDay();
@@ -320,7 +388,7 @@ async function generujMiesiac(docelowyKlucz, forceOverwrite = false) {
       stopien: w.stopien || "Ministrant",
       stopienRanga: w.stopienRanga || 1,
       stalyDzienTygodnia: stalyDzienTygodnia,
-      ostatniaZmianaDnia: w.ostatniaZmianaDnia || null,
+      ostatniaZmianaDnia: (cfgEntry && cfgEntry.ostatniaZmiana) || w.ostatniaZmianaDnia || null,
       komorki: noweKomorki,
       suma: 0
     });

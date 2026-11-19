@@ -109,6 +109,11 @@
         }
 
         var rotowaneGodziny = wyznaczRotowaneGodzinyGrup(targetRok, targetMIdx);
+        var staleDniCfg = {};
+        try {
+          var sdSnap = await dbFirestore.collection('konfiguracja').doc('stale_dni').get();
+          if (sdSnap && sdSnap.exists && sdSnap.data()) staleDniCfg = sdSnap.data();
+        } catch(e) {}
         var noweWiersze = [];
         var lp = 1;
 
@@ -117,8 +122,23 @@
           if (!w || !w.nazwisko) continue;
           if (w.nazwisko.toLowerCase().indexOf('mateusz pokojski') !== -1) continue;
 
-          var stalyDzien = (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia > 0) ? w.stalyDzienTygodnia : -1;
-          if (stalyDzien === -1 && w.komorki && w.komorki.length) {
+          var cfgEntry = null;
+          for (var sdKey in staleDniCfg) {
+            if (Object.prototype.hasOwnProperty.call(staleDniCfg, sdKey) && czyToTenSamMinistrant(sdKey, w.nazwisko)) {
+              cfgEntry = staleDniCfg[sdKey];
+              break;
+            }
+          }
+
+          var domyslnyStaly = (typeof wyznaczDomyslnyStalyDzienMinistranta === 'function') ? wyznaczDomyslnyStalyDzienMinistranta(w.nazwisko) : null;
+          var stalyDzien = -1;
+          if (cfgEntry && cfgEntry.stalyDzien > 0) {
+            stalyDzien = cfgEntry.stalyDzien;
+          } else if (w.stalyDzienTygodnia !== undefined && w.stalyDzienTygodnia !== null && w.stalyDzienTygodnia > 0) {
+            stalyDzien = w.stalyDzienTygodnia;
+          } else if ((w.stalyDzienTygodnia === undefined || w.stalyDzienTygodnia === null) && domyslnyStaly !== null) {
+            stalyDzien = domyslnyStaly;
+          } else if (w.stalyDzienTygodnia !== -1 && domyslnyStaly !== -1 && w.komorki && w.komorki.length) {
             for (var dayIdx = 0; dayIdx < w.komorki.length; dayIdx++) {
               var dtPrev = new Date(baza.rok || (new Date()).getFullYear(), baza.miesiacIdx !== undefined ? baza.miesiacIdx : (targetMIdx === 0 ? 11 : targetMIdx - 1), dayIdx + 1);
               var dowPrev = dtPrev.getDay();
@@ -144,7 +164,7 @@
             stopien: w.stopien || "Ministrant",
             stopienRanga: w.stopienRanga || 1,
             stalyDzienTygodnia: stalyDzien,
-            ostatniaZmianaDnia: w.ostatniaZmianaDnia || null,
+            ostatniaZmianaDnia: (cfgEntry && cfgEntry.ostatniaZmiana) || w.ostatniaZmianaDnia || null,
             komorki: noweKomorki,
             suma: 0
           });

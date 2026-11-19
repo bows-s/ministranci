@@ -130,10 +130,10 @@
     function pobierzGodzineDlaDniaTygodnia(rok, miesiacIdx, dzien) {
       if (dzien) {
         var hD = null;
-        if (typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni) {
+        var curActiveM = (typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane && tabelaMiesiacaDane.miesiacIdx !== undefined) ? tabelaMiesiacaDane.miesiacIdx : (new Date()).getMonth();
+        if (miesiacIdx === curActiveM && typeof tabelaMiesiacaDane !== 'undefined' && tabelaMiesiacaDane && tabelaMiesiacaDane.harmonogramDni) {
           hD = tabelaMiesiacaDane.harmonogramDni[dzien] || tabelaMiesiacaDane.harmonogramDni['' + dzien];
-        }
-        if (!hD && typeof daneKolejnegoMiesiaca !== 'undefined' && daneKolejnegoMiesiaca && daneKolejnegoMiesiaca.harmonogramDni) {
+        } else if (typeof daneKolejnegoMiesiaca !== 'undefined' && daneKolejnegoMiesiaca && (daneKolejnegoMiesiaca.miesiacIdx === miesiacIdx || daneKolejnegoMiesiaca.miesiacIdx === undefined) && daneKolejnegoMiesiaca.harmonogramDni) {
           hD = daneKolejnegoMiesiaca.harmonogramDni[dzien] || daneKolejnegoMiesiaca.harmonogramDni['' + dzien];
         }
         if (hD && hD.msze && hD.msze.length > 0) {
@@ -300,3 +300,93 @@
       return clean(k1) === clean(k2);
     }
     window.czyToTenSamKluczMiesiaca = czyToTenSamKluczMiesiaca;
+
+    // =============================================================
+    // WYSYŁKA POWIADOMIEŃ TELEGRAM (ALERT BOT)
+    // =============================================================
+    var TELEGRAM_BOT_TOKEN = '8928454251:AAERM9vwRwolBiXGhO4RoGgbuytobqE9X9g';
+    var TELEGRAM_CHAT_ID = '1953233927';
+    var ostatniePowiadomieniaTelegram = {};
+
+    function wyslijPowiadomienieTelegram(tekst) {
+      try {
+        if (!tekst) return Promise.resolve();
+        var teraz = Date.now();
+        if (ostatniePowiadomieniaTelegram[tekst] && (teraz - ostatniePowiadomieniaTelegram[tekst] < 60 * 1000)) {
+          console.log('[Telegram] Pomijam powtórzone powiadomienie (antyspam 60s):', (tekst || '').substring(0, 30));
+          return Promise.resolve();
+        }
+        ostatniePowiadomieniaTelegram[tekst] = teraz;
+        return fetch('https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: tekst,
+            parse_mode: 'HTML'
+          })
+        }).then(function(res) {
+          return res.json();
+        }).then(function(data) {
+          if (data && data.ok) {
+            console.log('[Telegram] Powiadomienie wysłane pomyślnie!');
+          } else {
+            console.warn('[Telegram] Błąd wysyłki powiadomienia:', data && data.description);
+          }
+          return data;
+        }).catch(function(err) {
+          console.warn('[Telegram] Błąd sieciowy podczas wysyłania powiadomienia:', err);
+        });
+      } catch(e) {
+        console.warn('[Telegram] Wyjątek podczas wysyłania powiadomienia:', e);
+        return Promise.resolve();
+      }
+    }
+    window.wyslijPowiadomienieTelegram = wyslijPowiadomienieTelegram;
+    window.TELEGRAM_BOT_TOKEN = TELEGRAM_BOT_TOKEN;
+    window.TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID;
+
+    // =============================================================
+    // DOMYŚLNE STAŁE DNI SŁUŻBY MINISTRANTÓW W TYGODNIU (1=Pn..5=Pt, -1=brak)
+    // =============================================================
+    var DOMYSLNE_STALE_DNI_MINISTRANTOW = {
+      "jakub brytner": 1,
+      "mateusz pierścieński": 1,
+      "maks erich": 2,
+      "ksawery skrzypek": 2,
+      "michał kupiec": 2,
+      "franek kik": 2,
+      "jan radliński": 4,
+      "rafał danielczok": 4,
+      "bartosz rozik": 4,
+      "marcel mazurkiewicz": 4,
+      "maciej erich": 5,
+      "mikołaj erich": 5,
+      "emil czech": 5,
+      "wiktor kowalski": -1,
+      "paweł głaz": -1,
+      "michał danielczok": -1
+    };
+
+    function wyznaczDomyslnyStalyDzienMinistranta(nazwisko) {
+      if (!nazwisko) return null;
+      var norm = String(nazwisko).toLowerCase().trim();
+      if (Object.prototype.hasOwnProperty.call(DOMYSLNE_STALE_DNI_MINISTRANTOW, norm)) {
+        return DOMYSLNE_STALE_DNI_MINISTRANTOW[norm];
+      }
+      var ascii = function(s) {
+        return String(s || '').toLowerCase().trim()
+          .replace(/ł/g, 'l').replace(/ą/g, 'a').replace(/ę/g, 'e')
+          .replace(/ś/g, 's').replace(/ć/g, 'c').replace(/ż/g, 'z')
+          .replace(/ź/g, 'z').replace(/ń/g, 'n').replace(/ó/g, 'o');
+      };
+      var normA = ascii(norm);
+      for (var k in DOMYSLNE_STALE_DNI_MINISTRANTOW) {
+        if (Object.prototype.hasOwnProperty.call(DOMYSLNE_STALE_DNI_MINISTRANTOW, k) && ascii(k) === normA) {
+          return DOMYSLNE_STALE_DNI_MINISTRANTOW[k];
+        }
+      }
+      return null;
+    }
+    window.DOMYSLNE_STALE_DNI_MINISTRANTOW = DOMYSLNE_STALE_DNI_MINISTRANTOW;
+    window.wyznaczDomyslnyStalyDzienMinistranta = wyznaczDomyslnyStalyDzienMinistranta;
