@@ -97,17 +97,31 @@ function patchDoc(col, id, payload, fieldPaths) {
 async function run() {
   const doc = await getDoc('stan_grafiku', 'Listopad_2026');
   const h = doc.harmonogramDni || {};
-  const d21 = h['21'];
-  if (!d21) throw new Error('Brak harmonogramDni["21"]!');
-  console.log('Przed:', JSON.stringify(d21));
 
-  d21.msze = (d21.msze || []).filter(m => m.godzina !== '16:30');
-  d21.godzinyMszy = (d21.godzinyMszy || []).filter(g => g !== '16:30');
-  h['21'] = d21;
+  for (const dayKey of ['21', '28']) {
+    const dObj = h[dayKey];
+    if (!dObj) {
+      console.log(`Brak harmonogramDni["${dayKey}"] - pomijam.`);
+      continue;
+    }
+    console.log(`Przed [${dayKey}]:`, JSON.stringify(dObj));
+    dObj.msze = (dObj.msze || []).filter(m => m.godzina !== '16:30');
+    dObj.godzinyMszy = (dObj.godzinyMszy || []).filter(g => g !== '16:30');
+    dObj.nabozenstwa = (dObj.nabozenstwa || []).filter(n => n.godzina !== '16:30');
+    dObj.nabozenstwa.push({
+      godzina: '16:30',
+      nazwa: 'Adoracja Najświętszego Sakramentu',
+      punkty: 2,
+      typ: 'nabozenstwo',
+      samodzielne: false
+    });
+    h[dayKey] = dObj;
+  }
 
   await patchDoc('stan_grafiku', 'Listopad_2026', { harmonogramDni: h }, ['harmonogramDni']);
   const after = await getDoc('stan_grafiku', 'Listopad_2026');
-  console.log('Po:', JSON.stringify(after.harmonogramDni['21']));
+  console.log('Po [21]:', JSON.stringify(after.harmonogramDni['21']));
+  console.log('Po [28]:', JSON.stringify(after.harmonogramDni['28']));
 }
 
 run().catch(err => {

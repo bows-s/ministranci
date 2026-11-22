@@ -222,9 +222,12 @@ async function parseGazetkaPdf(pdfUrl) {
       const descAfterTime = itemDesc.replace(/^\d{1,2}[.:]\d{2}\s*/, '').trim();
 
       const isRosary = /^(?:nabożeństwo\s+różańcowe|różaniec)/i.test(descAfterTime);
+      const isAdoration = /^adoracj/i.test(descAfterTime);
+      const isOtherDevotion = /^(?:nabożeństwo|droga\s+krzyżowa|gorzkie\s+żale|nieszpory|nowenna|koronka|godzinki)/i.test(descAfterTime);
+      const isDevotion = isRosary || isAdoration || isOtherDevotion;
       const isSchoolMass = /szkoln/i.test(descAfterTime);
 
-      if (isRosary) {
+      if (isDevotion) {
         // Sprawdź czy to osobne nabożeństwo bez mszy (np. niedziela o 15:00, brak mszy w pobliżu):
         // Za osobną fatygę i przyjście do kościoła tylko na to nabożeństwo zamiast 2 przyznajemy 3 punkty!
         const [curH, curM] = tCur.timeStr.split(':').map(Number);
@@ -237,9 +240,19 @@ async function parseGazetkaPdf(pdfUrl) {
         });
         const isStandalone = !isAttachedToMass;
 
+        let nazwaNab = 'Nabożeństwo';
+        if (isRosary) nazwaNab = 'Nabożeństwo Różańcowe';
+        else if (isAdoration) nazwaNab = 'Adoracja Najświętszego Sakramentu';
+        else if (/^droga\s+krzyżowa/i.test(descAfterTime)) nazwaNab = 'Droga Krzyżowa';
+        else if (/^gorzkie\s+żale/i.test(descAfterTime)) nazwaNab = 'Gorzkie Żale';
+        else if (/^nieszpory/i.test(descAfterTime)) nazwaNab = 'Nieszpory';
+        else if (/^nowenna/i.test(descAfterTime)) nazwaNab = 'Nowenna';
+        else if (/^koronka/i.test(descAfterTime)) nazwaNab = 'Koronka';
+        else if (/^godzinki/i.test(descAfterTime)) nazwaNab = 'Godzinki';
+
         nabozenstwa.push({
           godzina: tCur.timeStr,
-          nazwa: 'Nabożeństwo Różańcowe',
+          nazwa: nazwaNab,
           punkty: isStandalone ? 3 : 2,
           typ: 'nabozenstwo',
           samodzielne: isStandalone
