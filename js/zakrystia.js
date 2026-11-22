@@ -17,10 +17,24 @@
       if (dNum === 1 && curMIdx === 10) return true; // 1 listopada - Wszystkich Świętych
       if (dNum === 2 && curMIdx === 10) return false; // 2 listopada nie jest świętem 5 pkt
       var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? (daneTabeli.dniNaglowek[dNum - 1] || daneTabeli.dniNaglowek['' + (dNum - 1)]) : null;
-      if (dNaglowek && dNaglowek.czySwieto) return true;
+      if (dNaglowek) {
+        return !!(dNaglowek.czySwieto && dNaglowek.punktyZaObecnosc === 5);
+      }
+      // Fallback (gdy brak nagłówka dnia): wyłącznie główne święta nakazane 5 pkt (nie każda niedzielna Uroczystość!)
+      var mm = String((curMIdx !== undefined ? curMIdx : 9) + 1).padStart(2, '0');
+      var dd = String(dNum).padStart(2, '0');
+      var key = mm + '-' + dd;
+      if (key === '01-01' || key === '01-06' || key === '05-03' || key === '08-15' || key === '11-01' || key === '12-25' || key === '12-26') {
+        return true;
+      }
       if (typeof wyznaczDaneLiturgiczne === 'function') {
         var lit = wyznaczDaneLiturgiczne(new Date(curYear || 2026, curMIdx !== undefined ? curMIdx : 9, dNum));
-        if (lit && (lit.ranga === 'Uroczystość' || (lit.nazwa && lit.nazwa.indexOf('Wszystkich Świętych') !== -1))) {
+        if (lit && lit.nazwa && (
+          lit.nazwa.indexOf('Zmartwychwstania Pańskiego') !== -1 ||
+          lit.nazwa.indexOf('Poniedziałek Wielkanocny') !== -1 ||
+          lit.nazwa.indexOf('Boże Ciało') !== -1 ||
+          lit.nazwa.indexOf('Wszystkich Świętych') !== -1
+        )) {
           return true;
         }
       }
@@ -1352,9 +1366,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
         // Wykrywanie dni świątecznych i uroczystości (np. 1 listopada - Wszystkich Świętych -> 5 pkt):
         var dNaglowek = (daneTabeli && daneTabeli.dniNaglowek) ? daneTabeli.dniNaglowek[dNum - 1] : null;
         var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(new Date(currentYear, currentMonthIdx, dNum)) : null;
-        var isHoliday5Pkt = (dNaglowek && dNaglowek.czySwieto) ||
-                            (dNum === 1 && currentMonthIdx === 10) || // 1 listopada Wszystkich Świętych
-                            (litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
+        var isHoliday5Pkt = czyToDzienSwiateczny5Pkt(dNum, currentMonthIdx, currentYear, daneTabeli);
 
         // Podstawowy rodzaj z reguł ogólnych (msze św. są zawsze widoczne):
         var domyslnyRodzaj = isHoliday5Pkt ? 'msza_swieto' : (isWeekendMass ? 'msza_niedziela' : 'msza_tydzien');
@@ -2820,7 +2832,7 @@ function czyMaDostepDoZakrystii(nazwisko) {
       } else {
         // Sprawdź czy to święto / uroczystość (np. 1 listopada - Wszystkich Świętych)
         var litInfo = (typeof wyznaczDaneLiturgiczne === 'function') ? wyznaczDaneLiturgiczne(dt) : null;
-        var isHoliday = (d === 1 && m === 10) || (d !== 2 && litInfo && (litInfo.ranga === 'Uroczystość' || (litInfo.nazwa && litInfo.nazwa.indexOf('Wszystkich Świętych') !== -1)));
+        var isHoliday = czyToDzienSwiateczny5Pkt(d, m, r, tabelaZrodlowa);
 
         if (d === 1 && m === 10) {
           // Uroczystość Wszystkich Świętych (1 listopada)

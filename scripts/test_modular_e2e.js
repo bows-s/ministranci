@@ -140,6 +140,8 @@ console.log('wycofajPrzyjeteZastepstwo function: OK');
 // 5. Holiday attendance scoring tests (1 Nov: 1st mass = 5 pkt, 2nd mass = 2 pkt -> total 7 pkt)
 const isNov1Holiday = sandbox.czyToDzienSwiateczny5Pkt(1, 10, 2026, {});
 if (!isNov1Holiday) throw new Error('1 Nov must be detected as a 5-point holiday!');
+const isNov22Holiday = sandbox.czyToDzienSwiateczny5Pkt(22, 10, 2026, {});
+if (isNov22Holiday) throw new Error('22 Nov (Christ the King Sunday) must NOT be treated as a 5-point holiday!');
 
 const dummyRow = {
   nazwisko: 'Maciej Erich',
