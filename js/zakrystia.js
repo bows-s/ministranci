@@ -4031,7 +4031,8 @@ function czyMaDostepDoZakrystii(nazwisko) {
                       // Synchronizuj dokument obecności tamtej mszy w Firestore:
                       if (dbFirestore) {
                         var oDay = (cIdx === satColIdx) ? ((dowNum === 6) ? zakrystiaStan.dzien : (zakrystiaStan.dzien - 1)) : ((dowNum === 6) ? (zakrystiaStan.dzien + 1) : zakrystiaStan.dzien);
-                        var logPref = (currentMonthIdx !== undefined && currentMonthIdx !== 8) ? ('M' + currentMonthIdx + '_') : '';
+                        var zMIdx = (zakrystiaStan && zakrystiaStan.miesiacIdx !== undefined && zakrystiaStan.miesiacIdx !== null) ? zakrystiaStan.miesiacIdx : (new Date()).getMonth();
+                        var logPref = (zMIdx !== 8) ? ('M' + zMIdx + '_') : '';
                         var oLId = logPref + ((oDay < 10 ? '0' : '') + oDay) + '_' + wh.replace(':', '');
                         dbFirestore.collection('obecnosc').doc(oLId).get().then(function(snapO) {
                           if (snapO.exists && snapO.data() && snapO.data().ministranci) {
