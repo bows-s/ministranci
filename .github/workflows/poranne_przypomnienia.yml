@@ -2,8 +2,9 @@ name: Poranne Przypomnienia o Służbie
 
 on:
   schedule:
-    # Codziennie o 05:00 UTC (07:00 czasu polskiego letniego / 06:00 zimowego)
-    - cron: '0 5 * * *'
+    # Codziennie o 05:53 UTC (06:53 czasu zimowego CET / 07:53 letniego CEST)
+    # Nie używamy pełnej godziny (:00), bo kolejki cron GitHub Actions o :00 mają wielogodzinne opóźnienia.
+    - cron: '53 5 * * *'
   workflow_dispatch: # Możliwość uruchomienia testowego ręcznie z poziomu GitHuba
 
 jobs:
