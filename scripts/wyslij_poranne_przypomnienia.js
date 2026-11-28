@@ -100,25 +100,37 @@ function wyznaczRotowaneGodzinyGrup(rok, miesiacIdx) {
 
 async function pobierzStanGrafikuFirestore(date) {
   const now = date || new Date();
-  const polishMonths = ['Styczen', 'Luty', 'Marzec', 'Kwiecien', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpien', 'Wrzesien', 'Pazdziernik', 'Listopad', 'Grudzien'];
-  const docName = polishMonths[now.getMonth()] + '_' + now.getFullYear();
+  const polishMonthsPL = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+  const polishMonthsAscii = ['Styczen', 'Luty', 'Marzec', 'Kwiecien', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpien', 'Wrzesien', 'Pazdziernik', 'Listopad', 'Grudzien'];
+  const candidates = [
+    polishMonthsPL[now.getMonth()] + '_' + now.getFullYear(),
+    polishMonthsAscii[now.getMonth()] + '_' + now.getFullYear()
+  ];
 
-  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/stan_grafiku/${docName}?key=${API_KEY}`;
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          if (!json.fields) return resolve(null);
-          const doc = {};
-          for (const k in json.fields) doc[k] = fromFirestoreValue(json.fields[k]);
-          resolve(doc);
-        } catch(e) { reject(e); }
-      });
-    }).on('error', reject);
-  });
+  function fetchOne(docName) {
+    const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/stan_grafiku/${encodeURIComponent(docName)}?key=${API_KEY}`;
+    return new Promise((resolve, reject) => {
+      https.get(url, (res) => {
+        let data = '';
+        res.on('data', c => data += c);
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            if (!json.fields) return resolve(null);
+            const doc = {};
+            for (const k in json.fields) doc[k] = fromFirestoreValue(json.fields[k]);
+            resolve(doc);
+          } catch(e) { reject(e); }
+        });
+      }).on('error', reject);
+    });
+  }
+
+  for (const name of candidates) {
+    const doc = await fetchOne(name);
+    if (doc && doc.wiersze && doc.wiersze.length > 0) return doc;
+  }
+  return null;
 }
 
 function wyznaczDyzuryWDniu(docData, date) {

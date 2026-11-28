@@ -133,6 +133,8 @@ function obsluzZapytanieAPI(e) {
       wynik = testowePowiadomienieFCM(args[0]);
     } else if (funkcja === "aktywujWyzwalaczPoranny") {
       wynik = utworzWyzwalaczPoranny();
+    } else if (funkcja === "usunWyzwalaczPoranny") {
+      wynik = usunWyzwalaczPoranny();
     } else if (funkcja === "testujWieczornePrzypomnienia") {
       var customDate = (args && args[0]) ? new Date(args[0]) : null;
       wynik = wyslijWieczornePrzypomnieniaONajblizszejSluzbie(customDate);
@@ -1768,6 +1770,18 @@ function utworzWyzwalaczPoranny() {
     .create();
 
   return { sukces: true, wiadomosc: "Automatyczne wyzwalacze (przypomnienie o 7:00, wieczorne o 20:00 oraz zegar giełdy co 30 minut) zostały pomyślnie utworzone!" };
+}
+
+function usunWyzwalaczPoranny() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var usuniete = 0;
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === "wyslijPorannePrzypomnieniaOSluzbie") {
+      ScriptApp.deleteTrigger(triggers[i]);
+      usuniete++;
+    }
+  }
+  return { sukces: true, usuniete: usuniete, wiadomosc: "Usunięto poranne wyzwalacze GAS: " + usuniete };
 }
 
 function menuAktywujWyzwalaczPoranny() {
