@@ -1,10 +1,8 @@
 name: Poranne Przypomnienia o Służbie
 
 on:
-  schedule:
-    # Codziennie o 05:53 UTC (06:53 czasu zimowego CET / 07:53 letniego CEST)
-    # Nie używamy pełnej godziny (:00), bo kolejki cron GitHub Actions o :00 mają wielogodzinne opóźnienia.
-    - cron: '53 5 * * *'
+  # Harmonogram przeniesiony na natywny wyzwalacz Google Apps Script (codziennie 07:00 Europe/Warsaw),
+  # ponieważ kolejka cron GitHub Actions opóźniała wysyłkę o 10-11 godzin (aż do 16:30-17:10).
   workflow_dispatch: # Możliwość uruchomienia testowego ręcznie z poziomu GitHuba
 
 jobs:

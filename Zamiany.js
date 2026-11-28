@@ -1027,18 +1027,211 @@ function czyMinistrantKwalifikujeSieDoOferty(nazwisko, filtrDanych, cache) {
   return true;
 }
 
+function wyznaczDyzuryWDniuZFirestoreGAS(docData, now) {
+  var dayNum = now.getDate();
+  var rok = docData.rok || now.getFullYear();
+  var mIdx = (docData.miesiacIdx !== undefined && docData.miesiacIdx !== null) ? docData.miesiacIdx : now.getMonth();
+  var dt = new Date(rok, mIdx, dayNum);
+  var dow = dt.getDay();
+
+  function cleanT(t) {
+    if (!t) return "";
+    var s = String(t).trim();
+    if (/^\d:\d\d/.test(s)) s = "0" + s;
+    return s.substring(0, 5);
+  }
+  function normN(s) {
+    return String(s || "").toLowerCase().trim()
+      .replace(/ł/g, "l").replace(/ą/g, "a").replace(/ę/g, "e")
+      .replace(/ś/g, "s").replace(/ć/g, "c").replace(/ż/g, "z")
+      .replace(/ź/g, "z").replace(/ń/g, "n").replace(/ó/g, "o");
+  }
+  function samePerson(a, b) {
+    var n1 = normN(a), n2 = normN(b);
+    if (!n1 || !n2) return false;
+    return n1 === n2 || (n1.length >= 4 && n2.indexOf(n1) !== -1) || (n2.length >= 4 && n1.indexOf(n2) !== -1);
+  }
+  function grpNum(g) {
+    var s = String(g || "").toLowerCase();
+    if (s.indexOf("czerwon") !== -1) return 1;
+    if (s.indexOf("pomarańcz") !== -1 || s.indexOf("pomarancz") !== -1) return 2;
+    if (s.indexOf("zielon") !== -1) return 3;
+    if (s.indexOf("żółt") !== -1 || s.indexOf("zolt") !== -1) return 4;
+    if (/(?:^|[\s(\[])(?:iv|4)(?:[\s)\]]|$)/i.test(s)) return 4;
+    if (/(?:^|[\s(\[])(?:iii|3)(?:[\s)\]]|$)/i.test(s)) return 3;
+    if (/(?:^|[\s(\[])(?:ii|2)(?:[\s)\]]|$)/i.test(s)) return 2;
+    if (/(?:^|[\s(\[])(?:i|1)(?:[\s)\]]|$)/i.test(s)) return 1;
+    return 0;
+  }
+
+  var godzinyGrup = {};
+  if (docData.grupy && Array.isArray(docData.grupy)) {
+    for (var gi = 0; gi < docData.grupy.length; gi++) {
+      if (docData.grupy[gi] && docData.grupy[gi].nazwa && docData.grupy[gi].godzinaNiedziela) {
+        godzinyGrup[docData.grupy[gi].nazwa] = cleanT(docData.grupy[gi].godzinaNiedziela);
+      }
+    }
+  }
+  if (Object.keys(godzinyGrup).length === 0 && docData.godzinyGrup) {
+    for (var gk in docData.godzinyGrup) godzinyGrup[gk] = cleanT(docData.godzinyGrup[gk]);
+  }
+  if (Object.keys(godzinyGrup).length === 0) {
+    var kol = ["08:30", "10:00", "11:30", "17:00"];
+    var shift = ((((rok - 2026) * 12 + (mIdx - 8)) % 4) + 4) % 4;
+    godzinyGrup = {
+      "I GRUPA (CZERWONA)": kol[(1 + shift) % 4],
+      "II GRUPA (POMARAŃCZOWA)": kol[(2 + shift) % 4],
+      "III GRUPA (ZIELONA)": kol[(3 + shift) % 4],
+      "IV GRUPA (ŻÓŁTA)": kol[(0 + shift) % 4]
+    };
+  }
+
+  var zamianyN = [];
+  var rawZN = docData.zamianyNiedziele || [];
+  for (var zi = 0; zi < rawZN.length; zi++) {
+    var zn = rawZN[zi];
+    if (!zn || zn.status === "ANULOWANA") continue;
+    if (zn.typ === "RECZNA") {
+      zamianyN.push({ typ: "RECZNA", dzien: parseInt(zn.dzien, 10), ministrant: zn.ministrant, godzina: cleanT(zn.godzina) });
+    } else if (zn.status === "ZAAKCEPTOWANA" || zn.status === "PRZEJETE") {
+      zamianyN.push({
+        typ: "WYMIANA",
+        dzien: parseInt(zn.dzien, 10),
+        wystawiajacy: zn.wystawiajacy,
+        godzOddana: cleanT(zn.godzinaOddawana || zn.godzOddana || zn.godzinaWystawiajacego),
+        przejmujacy: zn.przejmujacy,
+        godzWzieta: cleanT(zn.godzinaPrzejmujacego || zn.godzWzieta)
+      });
+    }
+  }
+
+  var dyzury = [];
+  var wiersze = docData.wiersze || [];
+  for (var wi = 0; wi < wiersze.length; wi++) {
+    var w = wiersze[wi];
+    var rawNazw = (w && w.nazwisko) ? String(w.nazwisko).trim() : "";
+    if (!rawNazw || rawNazw.toLowerCase().indexOf("kościelny") !== -1 || rawNazw.toLowerCase().indexOf("koscielny") !== -1) continue;
+    var cellDzis = (w.komorki && w.komorki[dayNum - 1]) ? w.komorki[dayNum - 1] : null;
+    if (cellDzis && (cellDzis.wartosc === 0 || cellDzis.wartosc === "0" || cellDzis.czyUsprawiedliwiony)) continue;
+
+    if (dow >= 1 && dow <= 5) {
+      if (cellDzis && cellDzis.maDyzur) {
+        var godzW = "18:00";
+        if (dow === 4) godzW = "17:00";
+        if (dow === 3 && mIdx !== 9) godzW = "08:00";
+        dyzury.push({ nazwisko: rawNazw, godzina: godzW, typ: "STALY", opis: "" });
+      }
+    } else {
+      var weekendSunDay = (dow === 6) ? (dayNum + 1) : dayNum;
+      var bazaGodz = "";
+      var wgNum = grpNum(w.grupa);
+      for (var gKey in godzinyGrup) {
+        if (wgNum > 0 && grpNum(gKey) === wgNum) { bazaGodz = godzinyGrup[gKey]; break; }
+      }
+      var effGodz = bazaGodz;
+      for (var ri = zamianyN.length - 1; ri >= 0; ri--) {
+        if (zamianyN[ri].typ === "RECZNA" && (zamianyN[ri].dzien === weekendSunDay || zamianyN[ri].dzien === dayNum) && samePerson(zamianyN[ri].ministrant, rawNazw)) {
+          effGodz = zamianyN[ri].godzina;
+          break;
+        }
+      }
+      for (var xi = 0; xi < zamianyN.length; xi++) {
+        if (zamianyN[xi].typ !== "RECZNA" && (zamianyN[xi].dzien === weekendSunDay || zamianyN[xi].dzien === dayNum)) {
+          if (samePerson(zamianyN[xi].wystawiajacy, rawNazw)) { effGodz = zamianyN[xi].godzWzieta; break; }
+          if (samePerson(zamianyN[xi].przejmujacy, rawNazw)) { effGodz = zamianyN[xi].godzOddana; break; }
+        }
+      }
+      if (dow === 6 && effGodz === "17:00") {
+        dyzury.push({ nazwisko: rawNazw, godzina: "17:00", typ: "WEEKEND", opis: "" });
+      } else if (dow === 0 && effGodz && effGodz !== "17:00") {
+        dyzury.push({ nazwisko: rawNazw, godzina: effGodz, typ: "WEEKEND", opis: "" });
+      }
+    }
+  }
+  return dyzury;
+}
+
 function wyslijPorannePrzypomnieniaOSluzbie(customDate) {
   var ss = pobierzAktywnyArkusz();
   var now = customDate || new Date();
+  var currentDay = now.getDate();
+  var currentMonthIdx = now.getMonth();
+  var currentYear = now.getFullYear();
+
+  // Zabezpieczenie przed podwojnym wyslaniem tego samego dnia (dla automatycznego wyzwalacza)
+  var todayKey = currentYear + "-" + (currentMonthIdx + 1) + "-" + currentDay;
+  var props = PropertiesService.getScriptProperties();
+  if (!customDate && props.getProperty("OSTATNIE_PORANNE_PRZYPOMNIENIE_DATA") === todayKey) {
+    console.log("Poranne przypomnienia zostaly juz dzis wyslane (" + todayKey + ") - pomijam.");
+    return { sukces: true, pominieto: true, wiadomosc: "Poranne przypomnienia zostały już dziś wysłane." };
+  }
+
+  // 1. Najpierw pobierz aktualny grafik prosto z Firestore (stan_grafiku)
+  var plMonths = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+  var ascMonths = ["Styczen", "Luty", "Marzec", "Kwiecien", "Maj", "Czerwiec", "Lipiec", "Sierpien", "Wrzesien", "Pazdziernik", "Listopad", "Grudzien"];
+  var fsDoc = pobierzDokumentFirestore("stan_grafiku", plMonths[currentMonthIdx] + "_" + currentYear);
+  if (!fsDoc || !fsDoc.wiersze) {
+    fsDoc = pobierzDokumentFirestore("stan_grafiku", ascMonths[currentMonthIdx] + "_" + currentYear);
+  }
+
+  if (fsDoc && fsDoc.wiersze && fsDoc.wiersze.length > 0) {
+    var dyzuryFs = wyznaczDyzuryWDniuZFirestoreGAS(fsDoc, now);
+    var wszyscyNaDyzurzeFs = dyzuryFs.map(function(d) { return d.nazwisko + " (" + d.godzina + ")"; });
+
+    var sheetTokFs = ss.getSheetByName("Powiadomienia_Tokeny");
+    if (!sheetTokFs || sheetTokFs.getLastRow() < 2) {
+      return { sukces: false, wiadomosc: "Brak zarejestrowanych urządzeń w Powiadomienia_Tokeny.", wszyscyNaDyzurze: wszyscyNaDyzurzeFs };
+    }
+    var tokenDataFs = sheetTokFs.getRange(2, 1, sheetTokFs.getLastRow() - 1, 2).getValues();
+    var wyslaneDoFs = [];
+    var wyslanoCountFs = 0;
+
+    for (var ti = 0; ti < tokenDataFs.length; ti++) {
+      var tNazw = tokenDataFs[ti][0];
+      var tTok = tokenDataFs[ti][1];
+      if (!tNazw || !tTok) continue;
+      var normT = oczyscNazwiskoMinistranta(tNazw).toLowerCase();
+      var matchD = null;
+      for (var di = 0; di < dyzuryFs.length; di++) {
+        var normD = oczyscNazwiskoMinistranta(dyzuryFs[di].nazwisko).toLowerCase();
+        if (normT === normD || (normT.length >= 4 && normD.indexOf(normT) !== -1) || (normD.length >= 4 && normT.indexOf(normD) !== -1)) {
+          matchD = dyzuryFs[di];
+          break;
+        }
+      }
+      if (matchD) {
+        var imieF = String(tNazw).trim().split(/\s+/)[0];
+        var tytulF = "Przypomnienie o służbie ⛪";
+        var trescF = "Cześć " + imieF + "! Dzisiaj masz dyżur na Mszy św. o godz. " + matchD.godzina + ". Pamiętaj o przyjściu!";
+        var rPushF = wyslijWiadomoscFCM(tTok, tytulF, trescF, { widok: "pulpit", url: "https://ministranci.web.app/" });
+        if (rPushF && rPushF.sukces) {
+          wyslanoCountFs++;
+          var labelF = tNazw + " (" + matchD.godzina + ")";
+          if (wyslaneDoFs.indexOf(labelF) === -1) wyslaneDoFs.push(labelF);
+        }
+      }
+    }
+
+    if (!customDate) {
+      props.setProperty("OSTATNIE_PORANNE_PRZYPOMNIENIE_DATA", todayKey);
+    }
+
+    return {
+      sukces: true,
+      zrodlo: "Firestore",
+      liczbaWyslanych: wyslanoCountFs,
+      odbiorcy: wyslaneDoFs,
+      wszyscyNaDyzurze: wszyscyNaDyzurzeFs,
+      wiadomosc: wyslaneDoFs.length > 0 ? ("Wysłano przypomnienia o służbie do:\n" + wyslaneDoFs.join("\n")) : "Brak odbiorców z tokenem na dziś."
+    };
+  }
+
+  // Fallback do arkusza Google Sheets jeśli brak dokumentu w Firestore
   var cache = przygotujDaneHarmonogramu(ss, now);
   if (!cache) {
     console.warn("Brak arkusza bieżącego miesiąca dla porannych powiadomień.");
     return { sukces: false, wiadomosc: "Brak arkusza bieżącego miesiąca." };
   }
-
-  var currentDay = now.getDate();
-  var currentMonthIdx = now.getMonth();
-  var currentYear = now.getFullYear();
 
   // 1. Sprawdzamy kto W OGÓLE w grafiku ma dzisiaj wyznaczoną służbę
   var wszyscyNaDyzurzeDzis = [];
