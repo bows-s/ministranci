@@ -457,6 +457,68 @@
         pokazToast('Zalogowano pomyślnie');
       }
 
+      function zLimitemCzasu(promise, ms) {
+        return new Promise(function(resolve, reject) {
+          var done = false;
+          var timer = setTimeout(function() {
+            if (!done) {
+              done = true;
+              reject(new Error('TIMEOUT_' + ms));
+            }
+          }, ms);
+          promise.then(function(val) {
+            if (!done) {
+              done = true;
+              clearTimeout(timer);
+              resolve(val);
+            }
+          }).catch(function(err) {
+            if (!done) {
+              done = true;
+              clearTimeout(timer);
+              reject(err);
+            }
+          });
+        });
+      }
+
+      async function pobierzPinPrzezREST(nazwisko) {
+        if (typeof fetch !== 'function' || typeof firebaseConfig === 'undefined' || !firebaseConfig.projectId || !firebaseConfig.apiKey) {
+          throw new Error('Brak konfiguracji REST');
+        }
+        var url = 'https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents/autoryzacja_pin/' + encodeURIComponent(nazwisko) + '?key=' + firebaseConfig.apiKey;
+        var res = await zLimitemCzasu(fetch(url, { method: 'GET', cache: 'no-store' }), 6000);
+        if (res.status === 404) {
+          return { exists: false, data: null };
+        }
+        if (!res.ok) {
+          throw new Error('HTTP_' + res.status);
+        }
+        var json = await res.json();
+        var pinHash = json && json.fields && json.fields.pinHash && json.fields.pinHash.stringValue;
+        return { exists: true, data: { pinHash: pinHash || '' } };
+      }
+
+      async function zapiszPinPrzezREST(nazwisko, pinHash) {
+        if (typeof fetch !== 'function' || typeof firebaseConfig === 'undefined' || !firebaseConfig.projectId || !firebaseConfig.apiKey) {
+          throw new Error('Brak konfiguracji REST');
+        }
+        var url = 'https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents/autoryzacja_pin/' + encodeURIComponent(nazwisko) + '?key=' + firebaseConfig.apiKey;
+        var body = JSON.stringify({
+          fields: {
+            nazwisko: { stringValue: nazwisko },
+            pinHash: { stringValue: pinHash },
+            zaktualizowano: { timestampValue: new Date().toISOString() }
+          }
+        });
+        var res = await zLimitemCzasu(fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: body
+        }), 6000);
+        if (!res.ok) throw new Error('HTTP_PATCH_' + res.status);
+      }
+
       var u = (listaUzytkownikow || []).find(function(x) { return x.nazwisko === n; });
 
       btn.disabled = true;
@@ -466,52 +528,62 @@
         var pHash = await obliczHashPIN(p);
 
         if (!dbFirestore) {
-          btn.disabled = false;
-          btn.innerHTML = 'Zaloguj się';
           zalogujSukces();
           return;
         }
 
-        // Sprawdź w zabezpieczonej kolekcji autoryzacja_pin
-        var authDoc = await dbFirestore.collection('autoryzacja_pin').doc(n).get();
-        if (!authDoc.exists) {
+        // Sprawdź w zabezpieczonej kolekcji autoryzacja_pin (z limitem 4s i automatycznym fallbackiem REST,
+        // aby zawieszona persistencja IndexedDB / WebChannel w PWA na telefonie nigdy nie blokowała logowania!)
+        var authExists = false;
+        var savedData = null;
+        try {
+          var authDoc = await zLimitemCzasu(dbFirestore.collection('autoryzacja_pin').doc(n).get(), 4000);
+          authExists = !!(authDoc && authDoc.exists);
+          savedData = authExists ? authDoc.data() : null;
+        } catch(errSdk) {
+          console.warn('Firestore SDK PIN timeout/error, przełączam na szybki REST API:', errSdk);
+          var restRes = await pobierzPinPrzezREST(n);
+          authExists = restRes.exists;
+          savedData = restRes.data;
+        }
+
+        if (!authExists) {
           // Ustalenie PIN po raz pierwszy
-          await dbFirestore.collection('autoryzacja_pin').doc(n).set({
-            nazwisko: n,
-            pinHash: pHash,
-            utworzono: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          try {
+            await zLimitemCzasu(dbFirestore.collection('autoryzacja_pin').doc(n).set({
+              nazwisko: n,
+              pinHash: pHash,
+              utworzono: firebase.firestore.FieldValue.serverTimestamp()
+            }), 4000);
+          } catch(errSetSdk) {
+            console.warn('Firestore SDK set PIN timeout/error, zapisuję przez REST API:', errSetSdk);
+            await zapiszPinPrzezREST(n, pHash);
+          }
           if (u) u.maPin = true;
           try {
-            await dbFirestore.collection('konfiguracja').doc('uzytkownicy').set({
+            await zLimitemCzasu(dbFirestore.collection('konfiguracja').doc('uzytkownicy').set({
               lista: (listaUzytkownikow || []).map(function(item) {
                 return { nazwisko: item.nazwisko, maPin: (item.nazwisko === n ? true : !!item.maPin) };
               }),
               zaktualizowano: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            }, { merge: true }), 3000);
           } catch(eU) {}
-          btn.disabled = false;
-          btn.innerHTML = 'Zaloguj się';
           pokazToast('PIN został pomyślnie ustalony');
           zalogujSukces();
           return;
         }
 
-        var savedData = authDoc.data();
         if (savedData && savedData.pinHash === pHash) {
-          btn.disabled = false;
-          btn.innerHTML = 'Zaloguj się';
           zalogujSukces();
         } else {
-          btn.disabled = false;
-          btn.innerHTML = 'Zaloguj się';
           alert('Błędny kod PIN. Spróbuj ponownie.');
         }
       } catch(errAuth) {
         console.error('Błąd logowania:', errAuth);
+        alert('Błąd połączenia podczas sprawdzania PIN. Spróbuj ponownie.');
+      } finally {
         btn.disabled = false;
         btn.innerHTML = 'Zaloguj się';
-        alert('Błąd połączenia podczas sprawdzania PIN. Spróbuj ponownie.');
       }
     }
 
@@ -529,6 +601,11 @@
       document.getElementById('auth-pin').value = '';
       document.getElementById('auth-select-user').value = '';
       document.getElementById('pin-container').style.display = 'none';
+      var btnLoginReset = document.getElementById('btn-login');
+      if (btnLoginReset) {
+        btnLoginReset.disabled = false;
+        btnLoginReset.innerHTML = 'Zaloguj się';
+      }
       
       // Reset widoków do pulpitu
       if (document.getElementById('widok-tryb-zakrystia')) document.getElementById('widok-tryb-zakrystia').style.display = 'none';
